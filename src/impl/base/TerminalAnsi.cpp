@@ -1,9 +1,15 @@
 #include "TerminalAnsi.hpp"
 #include "../ConsolePrivate.hpp"
-#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <regex>
+#if defined _MSC_VER || defined __MINGW32__
+#include <io.h>
+#define flockfile _lock_file
+#define funlockfile _unlock_file
+#else
+#include <stdio.h>
+#endif
 
 namespace emb {
     namespace console {
@@ -86,10 +92,12 @@ namespace emb {
         }
 
         void TerminalAnsi::commit() const noexcept {
+            flockfile(stdout);
             ConsoleSessionWithTerminal::endStdCapture();
-            cout << m_strDataToPrint;
-            cout.flush();
+            fprintf(stdout, "%s", m_strDataToPrint.c_str());
+            fflush(stdout);
             ConsoleSessionWithTerminal::beginStdCapture();
+            funlockfile(stdout);
             Terminal::commit();
         }
 
