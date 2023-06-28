@@ -92,12 +92,14 @@ namespace emb {
         }
 
         void TerminalAnsi::commit() const noexcept {
-            flockfile(stdout);
+            bool bLockOk = 0 == ftrylockfile(stdout);
             ConsoleSessionWithTerminal::endStdCapture();
             fprintf(stdout, "%s", m_strDataToPrint.c_str());
             fflush(stdout);
             ConsoleSessionWithTerminal::beginStdCapture();
-            funlockfile(stdout);
+            if(bLockOk) {
+                funlockfile(stdout);
+            }
             Terminal::commit();
         }
 
