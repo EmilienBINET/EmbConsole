@@ -4,6 +4,14 @@
 #include <unordered_map>
 #include <windows.h>
 
+// MinGW 8.1 does not define these
+#ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
+#  define ENABLE_VIRTUAL_TERMINAL_INPUT 0x200
+#endif
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#  define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x4
+#endif
+
 namespace emb {
     namespace console {
         using namespace std;
