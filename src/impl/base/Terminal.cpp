@@ -147,11 +147,11 @@ namespace emb {
                     }
 
                     if (bUserEntryIsValid) {
-                        cv.notify_one();
-
                         if (auto onValid = getType<OnValid>(a_vpPromptCommands)) {
                             (*onValid)(a_strUserEntry);
                         }
+
+                        cv.notify_one();
                     }
                     else {
                         setColor(SetColor::Color::BrightRed, SetColor::Color::Black);
@@ -172,11 +172,11 @@ namespace emb {
                         printNewLine();
                         commit();
 
-                        cv.notify_one();
-
                         if (auto onCancel = getType<OnCancel>(a_vpPromptCommands)) {
                             (*onCancel)();
                         }
+
+                        cv.notify_one();
                     }
                     return true;
                 });
@@ -220,11 +220,11 @@ namespace emb {
                                 printNewLine();
                                 commit();
 
-                                cv.notify_one();
-
                                 if (auto onValid = getType<OnValid>(a_vpPromptCommands)) {
                                     (*onValid)(choice->m_strValue);
                                 }
+
+                                cv.notify_one();
 
                                 break;
                             }
@@ -238,11 +238,11 @@ namespace emb {
                         printNewLine();
                         commit();
 
-                        cv.notify_one();
-
                         if (auto onCancel = getType<OnCancel>(a_vpPromptCommands)) {
                             (*onCancel)();
                         }
+
+                        cv.notify_one();
                     }
                     return bUserEntryIsValid;
                 });
@@ -298,11 +298,11 @@ namespace emb {
                                 printNewLine();
                                 commit();
 
-                                cv.notify_one();
-
                                 if (auto onValid = getType<OnValid>(a_vpPromptCommands)) {
                                     (*onValid)(choice->m_strValue);
                                 }
+
+                                cv.notify_one();
 
                                 break;
                             }
@@ -316,11 +316,11 @@ namespace emb {
                         printNewLine();
                         commit();
 
-                        cv.notify_one();
-
                         if (auto onCancel = getType<OnCancel>(a_vpPromptCommands)) {
                             (*onCancel)();
                         }
+
+                        cv.notify_one();
                     }
                     return bUserEntryIsValid;
                 });
