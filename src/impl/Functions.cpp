@@ -3,6 +3,7 @@
 #include <sstream>
 #include <future>
 #include <algorithm>
+#include <vector>
 
 namespace emb {
     namespace console {
@@ -16,6 +17,19 @@ namespace emb {
         }
         bool isSubCommandOf(string const& a_CommandPath, string const& a_Path) {
             return 0 == a_CommandPath.find(a_Path[a_Path.length() - 1] == '/' ? a_Path : a_Path + "/");
+        }
+        string getFolderName(string const& a_strCommandPath, string const& a_strCurrentPath) {
+            string str{};
+            string strPath = Functions::getCanonicalPath(a_strCurrentPath, true);
+            size_t pos = a_strCommandPath.find(strPath);
+            if(0 == pos) {
+                str = a_strCommandPath.substr(strPath.size());
+                pos = str.find_first_of('/');
+                if(string::npos != pos) {
+                    str = str.substr(0, pos+1);
+                }
+            }
+            return str;
         }
 
         Functions::Functions(ConsoleSessionWithTerminal& a_rConsole) noexcept : m_rConsole{ a_rConsole } {
@@ -39,10 +53,22 @@ namespace emb {
                     }
                 }
                 else {
+                    vector<string> vecPrintedFolders;
                     for (auto const& elm : m_mapFunctions) {
-                        if (isRootCommand(elm.first) || // root command => available from anywhere
-                            isSubCommandOf(elm.first, a_CmdData.console.getCurrentPath())) { // Other command => available from folder
-                            output += elm.first + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
+                        if (isRootCommand(elm.first)) { // root command => available from anywhere
+                            output += elm.first.substr(1) + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
+                        }
+                        else if(isSubCommandOf(elm.first, a_CmdData.console.getCurrentPath())) { // Other command => available from folder
+                            string folder = getFolderName(elm.first, a_CmdData.console.getCurrentPath());
+                            if(std::count(vecPrintedFolders.begin(), vecPrintedFolders.end(), folder) == 0) {
+                                vecPrintedFolders.push_back(folder);
+                                if(string::npos == folder.find('/')) { // command
+                                    output += folder + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
+                                }
+                                else { // folder
+                                    output += folder + "\t" + (bLongListing ? "\n" : "");
+                                }
+                            }
                         }
                     }
                 }
