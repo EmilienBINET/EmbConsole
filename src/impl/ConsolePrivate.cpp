@@ -67,6 +67,10 @@ namespace emb {
             m_bInstantPrint = a_bInstantPrint;
         }
 
+        string ConsoleSession::Private::getCurrentPath() const noexcept {
+            return m_pTerminal->getCurrentPath();
+        }
+
         Console::Private::Private(Console& a_rConsole) noexcept {
 #ifdef WIN32
             m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindows>>());

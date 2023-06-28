@@ -122,7 +122,7 @@ namespace emb {
         }
 
         std::string ConsoleSession::getCurrentPath() const noexcept {
-            return "/";
+            return m_pPrivateImpl->getCurrentPath();
         }
 
         void ConsoleSession::setInstantPrint(bool a_bInstantPrint) noexcept {
@@ -184,10 +184,6 @@ namespace emb {
             *m_pPrivateImpl << a_Cmd;
             return *this;
         }
-
-        //string Console::getCurrentPath() const noexcept {
-        //    return m_pPrivateImpl->getCurrentPath();
-        //}
 
         void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept {
             a_CommandInfo.validate();

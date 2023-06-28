@@ -71,6 +71,7 @@ namespace emb {
             Private& operator<< (PrintCommand::Ptr const&) noexcept;
             Private& operator<< (PromptCommand::Ptr const&) noexcept;
             void setInstantPrint(bool a_bInstantPrint) noexcept;
+            std::string getCurrentPath() const noexcept;
         private:
             TerminalPtr m_pTerminal{};
 

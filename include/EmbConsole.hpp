@@ -219,8 +219,6 @@ namespace emb {
             void setUserName(std::string const&) noexcept;
             void setMachineName(std::string const&) noexcept;
 
-            //std::string getCurrentPath() const noexcept;
-
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
             void delCommand(UserCommandInfo const&);
