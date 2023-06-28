@@ -6,6 +6,7 @@
 #if defined _MSC_VER || defined __MINGW32__
 #include <io.h>
 #define flockfile _lock_file
+#define ftrylockfile 0; flockfile
 #define funlockfile _unlock_file
 #else
 #include <stdio.h>
