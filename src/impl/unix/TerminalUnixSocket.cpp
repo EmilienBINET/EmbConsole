@@ -51,6 +51,7 @@ namespace emb {
             chmod(s_strSocketPath,  S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
 
             m_ServerThread = std::thread{ &TerminalUnixSocket::serverLoop, const_cast<TerminalUnixSocket*>(this) };
+            pthread_setname_np(m_ServerThread.native_handle(), "TrmUnxSockSrv");
 
             Terminal::start();
         }
@@ -115,7 +116,9 @@ namespace emb {
                     m_bStopClient = false;
                     m_iClientSocket = iClientSocket;
                     m_ClientThreadRx = thread{ std::bind(&TerminalUnixSocket::clientLoopRx, this, iClientSocket) };
+                    pthread_setname_np(m_ClientThreadRx.native_handle(), "TrmUnxSockRx");
                     m_ClientThreadTx = thread{ std::bind(&TerminalUnixSocket::clientLoopTx, this, iClientSocket) };
+                    pthread_setname_np(m_ClientThreadTx.native_handle(), "TrmUnxSockTx");
 
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();

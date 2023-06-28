@@ -71,6 +71,7 @@ namespace emb {
             m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>());
 #endif
             m_Thread = std::thread{ &Private::run, this };
+            pthread_setname_np(m_Thread.native_handle(), "Console");
         }
 
         Console::Private::Private(Private const& a_Obj) noexcept {
