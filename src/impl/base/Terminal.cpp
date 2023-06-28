@@ -667,6 +667,10 @@ namespace emb {
         }
 
         void Terminal::printCommandLine(bool const& a_bPrintInText) const noexcept {
+            if(!supportsInteractivity()) {
+                return;
+            }
+            
             int const iMinPromptSize = 5;
 
             auto printCommonPart = [&] {

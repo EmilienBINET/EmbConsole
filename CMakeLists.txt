@@ -34,6 +34,8 @@ add_library(EmbConsole
     src/impl/base/Terminal.cpp
     src/impl/base/TerminalAnsi.hpp
     src/impl/base/TerminalAnsi.cpp
+    src/impl/base/TerminalFile.hpp
+    src/impl/base/TerminalFile.cpp
     ${PLATFORM_SPECIFIC_FILES}
 )
 target_include_directories(EmbConsole PUBLIC include)

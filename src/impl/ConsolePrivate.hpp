@@ -54,6 +54,10 @@ namespace emb {
             TConsoleSessionWithTerminal()
                 : ConsoleSessionWithTerminal{ std::make_unique<TerminalType>(*this) } {
             }
+            template<typename... U>
+            TConsoleSessionWithTerminal(U&&... u)
+                : ConsoleSessionWithTerminal{ std::make_unique<TerminalType>(*this, std::forward<U>(u)...) } {
+            }
         };
 
         class ConsoleSession::Private {

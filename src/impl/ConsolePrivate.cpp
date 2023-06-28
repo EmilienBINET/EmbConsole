@@ -7,6 +7,7 @@
 #include "unix/TerminalUnix.hpp"
 #include "unix/TerminalUnixSocket.hpp"
 #endif
+#include "base/TerminalFile.hpp"
 
 namespace emb {
     namespace console {
@@ -74,6 +75,7 @@ namespace emb {
             m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnix>>());
             m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>());
 #endif
+            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>("/tmp/mylogs.log"));
             m_Thread = std::thread{ &Private::run, this };
             pthread_setname_np(m_Thread.native_handle(), "Console");
         }
