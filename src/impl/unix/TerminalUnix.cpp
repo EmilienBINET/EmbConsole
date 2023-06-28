@@ -26,7 +26,8 @@ namespace emb {
         //TerminalUnix& TerminalUnix::operator= (TerminalUnix const&) noexcept = default;
         //TerminalUnix& TerminalUnix::operator= (TerminalUnix&&) noexcept = default;
 
-        void TerminalUnix::start() const noexcept {
+        void TerminalUnix::start() noexcept {
+            TerminalAnsi::start();
             struct termios old;
             memset(&old, 0, sizeof(struct termios));
             if(tcgetattr(STDIN_FILENO, &old) < 0) {
@@ -61,7 +62,8 @@ namespace emb {
             processUserCommands();
         }
 
-        void TerminalUnix::stop() const noexcept {
+        void TerminalUnix::stop() noexcept {
+            TerminalAnsi::stop();
             struct termios old;
             memset(&old, 0, sizeof(struct termios));
             if (tcgetattr(STDIN_FILENO, &old) < 0) {
@@ -75,7 +77,6 @@ namespace emb {
                 perror("TerminalUnix::stop(2)");
             }
             std::signal(SIGWINCH, SIG_DFL);
-            const_cast<TerminalUnix*>(this)->setPromptEnabled(false);
             softReset();
         }
 

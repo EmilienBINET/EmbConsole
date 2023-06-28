@@ -102,9 +102,9 @@ namespace emb {
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
 
         private:
-            void start() const noexcept override;
+            void start() noexcept override;
             void processEvents() noexcept override;
-            void stop() const noexcept override;
+            void stop() noexcept override;
             void run();
 
         private:

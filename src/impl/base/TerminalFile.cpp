@@ -14,11 +14,11 @@ namespace emb {
         }
         TerminalFile::~TerminalFile() noexcept {}
 
-        void TerminalFile::start() const noexcept {}
+        void TerminalFile::start() noexcept {}
         void TerminalFile::processEvents() noexcept {
             processPrintCommands();
         }
-        void TerminalFile::stop() const noexcept {}
+        void TerminalFile::stop() noexcept {}
 
         bool TerminalFile::read(std::string& a_rstrKey) const noexcept {
             return false;

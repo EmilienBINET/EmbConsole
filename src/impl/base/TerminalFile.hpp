@@ -16,9 +16,9 @@ namespace emb {
             TerminalFile& operator= (TerminalFile const&) noexcept = delete;
             TerminalFile& operator= (TerminalFile&&) noexcept = delete;
 
-            void start() const noexcept override;
+            void start() noexcept override;
             void processEvents() noexcept override;
-            void stop() const noexcept override;
+            void stop() noexcept override;
 
             bool supportsInteractivity() const noexcept override { return false; }
             bool supportsColor() const noexcept override { return false; }

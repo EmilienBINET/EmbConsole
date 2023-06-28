@@ -27,7 +27,7 @@ namespace emb {
         //TerminalUnixSocket& TerminalUnixSocket::operator= (TerminalUnixSocket const&) noexcept = default;
         //TerminalUnixSocket& TerminalUnixSocket::operator= (TerminalUnixSocket&&) noexcept = default;
 
-        void TerminalUnixSocket::start() const noexcept {
+        void TerminalUnixSocket::start() noexcept {
             m_iServerSocket = socket(AF_UNIX, SOCK_STREAM, 0);
             if (-1 == m_iServerSocket) {
                 perror("TerminalUnixSocket::start(1)");
@@ -51,7 +51,7 @@ namespace emb {
 
             chmod(s_strSocketPath,  S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
 
-            m_ServerThread = std::thread{ &TerminalUnixSocket::serverLoop, const_cast<TerminalUnixSocket*>(this) };
+            m_ServerThread = std::thread{ &TerminalUnixSocket::serverLoop, this };
             pthread_setname_np(m_ServerThread.native_handle(), "TrmUnxSockSrv");
 
             Terminal::start();
@@ -76,7 +76,7 @@ namespace emb {
             }
         }
 
-        void TerminalUnixSocket::stop() const noexcept {
+        void TerminalUnixSocket::stop() noexcept {
             shutdown(m_iServerSocket, SHUT_RDWR);
             shutdown(m_iClientSocket, SHUT_RDWR);
             m_bStopClient = true;

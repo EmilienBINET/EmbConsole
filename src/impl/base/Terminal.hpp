@@ -46,9 +46,8 @@ namespace emb {
                 return m_rConsoleSession;
             }
 
-            virtual void start() const noexcept;
-            virtual void processEvents() noexcept = 0;
-            virtual void stop() const noexcept = 0;
+            void start() noexcept override;
+            void stop() noexcept override;
 
             void setPrintCommands(PrintCommand::VPtr const& a_vpPrintCommands, bool a_bInstantPrint) noexcept;
             void setPromptCommands(PromptCommand::VPtr const& a_vpPromptCommands) noexcept;

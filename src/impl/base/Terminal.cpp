@@ -36,12 +36,6 @@ namespace emb {
         /*Terminal::Terminal(Terminal&&) noexcept {
         }*/
         Terminal::~Terminal() noexcept {
-            m_bPromptEnabled = false;
-            printCommandLine();
-            begin();
-            setCursorVisible(true);
-            commit();
-            processPrintCommands(m_vpPrintCommands);
         }
         /*Terminal& Terminal::operator= (Terminal const&) noexcept {
             return *this;
@@ -50,7 +44,15 @@ namespace emb {
             return *this;
         }*/
 
-        void Terminal::start() const noexcept {
+        void Terminal::start() noexcept {
+        }
+
+        void Terminal::stop() noexcept {
+            setPromptEnabled(false);
+            begin();
+            setCursorVisible(true);
+            commit();
+            processPrintCommands(m_vpPrintCommands);
         }
 
         void Terminal::setPrintCommands(PrintCommand::VPtr const& a_vpPrintCommands, bool a_bInstantPrint) noexcept {
@@ -417,7 +419,7 @@ namespace emb {
                 }
 
                 for (auto const& printCommand : vpPrintCommands) {
-                    printCommand->process(const_cast<Terminal&>(*this));
+                    printCommand->process(*this);
                 }
                 if (vpPrintCommands.size() > 0) {
                     printCommandLine();

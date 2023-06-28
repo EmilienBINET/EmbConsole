@@ -16,9 +16,9 @@ namespace emb {
             TerminalWindows& operator= (TerminalWindows&&) noexcept = delete;
 
         protected:
-            void start() const noexcept override;
+            void start() noexcept override;
             void processEvents() noexcept override;
-            void stop() const noexcept override;
+            void stop() noexcept override;
 
             bool supportsInteractivity() const noexcept override;
             bool supportsColor() const noexcept override;

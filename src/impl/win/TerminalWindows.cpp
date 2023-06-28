@@ -28,7 +28,7 @@ namespace emb {
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows const&) noexcept = default;
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows&&) noexcept = default;
 
-        void TerminalWindows::start() const noexcept {
+        void TerminalWindows::start() noexcept {
             //    cout << "\033[1;10r";
             GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &m_ulPreviousInputMode);
             SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE),
@@ -66,8 +66,8 @@ namespace emb {
             requestTerminalSize();
         }
 
-        void TerminalWindows::stop() const noexcept {
-            const_cast<TerminalWindows*>(this)->setPromptEnabled(false);
+        void TerminalWindows::stop() noexcept {
+            this->setPromptEnabled(false);
             softReset();
             SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), m_ulPreviousInputMode);
             SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), m_ulPreviousOutputMode);

@@ -128,7 +128,7 @@ namespace emb {
             ConsoleSessionWithTerminal::setStandardOutputCapture(a_funcCaptureFunctor);
         }
 
-        void Console::Private::start() const noexcept {
+        void Console::Private::start() noexcept {
             ConsoleSessionWithTerminal::beginStdCapture();
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->start();
@@ -141,7 +141,7 @@ namespace emb {
             }
         }
 
-        void Console::Private::stop() const noexcept {
+        void Console::Private::stop() noexcept {
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->stop();
             }

@@ -11,9 +11,9 @@ namespace emb {
             ITerminal& operator= (ITerminal const&) noexcept;
             ITerminal& operator= (ITerminal&&) noexcept;
 
-            virtual void start() const noexcept = 0;
+            virtual void start() noexcept = 0;
             virtual void processEvents() noexcept = 0;
-            virtual void stop() const noexcept = 0;
+            virtual void stop() noexcept = 0;
         };
     } // console
 } // emb
