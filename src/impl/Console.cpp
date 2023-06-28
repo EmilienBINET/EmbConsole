@@ -12,7 +12,7 @@ namespace emb {
         //////////////////////////////////////////////////
 
         void IPrintableConsole::print(std::string const& a_Data) noexcept {
-            (*this) << Begin();
+            (*this) << Begin() << ClearLine(ClearLine::Type::All);
 
             string elm{};
             istringstream input{ a_Data };
@@ -26,6 +26,7 @@ namespace emb {
         void IPrintableConsole::printError(std::string const& a_Data) noexcept {
             (*this)
                 << Begin()
+                << ClearLine(ClearLine::Type::All)
                 << SetColor(SetColor::Color::Red) << PrintText(a_Data) << ResetTextFormat()
                 << PrintNewLine()
                 << Commit();
