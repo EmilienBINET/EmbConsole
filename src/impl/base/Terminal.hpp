@@ -42,6 +42,10 @@ namespace emb {
             Terminal& operator= (Terminal const&) noexcept = delete;
             Terminal& operator= (Terminal&&) noexcept = delete;
 
+            ConsoleSessionWithTerminal& consoleSession() const {
+                return m_rConsoleSession;
+            }
+
             virtual void start() const noexcept;
             virtual void processEvents() noexcept = 0;
             virtual void stop() const noexcept = 0;
@@ -189,6 +193,7 @@ namespace emb {
             void printCommandLine(bool const& a_bPrintInText = false) const noexcept;
 
         private:
+            ConsoleSessionWithTerminal& m_rConsoleSession;
             mutable std::recursive_mutex m_Mutex{};
             mutable std::mutex m_PrintMutex{};
             bool m_bPrintCommandEnabled{ true };

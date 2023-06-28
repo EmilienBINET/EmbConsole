@@ -1,5 +1,7 @@
 #include "TerminalAnsi.hpp"
+#include "../ConsolePrivate.hpp"
 #include <iostream>
+#include <string>
 #include <unordered_map>
 #include <regex>
 
@@ -74,17 +76,26 @@ namespace emb {
         }
 
         bool TerminalAnsi::write(std::string const& a_strDataToPrint) const noexcept {
-            cout << a_strDataToPrint;
+            m_strDataToPrint += a_strDataToPrint;
             return true;
         }
 
         void TerminalAnsi::begin() const noexcept {
             Terminal::begin();
+            m_strDataToPrint.clear();
         }
 
         void TerminalAnsi::commit() const noexcept {
+            ConsoleSessionWithTerminal::stdCapture().EndCapture();
+            cout << m_strDataToPrint;
             cout.flush();
+            ConsoleSessionWithTerminal::stdCapture().BeginCapture();
             Terminal::commit();
+
+            string str = ConsoleSessionWithTerminal::stdCapture().GetCapture();
+            if(str.size() > 0) {
+                consoleSession().print(str);
+            }
         }
 
         void TerminalAnsi::moveCursorUp(unsigned int const a_uiN) const noexcept {

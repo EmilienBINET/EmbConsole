@@ -69,12 +69,13 @@ namespace emb {
             void printTextAt(std::string const& a_strText, unsigned int const a_uiR, unsigned int const a_uiC) const noexcept override;
             void processPressedKeyCode(std::string const&) noexcept;
 
-        protected:
+        private:
             enum class DSRState {
                 PositionRequest,
                 SizeRequest,
             };
             DSRState m_eDSRState{ DSRState::PositionRequest };
+            mutable std::string m_strDataToPrint{};
         };
     } // console
 } // emb

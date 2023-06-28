@@ -24,6 +24,8 @@ add_library(EmbConsole
     src/impl/Functions.hpp
     src/impl/Functions.cpp
     src/impl/Options.cpp
+    src/impl/StdCapture.hpp
+    src/impl/StdCapture.cpp
     src/impl/ConsolePrintCommand.cpp
     src/impl/ConsolePromptCommand.cpp
     src/impl/base/ITerminal.hpp

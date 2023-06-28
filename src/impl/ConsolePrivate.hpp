@@ -2,6 +2,7 @@
 
 #include "EmbConsole.hpp"
 #include "Functions.hpp"
+#include "StdCapture.hpp"
 #include "base/ITerminal.hpp"
 #include <mutex>
 #include <thread>
@@ -14,6 +15,10 @@ namespace emb {
         public:
             TerminalPtr terminal() const {
                 return m_pTerminal;
+            }
+            static StdCapture& stdCapture() {
+                static StdCapture stdCapture;
+                return stdCapture;
             }
         protected:
             ConsoleSessionWithTerminal(TerminalPtr a_pTerminal)

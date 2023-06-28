@@ -1,4 +1,5 @@
 #include "ConsolePrivate.hpp"
+#include "StdCapture.hpp"
 #ifdef WIN32
 #include "win/TerminalWindows.hpp"
 #endif
@@ -113,6 +114,7 @@ namespace emb {
         }
 
         void Console::Private::start() const noexcept {
+            ConsoleSessionWithTerminal::stdCapture().BeginCapture();
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->start();
             }
@@ -128,6 +130,7 @@ namespace emb {
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->stop();
             }
+            ConsoleSessionWithTerminal::stdCapture().EndCapture();
         }
 
         void Console::Private::run() {
