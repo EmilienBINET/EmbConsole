@@ -86,16 +86,11 @@ namespace emb {
         }
 
         void TerminalAnsi::commit() const noexcept {
-            ConsoleSessionWithTerminal::stdCapture().EndCapture();
+            ConsoleSessionWithTerminal::endStdCapture();
             cout << m_strDataToPrint;
             cout.flush();
-            ConsoleSessionWithTerminal::stdCapture().BeginCapture();
+            ConsoleSessionWithTerminal::beginStdCapture();
             Terminal::commit();
-
-            string str = ConsoleSessionWithTerminal::stdCapture().GetCapture();
-            if(str.size() > 0) {
-                consoleSession().print(str);
-            }
         }
 
         void TerminalAnsi::moveCursorUp(unsigned int const a_uiN) const noexcept {

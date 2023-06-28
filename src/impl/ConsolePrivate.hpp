@@ -16,9 +16,23 @@ namespace emb {
             TerminalPtr terminal() const {
                 return m_pTerminal;
             }
-            static StdCapture& stdCapture() {
-                static StdCapture stdCapture;
-                return stdCapture;
+            static void setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) {
+                m_funcCaptureFunctor = a_funcCaptureFunctor;
+            }
+            static void beginStdCapture() {
+                if(m_funcCaptureFunctor) {
+                    m_StdCapture.BeginCapture();
+
+                    std::string strCaptured = m_StdCapture.GetCapture();
+                    if(strCaptured.size() > 0) {
+                        m_funcCaptureFunctor(strCaptured);
+                    }
+                }
+            }
+            static void endStdCapture() {
+                if(m_funcCaptureFunctor) {
+                    m_StdCapture.EndCapture();
+                }
             }
         protected:
             ConsoleSessionWithTerminal(TerminalPtr a_pTerminal)
@@ -27,6 +41,8 @@ namespace emb {
             }
         private:
             TerminalPtr m_pTerminal{};
+            static StdCapture m_StdCapture;
+            static StandardOutputFunctor m_funcCaptureFunctor;
         };
 
         template<typename TerminalType>
@@ -75,6 +91,7 @@ namespace emb {
             Private& operator<< (PrintCommand const& a_Cmd) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
+            void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
 
         private:
             void start() const noexcept override;

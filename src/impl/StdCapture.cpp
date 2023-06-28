@@ -1,3 +1,4 @@
+// https://stackoverflow.com/a/68348821
 #include "StdCapture.hpp"
 
 #ifdef _MSC_VER

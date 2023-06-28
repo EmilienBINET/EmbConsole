@@ -93,6 +93,7 @@ namespace emb {
 
         using UserCommandFunctor0 = std::function<void(void)>;
         using UserCommandFunctor1 = std::function<void(UserCommandData const&)>;
+        using StandardOutputFunctor = std::function<void(std::string const&)>;
 
         struct UserCommandInfo {
             std::string path;                   ///< Path of the command
@@ -222,6 +223,8 @@ namespace emb {
 
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
+
+            void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
 
         private:
             class Private;

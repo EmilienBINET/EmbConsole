@@ -13,6 +13,9 @@ namespace emb {
         using namespace std;
         using namespace std::chrono_literals;
 
+        StdCapture ConsoleSessionWithTerminal::m_StdCapture{};
+        StandardOutputFunctor ConsoleSessionWithTerminal::m_funcCaptureFunctor{};
+
         ConsoleSession::Private::Private(TerminalPtr a_pTerminal) noexcept
             : m_pTerminal{ a_pTerminal } {
         }
@@ -113,8 +116,12 @@ namespace emb {
             }
         }
 
+        void Console::Private::setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) noexcept {
+            ConsoleSessionWithTerminal::setStandardOutputCapture(a_funcCaptureFunctor);
+        }
+
         void Console::Private::start() const noexcept {
-            ConsoleSessionWithTerminal::stdCapture().BeginCapture();
+            ConsoleSessionWithTerminal::beginStdCapture();
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->start();
             }
@@ -130,7 +137,7 @@ namespace emb {
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->stop();
             }
-            ConsoleSessionWithTerminal::stdCapture().EndCapture();
+            ConsoleSessionWithTerminal::endStdCapture();
         }
 
         void Console::Private::run() {

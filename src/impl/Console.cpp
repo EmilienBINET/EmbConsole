@@ -198,5 +198,9 @@ namespace emb {
             a_CommandInfo.validate();
             m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor);
         }
+
+        void Console::setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) noexcept {
+            m_pPrivateImpl->setStandardOutputCapture(a_funcCaptureFunctor);
+        }
     } // console
 } // emb

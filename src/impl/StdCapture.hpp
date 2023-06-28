@@ -1,3 +1,4 @@
+// https://stackoverflow.com/a/68348821
 #ifndef STDCAPTURE_H
 #define STDCAPTURE_H
 
