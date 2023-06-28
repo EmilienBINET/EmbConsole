@@ -449,10 +449,12 @@ namespace emb {
             else if ("\x1b\x5b\x44" == a_strKey) {
                 Terminal::processPressedKey(Key::Left);
             }
-            else if ("\x1b\x5b\x48" == a_strKey) {
+            else if ("\x1b\x5b\x48" == a_strKey || 
+                     "\x1b\x5b\x31\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::Start);
             }
-            else if ("\x1b\x5b\x46" == a_strKey) {
+            else if ("\x1b\x5b\x46" == a_strKey || 
+                     "\x1b\x5b\x34\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::End);
             }
             else if ("\x1b\x5b\x35\x7e" == a_strKey) {
@@ -467,16 +469,20 @@ namespace emb {
             else if ("\x1b" == a_strKey) {
                 Terminal::processPressedKey(Key::Escape);
             }
-            else if ("\x1b\x4f\x50" == a_strKey) {
+            else if ("\x1b\x4f\x50" == a_strKey || 
+                     "\x1b\x5b\x31\x31\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F1);
             }
-            else if ("\x1b\x4f\x51" == a_strKey) {
+            else if ("\x1b\x4f\x51" == a_strKey || 
+                     "\x1b\x5b\x31\x32\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F2);
             }
-            else if ("\x1b\x4f\x52" == a_strKey) {
+            else if ("\x1b\x4f\x52" == a_strKey || 
+                     "\x1b\x5b\x31\x33\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F3);
             }
-            else if ("\x1b\x4f\x53" == a_strKey) {
+            else if ("\x1b\x4f\x53" == a_strKey || 
+                     "\x1b\x5b\x31\x34\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F4);
             }
             else if ("\x1b\x5b\x31\x35\x7e" == a_strKey) {
