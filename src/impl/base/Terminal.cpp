@@ -59,6 +59,7 @@ namespace emb {
             setPromptEnabled(false);
             begin();
             setCursorVisible(true);
+            softReset();
             commit();
             processPrintCommands(m_vpPrintCommands);
         }

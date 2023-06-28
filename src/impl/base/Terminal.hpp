@@ -102,6 +102,7 @@ namespace emb {
             virtual void setScrollingRegion(unsigned int const a_uiT, unsigned int const a_uiB) const noexcept {}
             virtual void setWindowTitle(std::string const& a_strTitle) const noexcept {}
             virtual void useAlternateScreenBuffer(bool const& a_bEnabled) const noexcept {}
+            virtual void softReset() const noexcept {}
             virtual void ringBell() const noexcept {}
             virtual void printNewLine() const noexcept {}
             virtual void printText(std::string const& a_strText) const noexcept {}

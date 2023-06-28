@@ -62,7 +62,7 @@ namespace emb {
             void setScrollingRegion(unsigned int const a_uiT, unsigned int const a_uiB) const noexcept override;
             void setWindowTitle(std::string const& a_strTitle) const noexcept override;
             void useAlternateScreenBuffer(bool const& a_bEnabled) const noexcept override;
-            void softReset() const noexcept /*override*/;
+            void softReset() const noexcept override;
             void ringBell() const noexcept override;
             void printNewLine() const noexcept override;
             void printText(std::string const& a_strText) const noexcept override;
