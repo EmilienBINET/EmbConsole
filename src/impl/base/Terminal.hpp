@@ -36,11 +36,11 @@ namespace emb {
 
         public:
             Terminal(ConsoleSessionWithTerminal&) noexcept;
-            Terminal(Terminal const&) noexcept;
-            Terminal(Terminal&&) noexcept;
+            Terminal(Terminal const&) noexcept = delete;
+            Terminal(Terminal&&) noexcept = delete;
             virtual ~Terminal() noexcept;
-            Terminal& operator= (Terminal const&) noexcept;
-            Terminal& operator= (Terminal&&) noexcept;
+            Terminal& operator= (Terminal const&) noexcept = delete;
+            Terminal& operator= (Terminal&&) noexcept = delete;
 
             virtual void start() const noexcept;
             virtual void processEvents() noexcept = 0;

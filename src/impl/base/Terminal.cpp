@@ -30,10 +30,10 @@ namespace emb {
                 onTerminalSizeChanged();
             });
         }
-        Terminal::Terminal(Terminal const&) noexcept {
-        }
-        Terminal::Terminal(Terminal&&) noexcept {
-        }
+        /*Terminal::Terminal(Terminal const&) noexcept {
+        }*/
+        /*Terminal::Terminal(Terminal&&) noexcept {
+        }*/
         Terminal::~Terminal() noexcept {
             m_bPromptEnabled = false;
             printCommandLine();
@@ -42,12 +42,12 @@ namespace emb {
             commit();
             processPrintCommands(m_vpPrintCommands);
         }
-        Terminal& Terminal::operator= (Terminal const&) noexcept {
+        /*Terminal& Terminal::operator= (Terminal const&) noexcept {
             return *this;
         }
         Terminal& Terminal::operator= (Terminal&&) noexcept {
             return *this;
-        }
+        }*/
 
         void Terminal::start() const noexcept {
         }

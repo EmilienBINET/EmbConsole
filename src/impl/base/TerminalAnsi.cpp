@@ -14,11 +14,11 @@ namespace emb {
 
         TerminalAnsi::TerminalAnsi(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : Terminal{ a_rConsoleSession } {
         }
-        TerminalAnsi::TerminalAnsi(TerminalAnsi const&) noexcept = default;
-        TerminalAnsi::TerminalAnsi(TerminalAnsi&&) noexcept = default;
+        //TerminalAnsi::TerminalAnsi(TerminalAnsi const&) noexcept = default;
+        //TerminalAnsi::TerminalAnsi(TerminalAnsi&&) noexcept = default;
         TerminalAnsi::~TerminalAnsi() noexcept = default;
-        TerminalAnsi& TerminalAnsi::operator= (TerminalAnsi const&) noexcept = default;
-        TerminalAnsi& TerminalAnsi::operator= (TerminalAnsi&&) noexcept = default;
+        //TerminalAnsi& TerminalAnsi::operator= (TerminalAnsi const&) noexcept = default;
+        //TerminalAnsi& TerminalAnsi::operator= (TerminalAnsi&&) noexcept = default;
 
         void TerminalAnsi::requestTerminalSize() const noexcept {
             if (isPromptEnabled() && tryBegin()) {

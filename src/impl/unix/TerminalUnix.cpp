@@ -15,16 +15,16 @@ namespace emb {
         TerminalUnix::TerminalUnix(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : TerminalAnsi{ a_rConsoleSession } {
             _this = this;
         }
-        TerminalUnix::TerminalUnix(TerminalUnix const&) noexcept = default;
-        TerminalUnix::TerminalUnix(TerminalUnix&&) noexcept = default;
+        //TerminalUnix::TerminalUnix(TerminalUnix const&) noexcept = default;
+        //TerminalUnix::TerminalUnix(TerminalUnix&&) noexcept = default;
         TerminalUnix::~TerminalUnix() noexcept {
             _this = nullptr;
             string key{};
             while (read(key)) {
             }
         }
-        TerminalUnix& TerminalUnix::operator= (TerminalUnix const&) noexcept = default;
-        TerminalUnix& TerminalUnix::operator= (TerminalUnix&&) noexcept = default;
+        //TerminalUnix& TerminalUnix::operator= (TerminalUnix const&) noexcept = default;
+        //TerminalUnix& TerminalUnix::operator= (TerminalUnix&&) noexcept = default;
 
         void TerminalUnix::start() const noexcept {
             struct termios old;

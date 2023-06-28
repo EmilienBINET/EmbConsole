@@ -9,11 +9,11 @@ namespace emb {
         {
         public:
             TerminalAnsi(ConsoleSessionWithTerminal&) noexcept;
-            TerminalAnsi(TerminalAnsi const&) noexcept;
-            TerminalAnsi(TerminalAnsi&&) noexcept;
+            TerminalAnsi(TerminalAnsi const&) noexcept = delete;
+            TerminalAnsi(TerminalAnsi&&) noexcept = delete;
             virtual ~TerminalAnsi() noexcept;
-            TerminalAnsi& operator= (TerminalAnsi const&) noexcept;
-            TerminalAnsi& operator= (TerminalAnsi&&) noexcept;
+            TerminalAnsi& operator= (TerminalAnsi const&) noexcept = delete;
+            TerminalAnsi& operator= (TerminalAnsi&&) noexcept = delete;
 
         protected:
             void requestTerminalSize() const noexcept;

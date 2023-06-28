@@ -9,11 +9,11 @@ namespace emb {
         {
         public:
             TerminalUnix(ConsoleSessionWithTerminal&) noexcept;
-            TerminalUnix(TerminalUnix const&) noexcept;
-            TerminalUnix(TerminalUnix&&) noexcept;
+            TerminalUnix(TerminalUnix const&) noexcept = delete;
+            TerminalUnix(TerminalUnix&&) noexcept = delete;
             virtual ~TerminalUnix() noexcept;
-            TerminalUnix& operator= (TerminalUnix const&) noexcept;
-            TerminalUnix& operator= (TerminalUnix&&) noexcept;
+            TerminalUnix& operator= (TerminalUnix const&) noexcept = delete;
+            TerminalUnix& operator= (TerminalUnix&&) noexcept = delete;
 
         protected:
             void start() const noexcept override;
