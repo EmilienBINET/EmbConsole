@@ -110,6 +110,18 @@ namespace emb {
             return *this;
         }
 
+        void Console::Private::setUserName(std::string const& a_strUserName) noexcept {
+            for (auto const& console : m_ConsolesVector) {
+                console->terminal()->setUserName(a_strUserName);
+            }
+        }
+
+        void Console::Private::setMachineName(std::string const& a_strMachineName) noexcept {
+            for (auto const& console : m_ConsolesVector) {
+                console->terminal()->setMachineName(a_strMachineName);
+            }
+        }
+
         void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept {
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor);

@@ -413,6 +413,17 @@ namespace emb {
             printCommandLine();
         }
 
+
+        void Terminal::setUserName(std::string const& a_strUserName) noexcept {
+            lock_guard<recursive_mutex> const l{ m_Mutex };
+            m_strCurrentUser = a_strUserName;
+        }
+
+        void Terminal::setMachineName(std::string const& a_strMachineName) noexcept {
+            lock_guard<recursive_mutex> const l{ m_Mutex };
+            m_strCurrentMachine = a_strMachineName;
+        }
+
         void Terminal::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept {
             return m_pFunctions->addCommand(a_CommandInfo, a_funcCommandFunctor);
         }

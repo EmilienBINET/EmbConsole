@@ -186,6 +186,14 @@ namespace emb {
             return *this;
         }
 
+        void Console::setUserName(std::string const& a_strUserName) noexcept {
+            m_pPrivateImpl->setUserName(a_strUserName);
+        }
+
+        void Console::setMachineName(std::string const& a_strMachineName) noexcept {
+            m_pPrivateImpl->setMachineName(a_strMachineName);
+        }
+
         void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept {
             a_CommandInfo.validate();
             m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor);

@@ -122,6 +122,9 @@ namespace emb {
 
             virtual void onTerminalSizeChanged() noexcept;
 
+            void setUserName(std::string const& a_strUserName) noexcept;
+            void setMachineName(std::string const& a_strMachineName) noexcept;
+
             void addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept;
             void addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor) noexcept;
             void delCommand(UserCommandInfo const& a_CommandInfo) noexcept;
