@@ -227,6 +227,8 @@ namespace emb {
 
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
 
+            void setPromptEnabled(bool) noexcept;
+
         private:
             class Private;
             std::unique_ptr<Private> m_pPrivateImpl;

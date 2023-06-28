@@ -207,5 +207,9 @@ namespace emb {
         void Console::setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) noexcept {
             m_pPrivateImpl->setStandardOutputCapture(a_funcCaptureFunctor);
         }
+
+        void Console::setPromptEnabled(bool a_bPromptEnabled) noexcept {
+            m_pPrivateImpl->setPromptEnabled(a_bPromptEnabled);
+        }
     } // console
 } // emb

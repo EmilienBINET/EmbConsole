@@ -100,6 +100,7 @@ namespace emb {
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
             void delCommand(UserCommandInfo const&) noexcept;
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
+            void setPromptEnabled(bool) noexcept;
 
         private:
             void start() noexcept override;

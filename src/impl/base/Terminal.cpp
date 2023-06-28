@@ -45,6 +45,7 @@ namespace emb {
         }*/
 
         void Terminal::start() noexcept {
+            onTerminalSizeChanged();
         }
 
         void Terminal::stop() noexcept {

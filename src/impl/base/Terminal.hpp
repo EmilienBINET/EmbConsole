@@ -200,7 +200,7 @@ namespace emb {
             PrintCommand::VPtr m_vpPrintCommands{};
             std::shared_ptr<Functions> m_pFunctions;
             Functions::VCommands m_vCommands{};
-            bool m_bPromptEnabled{ true };
+            bool m_bPromptEnabled{ false };
             std::string m_strCurrentPrompt{};
             std::string m_strCurrentUser{};
             std::string m_strCurrentMachine{};

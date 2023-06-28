@@ -128,6 +128,12 @@ namespace emb {
             ConsoleSessionWithTerminal::setStandardOutputCapture(a_funcCaptureFunctor);
         }
 
+        void Console::Private::setPromptEnabled(bool a_bPromptEnabled) noexcept {
+            for (auto const& console : m_ConsolesVector) {
+                console->terminal()->setPromptEnabled(a_bPromptEnabled);
+            }
+        }
+
         void Console::Private::start() noexcept {
             ConsoleSessionWithTerminal::beginStdCapture();
             for (auto const& console : m_ConsolesVector) {
