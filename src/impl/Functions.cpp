@@ -34,7 +34,7 @@ namespace emb {
 
         Functions::Functions(ConsoleSessionWithTerminal& a_rConsole) noexcept : m_rConsole{ a_rConsole } {
             addCommand(UserCommandInfo("/ls", "List information about the commands"), [&](UserCommandData const& a_CmdData) {
-                string output{ "===== LIST OF AVAILABLE COMMANDS =====\n" };
+                string output{};
                 bool bAll = a_CmdData.args.size() > 0 && a_CmdData.args.at(0).find('a') != string::npos;
                 bool bLongListing = a_CmdData.args.size() > 0 && a_CmdData.args.at(0).find('l') != string::npos;
 
@@ -53,12 +53,16 @@ namespace emb {
                     }
                 }
                 else {
-                    vector<string> vecPrintedFolders;
                     for (auto const& elm : m_mapFunctions) {
                         if (isRootCommand(elm.first)) { // root command => available from anywhere
                             output += elm.first.substr(1) + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
                         }
-                        else if(isSubCommandOf(elm.first, a_CmdData.console.getCurrentPath())) { // Other command => available from folder
+                    }
+                    output += bLongListing ? "" : "\n";
+                    vector<string> vecPrintedFolders;
+                    for (auto const& elm : m_mapFunctions) {
+                        if(isNotRootCommand(elm.first) &&
+                            isSubCommandOf(elm.first, a_CmdData.console.getCurrentPath())) { // Other command => available from folder
                             string folder = getFolderName(elm.first, a_CmdData.console.getCurrentPath());
                             if(std::count(vecPrintedFolders.begin(), vecPrintedFolders.end(), folder) == 0) {
                                 vecPrintedFolders.push_back(folder);
@@ -72,7 +76,7 @@ namespace emb {
                         }
                     }
                 }
-                output += std::string(bLongListing ? "" : "\n") + "======================================\n";
+                output += bLongListing ? "" : "\n";
 
                 a_CmdData.console.print(output);
             });
