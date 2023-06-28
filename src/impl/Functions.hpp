@@ -36,8 +36,10 @@ namespace emb {
 
             bool processAutoCompletion(std::string& a_strCurrentEntry, unsigned int const& a_uiCurrentCursorPosition, std::string const& a_strCurrentFolder, bool const& a_bNext) const noexcept;
 
+            bool folderExists(std::string const&) const noexcept;
+
         public:
-            static std::string getCanonicalPath(std::string const&) noexcept;
+            static std::string getCanonicalPath(std::string const&, bool bEndWithDelimiter = false) noexcept;
 
         private:
             Error extractElementsFromCommand(std::string& a_rstrCommand, std::vector<std::string>& a_rvstrArguments, std::string const& a_strRawCommand) const noexcept;

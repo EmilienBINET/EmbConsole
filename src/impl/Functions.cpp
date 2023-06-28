@@ -253,7 +253,17 @@ namespace emb {
             return bRes;
         }
 
-        string Functions::getCanonicalPath(string const& a_strFullPath) noexcept {
+        bool Functions::folderExists(std::string const& a_strFolder) const noexcept {
+            string strFolderToTest = getCanonicalPath(a_strFolder, true);
+            for (auto const& elm : m_mapFunctions) {
+                if(elm.first.find(strFolderToTest) == 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        string Functions::getCanonicalPath(string const& a_strFullPath, bool bEndWithDelimiter) noexcept {
             vector<string> vstrResult{};
 
             string elm{};
@@ -275,6 +285,10 @@ namespace emb {
             }
             if (strResult.empty()) {
                 strResult = "/";
+            }
+
+            if(bEndWithDelimiter && strResult.find_last_of('/') != strResult.size() - 1) {
+                strResult += "/";
             }
 
             return strResult;

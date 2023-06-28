@@ -21,14 +21,21 @@ namespace emb {
                 else {
                     string const& folder = a_CmdData.args.at(0);
                     assert(folder.size() > 0);
+                    string strNewFolder{};
                     if ('/' == folder.at(0)) {
-                        m_strCurrentFolder = Functions::getCanonicalPath(folder);
+                        strNewFolder = Functions::getCanonicalPath(folder);
                     }
                     else {
-                        m_strCurrentFolder = Functions::getCanonicalPath(m_strCurrentFolder + "/" + folder);
+                        strNewFolder = Functions::getCanonicalPath(m_strCurrentFolder + "/" + folder);
+                    }
+                    if(m_pFunctions->folderExists(strNewFolder)) {
+                        m_strCurrentFolder = strNewFolder;
+                        onTerminalSizeChanged();
+                    }
+                    else {
+                        a_CmdData.console.printError("Folder " + strNewFolder + " does not exists.");
                     }
                 }
-                onTerminalSizeChanged();
             });
         }
         /*Terminal::Terminal(Terminal const&) noexcept {
