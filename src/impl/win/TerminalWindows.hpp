@@ -2,6 +2,7 @@
 
 #include "../base/TerminalAnsi.hpp"
 #include <thread>
+#include <atomic>
 
 namespace emb {
     namespace console {
@@ -34,6 +35,7 @@ namespace emb {
             mutable unsigned long m_ulPreviousInputMode{};
             mutable unsigned long m_ulPreviousOutputMode{};
             std::thread m_InputThread{};
+            std::atomic<bool> m_bSizeChanged{false};
         };
     } // console
 } // emb

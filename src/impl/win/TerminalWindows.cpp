@@ -21,15 +21,11 @@ namespace emb {
         }
         //TerminalWindows::TerminalWindows(TerminalWindows const&) noexcept = default;
         //TerminalWindows::TerminalWindows(TerminalWindows&&) noexcept = default;
-        TerminalWindows::~TerminalWindows() noexcept {
-            //string keys{};
-            //while (read(keys)) {}  // purge cin
-        }
+        TerminalWindows::~TerminalWindows() noexcept = default;
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows const&) noexcept = default;
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows&&) noexcept = default;
 
         void TerminalWindows::start() noexcept {
-            //    cout << "\033[1;10r";
             GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &m_ulPreviousInputMode);
             SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE),
                 //ENABLE_ECHO_INPUT |
@@ -53,7 +49,7 @@ namespace emb {
             SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ulOutputMode);
             ConsoleSessionWithTerminal::setCaptureEndEvt([this, ulOutputMode]{
                 SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ulOutputMode);
-                //requestTerminalSize();
+                requestTerminalSize();
             });
 
             TerminalAnsi::start();
@@ -61,14 +57,12 @@ namespace emb {
         }
 
         void TerminalWindows::processEvents() noexcept {
-            /*string keys{};
-            while (read(keys)) {}
-            if (!keys.empty() && !parseTerminalSizeResponse(keys)) {
-                processPressedKeyCode(keys);
-            }*/
             processPrintCommands();
             processUserCommands();
-            //requestTerminalSize();
+
+            if(m_bSizeChanged) {
+                onTerminalSizeChanged();
+            }
         }
 
         void TerminalWindows::stop() noexcept {
@@ -86,11 +80,6 @@ namespace emb {
         }
 
         bool TerminalWindows::read(std::string& a_rstrKey) const noexcept {
-            //bool bRes = 0 != _kbhit();
-            //if (bRes) {
-            //    a_rstrKey += _getch();
-            //}
-            //return bRes;
             return false;
         }
 
@@ -117,7 +106,7 @@ namespace emb {
                                 break;
 
                             case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing
-                                //requestTerminalSize();
+                                processCapture();
                                 break;
 
                             case FOCUS_EVENT:  // disregard focus events
@@ -142,11 +131,8 @@ namespace emb {
             CONSOLE_SCREEN_BUFFER_INFO csbi;
             if(TRUE == GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
                 Size newSize{ csbi.srWindow.Right - csbi.srWindow.Left + 1, csbi.srWindow.Bottom - csbi.srWindow.Top + 1 };
-                bool bSizeChanged = getCurrentSize() != newSize;
+                m_bSizeChanged = getCurrentSize() != newSize;
                 setCurrentSize(newSize);
-                if (bSizeChanged) {
-                    onTerminalSizeChanged();
-                }
             }
         }
 
