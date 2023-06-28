@@ -124,6 +124,7 @@ namespace emb {
 
             void addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept;
             void addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor) noexcept;
+            void delCommand(UserCommandInfo const& a_CommandInfo) noexcept;
 
             void setPromptEnabled(bool);
 

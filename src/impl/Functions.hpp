@@ -30,6 +30,7 @@ namespace emb {
 
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
+            void delCommand(UserCommandInfo const&) noexcept;
 
             Error processEntry(std::string const& a_strRawCommand, std::string const& a_strPath) noexcept;
 

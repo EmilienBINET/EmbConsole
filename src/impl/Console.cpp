@@ -199,6 +199,11 @@ namespace emb {
             m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor);
         }
 
+        void Console::delCommand(UserCommandInfo const& a_CommandInfo) {
+            a_CommandInfo.validate();
+            m_pPrivateImpl->delCommand(a_CommandInfo);
+        }
+
         void Console::setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) noexcept {
             m_pPrivateImpl->setStandardOutputCapture(a_funcCaptureFunctor);
         }

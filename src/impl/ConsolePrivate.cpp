@@ -118,6 +118,12 @@ namespace emb {
             }
         }
 
+        void Console::Private::delCommand(UserCommandInfo const& a_CommandInfo) noexcept {
+            for (auto const& console : m_ConsolesVector) {
+                console->terminal()->delCommand(a_CommandInfo);
+            }
+        }
+
         void Console::Private::setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) noexcept {
             ConsoleSessionWithTerminal::setStandardOutputCapture(a_funcCaptureFunctor);
         }

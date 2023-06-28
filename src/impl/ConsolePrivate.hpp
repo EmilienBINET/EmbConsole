@@ -98,6 +98,7 @@ namespace emb {
             Private& operator<< (PrintCommand const& a_Cmd) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
+            void delCommand(UserCommandInfo const&) noexcept;
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
 
         private:

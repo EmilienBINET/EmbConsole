@@ -397,6 +397,10 @@ namespace emb {
             return m_pFunctions->addCommand(a_CommandInfo, a_funcCommandFunctor);
         }
 
+        void Terminal::delCommand(UserCommandInfo const& a_CommandInfo) noexcept {
+            return m_pFunctions->delCommand(a_CommandInfo);
+        }
+
         void Terminal::setPromptEnabled(bool a_bPromptEnabled) {
             lock_guard<recursive_mutex> l{ m_Mutex };
             m_bPromptEnabled = a_bPromptEnabled;

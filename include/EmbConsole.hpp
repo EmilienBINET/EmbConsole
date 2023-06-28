@@ -223,6 +223,7 @@ namespace emb {
 
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
+            void delCommand(UserCommandInfo const&);
 
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
 

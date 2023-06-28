@@ -99,6 +99,10 @@ namespace emb {
             m_mapFunctions[a_CommandInfo.path] = f;
         }
 
+        void Functions::delCommand(UserCommandInfo const& a_CommandInfo) noexcept {
+            m_mapFunctions.erase(a_CommandInfo.path);
+        }
+
         std::future<void> m_future;
 
         Functions::Error Functions::processEntry(string const& a_strRawCommand, string const& a_strPath) noexcept {
