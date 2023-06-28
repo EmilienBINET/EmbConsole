@@ -1,4 +1,5 @@
 #include "TerminalUnixSocket.hpp"
+#include <fstream>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -8,21 +9,44 @@
 
 /* CLIENT:
  * #!/bin/bash
- * stty -icanon -echo && nc -U /tmp/mysocket
+ * stty -icanon -echo
+ * nc -U /tmp/mysocket
+ * stty icanon echo
  */
 namespace emb {
     namespace console {
         using namespace std;
 
         static constexpr char s_strSocketPath[] = "/tmp/mysocket";
+        static constexpr char s_strShellPath[] = "/tmp/myshell";
 
         TerminalUnixSocket::TerminalUnixSocket(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : TerminalAnsi{ a_rConsoleSession } {
+
+            // Create the shell to access unix socket
+            ofstream outShell{ s_strShellPath };
+            outShell
+                << "#!/bin/bash" << endl
+                << "stty -icanon -echo" << endl
+                << "nc -U " << s_strSocketPath << endl
+                << "stty icanon echo" << endl;
+            chmod(s_strShellPath, ACCESSPERMS);
+
+            addCommand(emb::console::UserCommandInfo("/exit", "Exit the current shell"), [this]{
+                if(m_iClientSocket > 0) {
+                    shutdown(m_iClientSocket, SHUT_RDWR);
+                    m_bStopClient = true;
+                }
+            });
+
         }
         //TerminalUnixSocket::TerminalUnixSocket(TerminalUnixSocket const&) noexcept = default;
         //TerminalUnixSocket::TerminalUnixSocket(TerminalUnixSocket&&) noexcept = default;
         TerminalUnixSocket::~TerminalUnixSocket() noexcept {
             string key{};
             while (read(key)) {}
+
+            unlink(s_strShellPath);
+            unlink(s_strSocketPath);
         }
         //TerminalUnixSocket& TerminalUnixSocket::operator= (TerminalUnixSocket const&) noexcept = default;
         //TerminalUnixSocket& TerminalUnixSocket::operator= (TerminalUnixSocket&&) noexcept = default;
@@ -54,7 +78,7 @@ namespace emb {
             m_ServerThread = std::thread{ &TerminalUnixSocket::serverLoop, this };
             pthread_setname_np(m_ServerThread.native_handle(), "TrmUnxSockSrv");
 
-            Terminal::start();
+            TerminalAnsi::start();
         }
 
         void TerminalUnixSocket::processEvents() noexcept {
@@ -77,6 +101,7 @@ namespace emb {
         }
 
         void TerminalUnixSocket::stop() noexcept {
+            TerminalAnsi::stop();
             shutdown(m_iServerSocket, SHUT_RDWR);
             shutdown(m_iClientSocket, SHUT_RDWR);
             m_bStopClient = true;
