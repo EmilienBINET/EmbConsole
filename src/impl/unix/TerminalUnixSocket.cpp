@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/types.h>
+#include <chrono>
 
 /* CLIENT:
  * #!/bin/bash
@@ -67,7 +68,12 @@ namespace emb {
             }
             processPrintCommands();
             processUserCommands();
-            requestTerminalSize();
+
+            static chrono::time_point<chrono::steady_clock> timepoint{chrono::steady_clock::now()};
+            if(timepoint <= chrono::steady_clock::now()) {
+                requestTerminalSize();
+                timepoint = chrono::steady_clock::now() + chrono::milliseconds(1000);
+            }
         }
 
         void TerminalUnixSocket::stop() const noexcept {
