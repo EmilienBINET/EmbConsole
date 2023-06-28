@@ -2,7 +2,6 @@
 #include "StdCapture.hpp"
 
 #if defined _MSC_VER || defined __MINGW32__
-#include <windows.h>
 #include <io.h>
 #define popen _popen 
 #define pclose _pclose
@@ -75,9 +74,9 @@ bool StdCapture::EndCapture()
     secure_dup2(m_oldStdOut, STD_OUT_FD);
     secure_dup2(m_oldStdErr, STD_ERR_FD);
 
-#if defined _MSC_VER || defined __MINGW32__
-    SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), m_win32ConsoleMode);
-#endif
+    if(m_fctCaptureEnd) {
+        m_fctCaptureEnd();
+    }
 
     const int bufSize = 1025;
     char buf[bufSize];
@@ -127,8 +126,8 @@ std::string StdCapture::GetCapture()
     return m_captured;
 }
 
-void StdCapture::setWin32ConsoleMode(unsigned long consoleMode) {
-    m_win32ConsoleMode = consoleMode;
+void StdCapture::setCaptureEndEvt(std::function<void(void)> const& a_fctCaptureEnd) {
+    m_fctCaptureEnd = a_fctCaptureEnd;
 }
 
 int StdCapture::secure_dup(int src)

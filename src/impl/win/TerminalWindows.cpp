@@ -22,8 +22,8 @@ namespace emb {
         //TerminalWindows::TerminalWindows(TerminalWindows const&) noexcept = default;
         //TerminalWindows::TerminalWindows(TerminalWindows&&) noexcept = default;
         TerminalWindows::~TerminalWindows() noexcept {
-            string keys{};
-            while (read(keys)) {}  // purge cin
+            //string keys{};
+            //while (read(keys)) {}  // purge cin
         }
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows const&) noexcept = default;
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows&&) noexcept = default;
@@ -35,11 +35,11 @@ namespace emb {
                 //ENABLE_ECHO_INPUT |
                 //ENABLE_INSERT_MODE |
                 //ENABLE_LINE_INPUT |
-                ENABLE_MOUSE_INPUT |
+                //ENABLE_MOUSE_INPUT |
                 ENABLE_PROCESSED_INPUT |
                 ENABLE_EXTENDED_FLAGS |
                 //ENABLE_QUICK_EDIT_MODE |
-                ENABLE_WINDOW_INPUT |
+                //ENABLE_WINDOW_INPUT |
                 ENABLE_VIRTUAL_TERMINAL_INPUT |
                 0);
             GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &m_ulPreviousOutputMode);
@@ -51,24 +51,28 @@ namespace emb {
                 //ENABLE_LVB_GRID_WORLDWIDE |
                 0;
             SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ulOutputMode);
-            ConsoleSessionWithTerminal::setWin32ConsoleMode(ulOutputMode);
-            Terminal::start();
+            ConsoleSessionWithTerminal::setCaptureEndEvt([this, ulOutputMode]{
+                SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ulOutputMode);
+                //requestTerminalSize();
+            });
+
+            TerminalAnsi::start();
+            m_InputThread = std::thread{ &TerminalWindows::inputLoop, this };
         }
 
         void TerminalWindows::processEvents() noexcept {
-            string keys{};
+            /*string keys{};
             while (read(keys)) {}
             if (!keys.empty() && !parseTerminalSizeResponse(keys)) {
                 processPressedKeyCode(keys);
-            }
+            }*/
             processPrintCommands();
             processUserCommands();
-            requestTerminalSize();
+            //requestTerminalSize();
         }
 
         void TerminalWindows::stop() noexcept {
-            this->setPromptEnabled(false);
-            softReset();
+            TerminalAnsi::stop();
             SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), m_ulPreviousInputMode);
             SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), m_ulPreviousOutputMode);
         }
@@ -82,11 +86,69 @@ namespace emb {
         }
 
         bool TerminalWindows::read(std::string& a_rstrKey) const noexcept {
-            bool bRes = 0 != _kbhit();
-            if (bRes) {
-                a_rstrKey += _getch();
-            }
-            return bRes;
+            //bool bRes = 0 != _kbhit();
+            //if (bRes) {
+            //    a_rstrKey += _getch();
+            //}
+            //return bRes;
+            return false;
         }
+
+        void TerminalWindows::inputLoop() noexcept {
+            HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+            if(hStdin != INVALID_HANDLE_VALUE) {
+                DWORD cNumRead;
+                size_t const sizeBuf{128};
+                INPUT_RECORD irInBuf[sizeBuf];
+                while(true) {
+                    if(ReadConsoleInput(hStdin, irInBuf, sizeBuf, &cNumRead)) {
+                        string strKeyCode{};
+                        for (DWORD i=0; i<cNumRead; ++i) {
+                            switch(irInBuf[i].EventType) {
+                            case KEY_EVENT: // keyboard input
+                                if(TRUE == irInBuf[i].Event.KeyEvent.bKeyDown) {
+                                    for(WORD j=0; j<irInBuf[i].Event.KeyEvent.wRepeatCount; ++j) {
+                                        strKeyCode += irInBuf[i].Event.KeyEvent.uChar.AsciiChar;
+                                    }
+                                }
+                                break;
+
+                            case MOUSE_EVENT: // mouse input
+                                break;
+
+                            case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing
+                                //requestTerminalSize();
+                                break;
+
+                            case FOCUS_EVENT:  // disregard focus events
+                                break;
+
+                            case MENU_EVENT:   // disregard menu events
+                                break;
+
+                            default:
+                                break;
+                            }
+                        }
+                        if(!strKeyCode.empty()) {
+                            processPressedKeyCode(strKeyCode);
+                        }
+                    }
+                }
+            }
+        }
+
+        void TerminalWindows::requestTerminalSize() noexcept {
+            CONSOLE_SCREEN_BUFFER_INFO csbi;
+            if(TRUE == GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+                Size newSize{ csbi.srWindow.Right - csbi.srWindow.Left + 1, csbi.srWindow.Bottom - csbi.srWindow.Top + 1 };
+                bool bSizeChanged = getCurrentSize() != newSize;
+                setCurrentSize(newSize);
+                if (bSizeChanged) {
+                    onTerminalSizeChanged();
+                }
+            }
+        }
+
     } // console
 } // emb

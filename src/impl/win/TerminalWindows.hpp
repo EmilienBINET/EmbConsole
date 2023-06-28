@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../base/TerminalAnsi.hpp"
+#include <thread>
 
 namespace emb {
     namespace console {
@@ -26,8 +27,13 @@ namespace emb {
             bool read(std::string& a_rstrKey) const noexcept override;
 
         private:
+            void inputLoop() noexcept;
+            void requestTerminalSize() noexcept;
+
+        private:
             mutable unsigned long m_ulPreviousInputMode{};
             mutable unsigned long m_ulPreviousOutputMode{};
+            std::thread m_InputThread{};
         };
     } // console
 } // emb
