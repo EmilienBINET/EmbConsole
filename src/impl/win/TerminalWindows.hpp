@@ -34,6 +34,7 @@ namespace emb {
         private:
             mutable unsigned long m_ulPreviousInputMode{};
             mutable unsigned long m_ulPreviousOutputMode{};
+            std::atomic<bool> m_bStopThread{false};
             std::thread m_InputThread{};
             std::atomic<bool> m_bSizeChanged{false};
         };

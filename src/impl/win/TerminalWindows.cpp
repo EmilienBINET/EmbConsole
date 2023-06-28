@@ -61,6 +61,7 @@ namespace emb {
             processUserCommands();
 
             if(m_bSizeChanged) {
+                m_bSizeChanged = false;
                 onTerminalSizeChanged();
             }
         }
@@ -69,6 +70,8 @@ namespace emb {
             TerminalAnsi::stop();
             SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), m_ulPreviousInputMode);
             SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), m_ulPreviousOutputMode);
+            m_bStopThread = true;
+            m_InputThread.join();
         }
 
         bool TerminalWindows::supportsInteractivity() const noexcept {
@@ -89,7 +92,7 @@ namespace emb {
                 DWORD cNumRead;
                 size_t const sizeBuf{128};
                 INPUT_RECORD irInBuf[sizeBuf];
-                while(true) {
+                while(!m_bStopThread) {
                     if(ReadConsoleInput(hStdin, irInBuf, sizeBuf, &cNumRead)) {
                         string strKeyCode{};
                         for (DWORD i=0; i<cNumRead; ++i) {
@@ -131,8 +134,10 @@ namespace emb {
             CONSOLE_SCREEN_BUFFER_INFO csbi;
             if(TRUE == GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
                 Size newSize{ csbi.srWindow.Right - csbi.srWindow.Left + 1, csbi.srWindow.Bottom - csbi.srWindow.Top + 1 };
-                m_bSizeChanged = getCurrentSize() != newSize;
-                setCurrentSize(newSize);
+                if(getCurrentSize() != newSize) {
+                    setCurrentSize(newSize);
+                    m_bSizeChanged = true;
+                }
             }
         }
 
