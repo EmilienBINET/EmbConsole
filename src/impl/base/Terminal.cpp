@@ -126,6 +126,9 @@ namespace emb {
 
             if (question) {
                 begin();
+                clearLine(ClearLine::Type::All);
+                printNewLine();
+                moveCursorToPreviousLine(1);
                 printText(question->m_strQuestion);
                 commit();
             }
@@ -158,6 +161,9 @@ namespace emb {
                         printText(validator->m_strErrorMessage.empty() ? "User entry did not pass validation." : validator->m_strErrorMessage);
                         resetTextFormat();
                         printNewLine();
+                        clearLine(ClearLine::Type::All);
+                        printNewLine();
+                        moveCursorToPreviousLine(1);
                         printText(question->m_strQuestion);
                     }
 
@@ -194,11 +200,13 @@ namespace emb {
             }
             else if (choicesCount <= 2) {
                 std::string promptText{ "Type one of [" };
+                begin();
                 for (size_t idx = 0; idx < choicesCount; ++idx) {
                     auto choice = getType<Choice>(a_vpPromptCommands, idx);
                     printText(" " + choice->visibleString(false));
                     promptText += choice->key();
                 }
+                commit();
                 promptText += "]";
 
                 std::condition_variable cv;
@@ -260,12 +268,17 @@ namespace emb {
             }
             else {
                 std::string promptText{ "Type on of [" };
+                begin();
                 for (size_t idx = 0; idx < choicesCount; ++idx) {
                     auto choice = getType<Choice>(a_vpPromptCommands, idx);
                     printNewLine();
+                    clearLine(ClearLine::Type::All);
+                    printNewLine();
+                    moveCursorToPreviousLine(1);
                     printText(" - " + choice->visibleString(false));
                     promptText += choice->key();
                 }
+                commit();
                 promptText += "]";
 
                 std::condition_variable cv;
