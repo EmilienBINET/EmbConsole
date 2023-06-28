@@ -70,7 +70,15 @@ namespace emb {
             TerminalAnsi::stop();
             SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), m_ulPreviousInputMode);
             SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), m_ulPreviousOutputMode);
+
             m_bStopThread = true;
+            // We send a fake event to unblock the ReadConsoleInput function
+            {
+                INPUT_RECORD irInBuf{};
+                irInBuf.EventType = FOCUS_EVENT; // That event is discarded later
+                DWORD wNumberOfEventsWritten{0};
+                WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), &irInBuf, 1, &wNumberOfEventsWritten);
+            }
             m_InputThread.join();
         }
 
