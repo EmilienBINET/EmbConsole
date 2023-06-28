@@ -16,6 +16,8 @@ public:
     bool EndCapture();
     std::string GetCapture();
 
+    void setWin32ConsoleMode(unsigned long);
+
 private:
     enum PIPES { READ, WRITE };
     
@@ -30,6 +32,8 @@ private:
     bool m_capturing;
     std::mutex m_mutex;
     std::string m_captured;
+
+    unsigned long m_win32ConsoleMode{};
 };
 
 #endif // STDCAPTURE_H

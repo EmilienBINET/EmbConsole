@@ -1,4 +1,5 @@
 #include "TerminalWindows.hpp"
+#include "../ConsolePrivate.hpp"
 #include <iostream>
 #include <conio.h>
 #include <unordered_map>
@@ -42,13 +43,15 @@ namespace emb {
                 ENABLE_VIRTUAL_TERMINAL_INPUT |
                 0);
             GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &m_ulPreviousOutputMode);
-            SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE),
+            DWORD ulOutputMode =
                 ENABLE_PROCESSED_OUTPUT |
                 //ENABLE_WRAP_AT_EOL_OUTPUT |
                 ENABLE_VIRTUAL_TERMINAL_PROCESSING |
                 //DISABLE_NEWLINE_AUTO_RETURN |
                 //ENABLE_LVB_GRID_WORLDWIDE |
-                0);
+                0;
+            SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ulOutputMode);
+            ConsoleSessionWithTerminal::setWin32ConsoleMode(ulOutputMode);
             Terminal::start();
         }
 

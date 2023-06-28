@@ -34,6 +34,9 @@ namespace emb {
                     m_StdCapture.EndCapture();
                 }
             }
+            static void setWin32ConsoleMode(unsigned long consoleMode) {
+                m_StdCapture.setWin32ConsoleMode(consoleMode);
+            }
         protected:
             ConsoleSessionWithTerminal(TerminalPtr a_pTerminal)
                 : ConsoleSession{ a_pTerminal }
