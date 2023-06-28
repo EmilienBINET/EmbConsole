@@ -18,14 +18,14 @@ namespace emb {
 
         TerminalWindows::TerminalWindows(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : TerminalAnsi{ a_rConsoleSession } {
         }
-        TerminalWindows::TerminalWindows(TerminalWindows const&) noexcept = default;
-        TerminalWindows::TerminalWindows(TerminalWindows&&) noexcept = default;
+        //TerminalWindows::TerminalWindows(TerminalWindows const&) noexcept = default;
+        //TerminalWindows::TerminalWindows(TerminalWindows&&) noexcept = default;
         TerminalWindows::~TerminalWindows() noexcept {
             string keys{};
             while (read(keys)) {}  // purge cin
         }
-        TerminalWindows& TerminalWindows::operator= (TerminalWindows const&) noexcept = default;
-        TerminalWindows& TerminalWindows::operator= (TerminalWindows&&) noexcept = default;
+        //TerminalWindows& TerminalWindows::operator= (TerminalWindows const&) noexcept = default;
+        //TerminalWindows& TerminalWindows::operator= (TerminalWindows&&) noexcept = default;
 
         void TerminalWindows::start() const noexcept {
             //    cout << "\033[1;10r";

@@ -1,7 +1,7 @@
 // https://stackoverflow.com/a/68348821
 #include "StdCapture.hpp"
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
 #include <io.h>
 #define popen _popen 
 #define pclose _pclose
@@ -54,7 +54,7 @@ void StdCapture::BeginCapture()
     secure_dup2(m_pipe[WRITE],STD_OUT_FD);
     secure_dup2(m_pipe[WRITE],STD_ERR_FD);
     m_capturing = true;
-#ifndef _MSC_VER
+#if !(defined _MSC_VER || defined __MINGW32__)
     secure_close(m_pipe[WRITE]);
 #endif
 }
@@ -81,7 +81,7 @@ bool StdCapture::EndCapture()
     {
         bytesRead = 0;
         fd_blocked = false;
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
         if (!eof(m_pipe[READ]))
             bytesRead = read(m_pipe[READ], buf, bufSize-1);
 #else
@@ -104,7 +104,7 @@ bool StdCapture::EndCapture()
     secure_close(m_oldStdOut);
     secure_close(m_oldStdErr);
     secure_close(m_pipe[READ]);
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
     secure_close(m_pipe[WRITE]);
 #endif
     m_capturing = false;
@@ -136,7 +136,7 @@ void StdCapture::secure_pipe(int * pipes)
     bool fd_blocked = false;
     do
     {
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
         ret = pipe(pipes, 65536, O_BINARY);
 #else
         ret = pipe(pipes) == -1;

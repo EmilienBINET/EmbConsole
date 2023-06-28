@@ -9,11 +9,11 @@ namespace emb {
         {
         public:
             TerminalWindows(ConsoleSessionWithTerminal&) noexcept;
-            TerminalWindows(TerminalWindows const&) noexcept;
-            TerminalWindows(TerminalWindows&&) noexcept;
+            TerminalWindows(TerminalWindows const&) noexcept = delete;
+            TerminalWindows(TerminalWindows&&) noexcept = delete;
             virtual ~TerminalWindows() noexcept;
-            TerminalWindows& operator= (TerminalWindows const&) noexcept;
-            TerminalWindows& operator= (TerminalWindows&&) noexcept;
+            TerminalWindows& operator= (TerminalWindows const&) noexcept = delete;
+            TerminalWindows& operator= (TerminalWindows&&) noexcept = delete;
 
         protected:
             void start() const noexcept override;
