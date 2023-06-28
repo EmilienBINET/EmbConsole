@@ -4,6 +4,7 @@
 
 #include <string>
 #include <mutex>
+#include <functional>
 
 class StdCapture
 {
@@ -16,7 +17,7 @@ public:
     bool EndCapture();
     std::string GetCapture();
 
-    void setWin32ConsoleMode(unsigned long);
+    void setCaptureEndEvt(std::function<void(void)> const& a_fctCaptureEnd);
 
 private:
     enum PIPES { READ, WRITE };
@@ -33,7 +34,7 @@ private:
     std::mutex m_mutex;
     std::string m_captured;
 
-    unsigned long m_win32ConsoleMode{};
+    std::function<void(void)> m_fctCaptureEnd{};
 };
 
 #endif // STDCAPTURE_H

@@ -34,8 +34,8 @@ namespace emb {
                     m_StdCapture.EndCapture();
                 }
             }
-            static void setWin32ConsoleMode(unsigned long consoleMode) {
-                m_StdCapture.setWin32ConsoleMode(consoleMode);
+            static void setCaptureEndEvt(std::function<void(void)> const& a_fctCaptureEnd) {
+                m_StdCapture.setCaptureEndEvt(a_fctCaptureEnd);
             }
         protected:
             ConsoleSessionWithTerminal(TerminalPtr a_pTerminal)

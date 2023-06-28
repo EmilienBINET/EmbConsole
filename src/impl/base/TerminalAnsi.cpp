@@ -87,6 +87,15 @@ namespace emb {
             return true;
         }
 
+        void TerminalAnsi::processCapture() const noexcept {
+            bool bLockOk = 0 == ftrylockfile(stdout);
+            ConsoleSessionWithTerminal::endStdCapture();
+            ConsoleSessionWithTerminal::beginStdCapture();
+            if(bLockOk) {
+                funlockfile(stdout);
+            }
+        }
+
         void TerminalAnsi::begin() const noexcept {
             Terminal::begin();
             m_strDataToPrint.clear();
