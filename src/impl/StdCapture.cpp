@@ -22,6 +22,7 @@
 #include <mutex>
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 #ifndef STD_OUT_FD 
 #define STD_OUT_FD (fileno(stdout)) 
@@ -118,6 +119,9 @@ bool StdCapture::EndCapture()
 std::string StdCapture::GetCapture()
 {
     std::lock_guard<std::mutex> lock(m_mutex);
+    m_captured.erase(std::find_if(m_captured.rbegin(), m_captured.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), m_captured.end());
     return m_captured;
 }
 
