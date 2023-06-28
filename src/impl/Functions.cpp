@@ -21,7 +21,7 @@ namespace emb {
         Functions::Functions(ConsoleSessionWithTerminal& a_rConsole) noexcept : m_rConsole{ a_rConsole } {
             addCommand(UserCommandInfo("/ls", "List information about the commands"), [&](UserCommandData const& a_CmdData) {
                 string output{ "===== LIST OF AVAILABLE COMMANDS =====\n" };
-                bool bAll = 0 != a_CmdData.args.size() > 0 && a_CmdData.args.at(0).find('a') != string::npos;
+                bool bAll = a_CmdData.args.size() > 0 && a_CmdData.args.at(0).find('a') != string::npos;
                 bool bLongListing = a_CmdData.args.size() > 0 && a_CmdData.args.at(0).find('l') != string::npos;
 
                 if (bAll) {

@@ -202,7 +202,7 @@ namespace emb {
             std::string m_strCurrentFolder{};
             std::string m_strCurrentEntry{};
             unsigned int m_uiCurrentCursorPosition{ 0 };
-            int m_iMaxPromptSize{ 0 };
+            unsigned int m_uiMaxPromptSize{ 0 };
             unsigned int m_uiCurrentWindowPosition{ 0 };
             unsigned int m_uiCurrentWindowSize{ 0 };
             std::vector<std::string> m_vstrPreviousEntries{};

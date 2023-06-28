@@ -389,7 +389,7 @@ namespace emb {
         }
 
         void TerminalAnsi::processPressedKeyCode(string const& a_strKey) noexcept {
-            auto string_to_hex = [](const std::string& input) {
+            /*auto string_to_hex = [](const std::string& input) {
                 static const char hex_digits[] = "0123456789ABCDEF";
                 std::string output;
                 output.reserve(input.length() * 2);
@@ -399,7 +399,7 @@ namespace emb {
                     output.push_back(hex_digits[c & 15]);
                 }
                 return output;
-            };
+            };*/
 
             auto stdWrapper = [](int(&stdFunction)(int), int const& param) {
                 bool bRes = false;

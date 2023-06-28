@@ -327,12 +327,11 @@ namespace emb {
             }
             //printNewLine();
             //commit();
-            auto i = 0;
         }
 
         void Terminal::onTerminalSizeChanged() noexcept {
             if (m_strCurrentPrompt.empty()) {
-                m_iMaxPromptSize =
+                m_uiMaxPromptSize =
                     m_CurrentSize.iWidth
                     - m_strCurrentUser.size()
                     - m_strCurrentMachine.size()
@@ -340,13 +339,13 @@ namespace emb {
                     - 5; // @ + : + $ + space + last char
             }
             else {
-                m_iMaxPromptSize =
+                m_uiMaxPromptSize =
                     m_CurrentSize.iWidth
                     - m_strCurrentPrompt.size()
                     - 3; // + > + space + last char
             }
 
-            if (m_strCurrentEntry.size() <= m_iMaxPromptSize) {
+            if (m_strCurrentEntry.size() <= m_uiMaxPromptSize) {
                 // enough room to show all command line
                 m_uiCurrentWindowPosition = 0;
                 m_uiCurrentWindowSize = m_strCurrentEntry.size();
@@ -355,7 +354,7 @@ namespace emb {
                 // not enough room to show all command line
                 // so truncate the command line by the right by reducing the shown window size
                 // after that step, the cursor might be outside of the window
-                m_uiCurrentWindowSize = m_iMaxPromptSize;
+                m_uiCurrentWindowSize = m_uiMaxPromptSize;
 
                 if (m_uiCurrentCursorPosition > m_uiCurrentWindowPosition + m_uiCurrentWindowSize) {
                     m_uiCurrentWindowPosition = m_uiCurrentCursorPosition - m_uiCurrentWindowSize;
@@ -521,7 +520,7 @@ namespace emb {
                     if (m_bPromptEnabled && PromptMode::Normal == m_eCurrentPromptMode) {
                         if (m_pFunctions->processAutoCompletion(m_strCurrentEntry, m_uiCurrentCursorPosition, m_strCurrentFolder, Key::Tab == a_eKey)) {
                             m_uiCurrentWindowPosition = 0;
-                            m_uiCurrentWindowSize = min<int>(m_iMaxPromptSize, m_strCurrentEntry.size());
+                            m_uiCurrentWindowSize = min<unsigned int>(m_uiMaxPromptSize, m_strCurrentEntry.size());
                         }
                     }
                     break;
@@ -535,7 +534,7 @@ namespace emb {
                             m_uiCurrentCursorPosition = 0;
                             m_strCurrentEntry = m_vstrPreviousEntries.at(m_iCurrentPositionInPreviousEntries);
                             m_uiCurrentWindowPosition = 0;
-                            m_uiCurrentWindowSize = min<int>(m_iMaxPromptSize, m_strCurrentEntry.size());
+                            m_uiCurrentWindowSize = min<unsigned int>(m_uiMaxPromptSize, m_strCurrentEntry.size());
                         }
                         else {
                             ringBell();
@@ -556,7 +555,7 @@ namespace emb {
                                 m_strCurrentEntry = m_vstrPreviousEntries.at(m_iCurrentPositionInPreviousEntries);
                             }
                             m_uiCurrentWindowPosition = 0;
-                            m_uiCurrentWindowSize = min<int>(m_iMaxPromptSize, m_strCurrentEntry.size());
+                            m_uiCurrentWindowSize = min<unsigned int>(m_uiMaxPromptSize, m_strCurrentEntry.size());
                         }
                         else {
                             ringBell();
@@ -608,6 +607,8 @@ namespace emb {
                     break;
                 case Key::PageDown:
                     break;
+                case Key::Insert:
+                    break;
                 case Key::Escape:
                     break;
                 case Key::F1:
@@ -632,12 +633,16 @@ namespace emb {
                     break;
                 case Key::F10:
                     break;
+                case Key::F11:
+                    break;
+                case Key::F12:
+                    break;
                 case Key::Printable:
                     if (m_bPromptEnabled && (PromptMode::Normal == m_eCurrentPromptMode || PromptMode::QuestionNormal == m_eCurrentPromptMode)) {
                         m_strCurrentEntry.insert(m_uiCurrentCursorPosition, a_strValue);
                         ++m_uiCurrentCursorPosition;
 
-                        if (m_uiCurrentWindowSize < m_iMaxPromptSize) {
+                        if (m_uiCurrentWindowSize < m_uiMaxPromptSize) {
                             ++m_uiCurrentWindowSize;
                         }
                         else {
@@ -703,7 +708,7 @@ namespace emb {
                 clearLine(ClearLine::Type::FromCursorToEnd);
                 restoreCursor();
             }
-            else if (m_iMaxPromptSize < iMinPromptSize) {
+            else if (m_uiMaxPromptSize < iMinPromptSize) {
                 saveCursor();
                 moveCursorDown(1);
                 clearDisplay(ClearDisplay::Type::FromCursorToEnd);
