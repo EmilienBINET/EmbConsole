@@ -134,8 +134,8 @@ namespace emb {
          * @return std::vector<std::string> List of the possible choices for the user autocompletion
          */
         EmbConsole_EXPORT std::vector<std::string> autocompleteFromFileSystem(
-            std::string const& a_strPartialPath, std::string const& a_strRootPath,
-            bool a_bListFiles = true, bool a_bListDirectories = false, bool a_bRecursive = false);
+            std::string const& a_strPartialPath, std::string const& a_strRootPath = {},
+            bool a_bListFiles = true, bool a_bListDirectories = false, bool a_bRecursive = false) noexcept;
 
         //////////////////////////////////////////////////
         ///// Console stream object

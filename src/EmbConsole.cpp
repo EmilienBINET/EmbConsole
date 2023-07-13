@@ -20,8 +20,13 @@ namespace emb {
         }
 
         std::vector<std::string> autocompleteFromFileSystem(std::string const& a_strPartialPath, std::string const& a_strRootPath,
-                                                        bool a_bListFiles, bool a_bListDirectories, bool a_bRecursive) {
+                                                        bool a_bListFiles, bool a_bListDirectories, bool a_bRecursive) noexcept {
             std::vector<std::string> vecChoices{};
+
+            assert(!(a_bListDirectories == false && a_bRecursive == true) && "Cannot recurse without listing directories");
+
+            // If the root path is not given, we suppose it is /
+            string strRootPath{a_strRootPath.empty() ? "/" : a_strRootPath};
 
             // We get the position of the last '/' in the argument the user is typing
             size_t ulPos = a_strPartialPath.find_last_of('/');
@@ -30,7 +35,7 @@ namespace emb {
             string strPrefixFolder{}; // what complete folder the user typed
             string strPrefixFolderCanonized{};
             string strPartialArg{a_strPartialPath}; // what partial folder the user started to typed
-            string strCurrentFolder{a_strRootPath}; // what folder we need to search the choices into
+            string strCurrentFolder{strRootPath}; // what folder we need to search the choices into
             if(a_bRecursive && string::npos != ulPos) {
                 // if a complete folder has already been typed, it is the part before the last '/'
                 strPrefixFolder = a_strPartialPath.substr(0, ulPos+1);
@@ -49,7 +54,7 @@ namespace emb {
                 // If the file matches the searched type
                 if( (a_bListFiles && is_regular_file(entry)) || ((a_bListDirectories || a_bRecursive) && fs::is_directory(entry))) {
                     // We format the output and add it to the list if it starts with the partial user entry
-                    std::string path = entry.path().string().substr(a_strRootPath.size());
+                    std::string path = entry.path().string().substr(strRootPath.size());
                     if(0 == path.find(strPrefixFolderCanonized)) {
                         path = path.substr(strPrefixFolderCanonized.size());
                     }
