@@ -14,29 +14,81 @@ namespace emb {
             , m_strCurrentUser{ "user" }
             , m_strCurrentMachine{ "machine" }
             , m_strCurrentFolder{ "/" } {
-            m_pFunctions->addCommand(UserCommandInfo("/cd", "Change the shell working directory"), [&](UserCommandData const& a_CmdData) {
-                if (1 != a_CmdData.args.size()) {
-                    a_CmdData.console.printError("Usage: cd <dir>");
-                }
-                else {
-                    string const& folder = a_CmdData.args.at(0);
-                    assert(folder.size() > 0);
-                    string strNewFolder{};
-                    if ('/' == folder.at(0)) {
-                        strNewFolder = Functions::getCanonicalPath(folder);
+
+            // the "cd" command allows the user to navigate among console directories
+            m_pFunctions->addCommand(UserCommandInfo("/cd", "Change the shell working directory"),
+                //---------- The 1rs lamba is called when the user call the "cd" command ----------
+                [this](UserCommandData const& a_CmdData) {
+                    if (1 != a_CmdData.args.size()) {
+                        // "cd" command is called with an invalid number of parameter
+                        a_CmdData.console.printError("Usage: cd <dir>");
                     }
                     else {
-                        strNewFolder = Functions::getCanonicalPath(m_strCurrentFolder + "/" + folder);
+                        // "cd" command is called with a valid number of parameter:
+                        // the 1st parameter is the destination folder
+                        string strDestinationPath = a_CmdData.args.at(0);
+                        assert(strDestinationPath.size() > 0);
+
+                        // Parse the destination folder into a usable path
+                        if (Functions::isAbsolutePath(strDestinationPath)) {
+                            // If the path is absolute, we just canonize it
+                            strDestinationPath = Functions::getCanonicalPath(strDestinationPath);
+                        }
+                        else {
+                            // If the path is relative, we need to a the current folder before the canonization
+                            strDestinationPath = Functions::getCanonicalPath(m_strCurrentFolder + "/" + strDestinationPath);
+                        }
+
+                        if(m_pFunctions->folderExists(strDestinationPath)) {
+                            // If the destination exists in the list of folders, we change the current folder and update the terminal size
+                            // because the new folder my have an impact on the size of the command line prompt
+                            m_strCurrentFolder = strDestinationPath;
+                            onTerminalSizeChanged();
+                        }
+                        else {
+                            // If the destination does not exist, we print the error
+                            a_CmdData.console.printError("Directory " + strDestinationPath + " does not exists.");
+                        }
                     }
-                    if(m_pFunctions->folderExists(strNewFolder)) {
-                        m_strCurrentFolder = strNewFolder;
-                        onTerminalSizeChanged();
+                },
+                //---------- The 2nd lamba is called when the user tries to autocomplete the "cd command" ----------
+                [this](UserCommandAutoCompleteData const& a_AcData) {
+                    // We need to create a choices list among which the user can naviguate using <Tab> and <RTab> keyboard keys
+                    vector<string> vecChoices{};
+
+                    // We get the position of the last '/' in the argument the user is typing
+                    size_t ulPos = a_AcData.partialArg.find_last_of('/');
+
+                    // We need to find information about what the user is typing:
+                    string strPrefixFolder{}; // what complete folder the user typed
+                    string strPartialArg{a_AcData.partialArg}; // what partial folder the user started to typed
+                    string strCurrentFolder{m_strCurrentFolder}; // what folder we need to search the choices into
+                    if(string::npos != ulPos) {
+                        // if a complete folder has already been typed, it is the part before the last '/'
+                        strPrefixFolder = a_AcData.partialArg.substr(0, ulPos+1);
+                        // and then the partial arg is now the part after the last '/'
+                        strPartialArg = a_AcData.partialArg.substr(ulPos+1);
+                        // the current folder we need to search the choices into is constructed from the current folder where the "cd"
+                        // command is typed and the complete folder the user typed as an argument of "cd"
+                        strCurrentFolder = Functions::getCanonicalPath(strCurrentFolder + "/" + strPrefixFolder);
+                        // e.g. if the current directory is /w/x
+                        // cd abcd/ef<Tab> => strPrefixFolder is "abcd/", strPartialArg is "ef", strCurrentFolder is /w/x/abcd
                     }
-                    else {
-                        a_CmdData.console.printError("Folder " + strNewFolder + " does not exists.");
+
+                    // We search the commands available from the current folder
+                    auto vecLocalCommands = m_pFunctions->getCommands(strCurrentFolder);
+
+                    // We filter the found command and only keep the directories that start with strPartialArg
+                    for(auto const& elm : vecLocalCommands) {
+                        if(elm.bIsDirectory && 0 == elm.strName.find(strPartialArg)) {
+                            vecChoices.push_back(strPrefixFolder + elm.strName);
+                        }
                     }
+
+                    // We return the generated list of the possible choices to the user
+                    return vecChoices;
                 }
-            });
+            );
         }
         /*Terminal::Terminal(Terminal const&) noexcept {
         }*/
@@ -424,12 +476,14 @@ namespace emb {
             m_strCurrentMachine = a_strMachineName;
         }
 
-        void Terminal::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept {
-            return m_pFunctions->addCommand(a_CommandInfo, a_funcCommandFunctor);
+        void Terminal::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor,
+                                  UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            return m_pFunctions->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }
 
-        void Terminal::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor) noexcept {
-            return m_pFunctions->addCommand(a_CommandInfo, a_funcCommandFunctor);
+        void Terminal::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor,
+                                  UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            return m_pFunctions->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }
 
         void Terminal::delCommand(UserCommandInfo const& a_CommandInfo) noexcept {
@@ -461,14 +515,14 @@ namespace emb {
         }
 
         void Terminal::processUserCommands() noexcept {
-            Functions::VCommands vCommands;
+            Functions::VUserEntries vUserEntries;
             {
                 lock_guard<recursive_mutex> l{ m_Mutex };
-                vCommands = m_vCommands;
-                m_vCommands.clear();
+                vUserEntries = m_vUserEntries;
+                m_vUserEntries.clear();
             }
-            for (auto const& elm : vCommands) {
-                m_pFunctions->processEntry(elm.strRawCommand, elm.strCurrentPath);
+            for (auto const& elm : vUserEntries) {
+                m_pFunctions->processEntry(elm);
             }
         }
 
@@ -499,7 +553,7 @@ namespace emb {
                 {
                 case Key::Enter:
                     if (m_bPromptEnabled && PromptMode::Normal == m_eCurrentPromptMode) {
-                        m_vCommands.push_back(Functions::Command{ m_strCurrentEntry, m_strCurrentFolder });
+                        m_vUserEntries.push_back(Functions::UserEntry{ m_strCurrentEntry, m_strCurrentFolder });
                         printCommandLine(true);
                         m_iCurrentPositionInPreviousEntries = -1;
                         if (!m_strCurrentEntry.empty()) {
@@ -709,7 +763,7 @@ namespace emb {
             if(!supportsInteractivity()) {
                 return;
             }
-            
+
             int const iMinPromptSize = 5;
 
             auto printCommonPart = [&] {

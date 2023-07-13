@@ -99,8 +99,8 @@ namespace emb {
             Private& operator<< (PrintCommand const& a_Cmd) noexcept;
             void setUserName(std::string const&) noexcept;
             void setMachineName(std::string const&) noexcept;
-            void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&) noexcept;
-            void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
+            void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&, UserCommandAutoCompleteFunctor const&) noexcept;
+            void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&, UserCommandAutoCompleteFunctor const&) noexcept;
             void delCommand(UserCommandInfo const&) noexcept;
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
             void setPromptEnabled(bool) noexcept;

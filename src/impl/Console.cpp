@@ -194,14 +194,16 @@ namespace emb {
             m_pPrivateImpl->setMachineName(a_strMachineName);
         }
 
-        void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept {
+        void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor,
+                                 UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             a_CommandInfo.validate();
-            m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor);
+            m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }
 
-        void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor) noexcept {
+        void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor,
+                                 UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             a_CommandInfo.validate();
-            m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor);
+            m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }
 
         void Console::delCommand(UserCommandInfo const& a_CommandInfo) {

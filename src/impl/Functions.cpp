@@ -1,7 +1,6 @@
 #include "Functions.hpp"
 #include "ConsolePrivate.hpp"
 #include <sstream>
-#include <future>
 #include <algorithm>
 #include <vector>
 
@@ -9,27 +8,81 @@ namespace emb {
     namespace console {
         using namespace std;
 
-        bool isRootCommand(string const& a_CommandPath) {
+        bool Functions::isAbsolutePath(std::string const& a_Path) noexcept {
+            // Absolute path if not empty and starts with a '/'
+            return a_Path.size() > 0 && '/' == a_Path.at(0);
+        }
+
+        bool Functions::isRootCommand(string const& a_CommandPath) noexcept {
+            // Root command only one '/' is found and and it is the 1st character
             return 0 == a_CommandPath.find_last_of('/');
         }
-        bool isNotRootCommand(string const& a_CommandPath) {
-            return !isRootCommand(a_CommandPath);
+
+        bool Functions::isSubCommandOf(string const& a_CommandPath, string const& a_Path) noexcept {
+            // Sub command if the command path starts with path
+            // getCanonicalPath is used here to add the final '/' if needed
+            return 0 == a_CommandPath.find(getCanonicalPath(a_Path, true));
         }
-        bool isSubCommandOf(string const& a_CommandPath, string const& a_Path) {
-            return 0 == a_CommandPath.find(a_Path[a_Path.length() - 1] == '/' ? a_Path : a_Path + "/");
-        }
-        string getFolderName(string const& a_strCommandPath, string const& a_strCurrentPath) {
-            string str{};
-            string strPath = Functions::getCanonicalPath(a_strCurrentPath, true);
-            size_t pos = a_strCommandPath.find(strPath);
-            if(0 == pos) {
-                str = a_strCommandPath.substr(strPath.size());
-                pos = str.find_first_of('/');
-                if(string::npos != pos) {
-                    str = str.substr(0, pos+1);
+
+        string Functions::getLocalName(string const& a_strCommandPath, string const& a_strCurrentPath) noexcept {
+            string strLocalName{};
+
+            // We search inside the complete command path if the current path can be found
+            string strCurrentPath{ Functions::getCanonicalPath(a_strCurrentPath, true) };
+            size_t ulPos = a_strCommandPath.find(strCurrentPath);
+
+            // if the current path was found at position 0, it means that the command is a sub command of the current path
+            if(0 == ulPos) {
+                // Then we keep only what is at the right of the path : the local name
+                strLocalName = a_strCommandPath.substr(strCurrentPath.size());
+
+                // Then we search if the local name is a folder (if it as sub command, it will contain the '/' separator)
+                ulPos = strLocalName.find_first_of('/');
+                if(string::npos != ulPos) {
+                    // And we remove the sub command, keeping the local name in the format "directory/"
+                    strLocalName = strLocalName.substr(0, ulPos+1);
                 }
             }
-            return str;
+
+            return strLocalName;
+        }
+
+        string Functions::getCanonicalPath(std::string const& a_strPath, bool a_bEndWithDelimiter) noexcept {
+            // List of each element inside the path (each element is either a directory or a command)
+            vector<string> vstrResult{};
+
+            // We split the input path at each "/" and run some code on each token
+            string strToken{};
+            istringstream streamInput{ a_strPath };
+            while (getline(streamInput, strToken, '/')) {
+                if (".." == strToken) {
+                    // If the token is .. we need to remove the last token if it exists
+                    if (vstrResult.size() > 0) {
+                        vstrResult.pop_back();
+                    }
+                }
+                else if (!strToken.empty() && "." != strToken) {
+                    // if the token is empty or ., we do nothing, otherwise, we add the token to the list of elements
+                    vstrResult.push_back(strToken);
+                }
+            }
+
+            // We then join the remaining elements of the list into a single string, elements are separated by a '/'
+            string strResult{};
+            for (auto const& elm : vstrResult) {
+                strResult += "/" + elm;
+            }
+            if (strResult.empty()) {
+                // If it is the root, we keep only a /
+                strResult = "/";
+            }
+
+            // If it is requested to end with a separator, we add it if needed
+            if(a_bEndWithDelimiter && strResult.find_last_of('/') != strResult.size() - 1) {
+                strResult += "/";
+            }
+
+            return strResult;
         }
 
         Functions::Functions(ConsoleSessionWithTerminal& a_rConsole) noexcept : m_rConsole{ a_rConsole } {
@@ -39,39 +92,34 @@ namespace emb {
                 bool bLongListing = a_CmdData.args.size() > 0 && a_CmdData.args.at(0).find('l') != string::npos;
 
                 if (bAll) {
-                    output += "== Local commands ==\n";
-                    for (auto const& elm : m_mapFunctions) {
-                        if (isNotRootCommand(elm.first)) {
-                            output += elm.first + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
-                        }
-                    }
-                    output += std::string(bLongListing ? "" : "\n") + "== Global commands ==\n";
+                    output += "===== Global commands =====\n";
                     for (auto const& elm : m_mapFunctions) {
                         if (isRootCommand(elm.first)) {
                             output += elm.first + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
                         }
                     }
+                    output += std::string(bLongListing ? "" : "\n") + "===== Local commands =====\n";
+                    for (auto const& elm : m_mapFunctions) {
+                        if (!isRootCommand(elm.first)) {
+                            output += elm.first + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
+                        }
+                    }
                 }
                 else {
-                    for (auto const& elm : m_mapFunctions) {
-                        if (isRootCommand(elm.first)) { // root command => available from anywhere
-                            output += elm.first.substr(1) + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
+                    vector<LocalCommandInfo> vecLocalCommand = getCommands(a_CmdData.console.getCurrentPath());
+                    for (auto const& elm : vecLocalCommand) {
+                        if (elm.bIsRoot) { // root command => available from anywhere
+                            output += elm.strName + "\t" + (bLongListing ? elm.strDescription + "\n" : "");
                         }
                     }
                     output += bLongListing ? "" : "\n";
-                    vector<string> vecPrintedFolders;
-                    for (auto const& elm : m_mapFunctions) {
-                        if(isNotRootCommand(elm.first) &&
-                            isSubCommandOf(elm.first, a_CmdData.console.getCurrentPath())) { // Other command => available from folder
-                            string folder = getFolderName(elm.first, a_CmdData.console.getCurrentPath());
-                            if(std::count(vecPrintedFolders.begin(), vecPrintedFolders.end(), folder) == 0) {
-                                vecPrintedFolders.push_back(folder);
-                                if(string::npos == folder.find('/')) { // command
-                                    output += folder + "\t" + (bLongListing ? elm.second.i.description + "\n" : "");
-                                }
-                                else { // folder
-                                    output += folder + "\t" + (bLongListing ? "\n" : "");
-                                }
+                    for (auto const& elm : vecLocalCommand) {
+                        if(!elm.bIsRoot) { // Other command => available from folder
+                            if(!elm.bIsDirectory) { // command
+                                output += elm.strName + "\t" + (bLongListing ? elm.strDescription + "\n" : "");
+                            }
+                            else { // folder
+                                output += elm.strName + "\t" + (bLongListing ? "\n" : "");
                             }
                         }
                     }
@@ -109,23 +157,28 @@ namespace emb {
                 }
             });
         }
-        Functions::Functions(Functions const&) = default;
-        Functions::Functions(Functions&&) noexcept = default;
-        Functions::~Functions() noexcept = default;
-        Functions& Functions::operator= (Functions const&) = default;
-        Functions& Functions::operator= (Functions&&) noexcept = default;
 
-        void Functions::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept {
+        //Functions::Functions(Functions const&) = default;
+        //Functions::Functions(Functions&&) noexcept = default;
+        Functions::~Functions() noexcept = default;
+        //Functions& Functions::operator= (Functions const&) = default;
+        //Functions& Functions::operator= (Functions&&) noexcept = default;
+
+        void Functions::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor,
+                                   UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             Functor f;
             f.i = a_CommandInfo;
             f.f0 = a_funcCommandFunctor;
+            f.fa = a_funcAutoCompleteFunctor;
             m_mapFunctions[a_CommandInfo.path] = f;
         }
 
-        void Functions::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor) noexcept {
+        void Functions::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor,
+                                   UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             Functor f;
             f.i = a_CommandInfo;
             f.f1 = a_funcCommandFunctor;
+            f.fa = a_funcAutoCompleteFunctor;
             m_mapFunctions[a_CommandInfo.path] = f;
         }
 
@@ -133,63 +186,82 @@ namespace emb {
             m_mapFunctions.erase(a_CommandInfo.path);
         }
 
-        std::future<void> m_future;
-
-        Functions::Error Functions::processEntry(string const& a_strRawCommand, string const& a_strPath) noexcept {
-            Error result{ Error::NoError };
-
+        Functions::Error Functions::processEntry(UserEntry const& a_UserEntry) noexcept {
+            Functor f;
             string strCommand{};
             vector<string> vstrArguments{};
-            result = extractElementsFromCommand(strCommand, vstrArguments, a_strRawCommand);
+            Error result{ searchCommand(f, strCommand, vstrArguments, a_UserEntry.strUserEntry, a_UserEntry.strCurrentPath) };
 
             if (Error::NoError == result) {
-                string fullPath{ getCanonicalPath(a_strPath + "/" + strCommand) };
-                decltype(m_mapFunctions)::iterator it = m_mapFunctions.end();
-                auto it1 = m_mapFunctions.find(fullPath);
-                if (it1 != m_mapFunctions.end()) {
-                    it = it1;
+                if (f.f0) {
+                    m_future = std::async(std::launch::async, [=] {
+                        f.f0();
+                    });
                 }
-                else {
-                    auto it2 = m_mapFunctions.find("/" + strCommand);
-                    if (it2 != m_mapFunctions.end()) {
-                        it = it2;
-                    }
-                }
-                if (it != m_mapFunctions.end()) {
-                    auto& elm = it->second;
-                    if (elm.f0) {
-                        m_future = std::async(std::launch::async, [=] {
-                            elm.f0();
-                        });
-                    }
-                    else if (elm.f1) {
-                        m_future = std::async(std::launch::async, [fct = elm.f1, info = it->second.i, terminal = m_rConsole.get().terminal(), vstrArguments]{
-                            ConsoleSession session{ terminal };
-                            session.setInstantPrint(true);
-                            UserCommandData data{ info, session, vstrArguments };
-                            fct(data);
-                            });
-                    }
-                }
-                else if (!strCommand.empty()) {
-                    m_rConsole.get().printError("Cannot find command '" + strCommand + "'");
+                else if (f.f1) {
+                    m_future = std::async(std::launch::async, [fct = f.f1, info = f.i, terminal = m_rConsole.get().terminal(), vstrArguments]{
+                        ConsoleSession session{ terminal };
+                        session.setInstantPrint(true);
+                        UserCommandData data{ info, session, vstrArguments };
+                        fct(data);
+                    });
                 }
             }
-            return Error::NoError;
+            else if (Error::EmptyCommand != result) {
+                m_rConsole.get().printError("Cannot find command '" + strCommand + "'");
+            }
+
+            return result;
         }
 
-        string m_strLastAutoCompletionPrefix{};
-        size_t m_ullAutoCompletionPosition{ -1ULL };
-        vector<string> m_vstrAutoCompletionChoices{};
-
-        bool Functions::processAutoCompletion(std::string& a_strCurrentEntry, unsigned int const& a_uiCurrentCursorPosition, std::string const& a_strCurrentFolder, bool const& a_bNext) const noexcept {
+        bool Functions::processAutoCompletion(std::string& a_strCurrentEntry, unsigned int const& a_uiCurrentCursorPosition, std::string const& a_strCurrentFolder, bool const& a_bNext) noexcept {
             string strAutoCompletionPrefix{ a_strCurrentEntry.substr(0, a_uiCurrentCursorPosition) };
 
             bool bRes = false;
             if (strAutoCompletionPrefix.find(" ") != std::string::npos) {
                 // Spaces on the left of the cursor, so the auto completion is for command parameters (and not command itself)
-                // We nee to transmit the autocompletion data to the command autocompletion function if it exists
-                /// @todo
+                // We need to transmit the autocompletion data to the command autocompletion function if it exists
+                if (m_strLastAutoCompletionPrefix != strAutoCompletionPrefix ||
+                    (-1ULL == m_ullAutoCompletionPosition && strAutoCompletionPrefix.empty())) {
+                    m_strLastAutoCompletionPrefix = strAutoCompletionPrefix;
+                    m_strLastAutoCompletionPrefixWithoutPartialArg = m_strLastAutoCompletionPrefix.substr(0, m_strLastAutoCompletionPrefix.find_last_of(' ') + 1);
+                    m_ullAutoCompletionPosition = 0;
+                    m_vstrAutoCompletionChoices.clear();
+
+                    string word = m_strLastAutoCompletionPrefix.substr(m_strLastAutoCompletionPrefix.find_last_of(' ') + 1);
+
+                    Functor f;
+                    string strCommand{};
+                    vector<string> vstrArguments{};
+                    Error result{ searchCommand(f, strCommand, vstrArguments, m_strLastAutoCompletionPrefixWithoutPartialArg, a_strCurrentFolder) };
+
+                    if (Error::NoError == result && f.fa) {
+                        UserCommandAutoCompleteData data{ vstrArguments, word };
+                        m_vstrAutoCompletionChoices = f.fa(data);
+                    }
+                }
+                else {
+                    if (a_bNext) {
+                        if (m_ullAutoCompletionPosition < m_vstrAutoCompletionChoices.size() - 1) {
+                            ++m_ullAutoCompletionPosition;
+                        }
+                        else {
+                            m_ullAutoCompletionPosition = 0;
+                        }
+                    }
+                    else { // previous
+                        if (m_ullAutoCompletionPosition > 0) {
+                            --m_ullAutoCompletionPosition;
+                        }
+                        else {
+                            m_ullAutoCompletionPosition = m_vstrAutoCompletionChoices.size() - 1;
+                        }
+                    }
+                }
+                if (m_ullAutoCompletionPosition < m_vstrAutoCompletionChoices.size()) {
+                    a_strCurrentEntry = m_strLastAutoCompletionPrefixWithoutPartialArg + m_vstrAutoCompletionChoices.at(m_ullAutoCompletionPosition);
+                    bRes = true;
+                }
             }
             else {
                 // No space on the left of the cursor, so the auto completion is for the command
@@ -259,17 +331,9 @@ namespace emb {
                             }
                         }
                     }
-                    //if (isRootCommand(a_strCurrentEntry)) {
-                    //    // base command, juste remove te first character
-                    //    a_strCurrentEntry = a_strCurrentEntry.substr(1);
-                    //}
-                    //else {
-                    //    strAutoCompletionPrefix = getCanonicalPath(a_strCurrentFolder + "/" + strAutoCompletionPrefix);
-                    //    a_strCurrentEntry = a_strCurrentEntry.substr(a_strCurrentEntry.find(strAutoCompletionPrefix) + strAutoCompletionPrefix.length());
-                    //}
                     bRes = true;
                     /*
-                     * cas :  DIR    STR     RESULT
+                     * case:  DIR    STR     RESULT
                      *        /      ""      retirer le premier /
                      *        /      ab      retirer le premier /
                      *        /      /ab     ne rien retirer
@@ -293,38 +357,36 @@ namespace emb {
             return false;
         }
 
-        string Functions::getCanonicalPath(string const& a_strFullPath, bool bEndWithDelimiter) noexcept {
-            vector<string> vstrResult{};
+        std::vector<Functions::LocalCommandInfo> Functions::getCommands(std::string const& a_strCurrentPath) const noexcept {
+            std::vector<LocalCommandInfo> vecCmds{};
 
-            string elm{};
-            istringstream input{ a_strFullPath };
-            while (getline(input, elm, '/')) {
-                if (".." == elm) {
-                    if (vstrResult.size() > 0) {
-                        vstrResult.pop_back();
+            for (auto const& elm : m_mapFunctions) {
+                if (isRootCommand(elm.first)) { // root command => available from anywhere
+                    vecCmds.push_back(LocalCommandInfo{false, true, elm.first.substr(1), elm.second.i.description});
+                }
+            }
+
+            vector<string> vecPrintedFolders;
+            for (auto const& elm : m_mapFunctions) {
+                if(!isRootCommand(elm.first) &&
+                    isSubCommandOf(elm.first, a_strCurrentPath)) { // Other command => available from folder
+                    string folder = getLocalName(elm.first, a_strCurrentPath);
+                    if(std::count(vecPrintedFolders.begin(), vecPrintedFolders.end(), folder) == 0) {
+                        vecPrintedFolders.push_back(folder);
+                        if(string::npos == folder.find('/')) { // command
+                            vecCmds.push_back(LocalCommandInfo{false, false, folder, elm.second.i.description});
+                        }
+                        else { // folder
+                            vecCmds.push_back(LocalCommandInfo{true, false, folder, elm.second.i.description});
+                        }
                     }
                 }
-                else if (!elm.empty() && "." != elm) {
-                    vstrResult.push_back(elm);
-                }
             }
 
-            string strResult{};
-            for (auto const& elm : vstrResult) {
-                strResult += "/" + elm;
-            }
-            if (strResult.empty()) {
-                strResult = "/";
-            }
-
-            if(bEndWithDelimiter && strResult.find_last_of('/') != strResult.size() - 1) {
-                strResult += "/";
-            }
-
-            return strResult;
+            return vecCmds;
         }
 
-        Functions::Error Functions::extractElementsFromCommand(string& a_rstrCommand, vector<string>& a_rvstrArguments, string const& a_strRawCommand) const noexcept {
+        Functions::Error Functions::extractElementsFromUserEntry(string& a_rstrCommand, vector<string>& a_rvstrArguments, string const& a_strUserEntry) const noexcept {
             enum class Token
             {
                 Command,
@@ -348,7 +410,7 @@ namespace emb {
             };
 
             char c_prev{ 0 };
-            for (auto const& c : a_strRawCommand) {
+            for (auto const& c : a_strUserEntry) {
                 if (c == ' ' || c == '\t') {
                     if (Token::Command == token) {
                         token = Token::Arguments;
@@ -397,5 +459,40 @@ namespace emb {
 
             return 0 == cQuote ? Error::NoError : Error::QuoteNotClosed;
         }
+
+        Functions::Error Functions::searchCommand(Functor& a_rFunctor, string& a_rstrCommand, vector<string>& a_rvstrArguments,
+                                                  string const& a_strUserEntry, string const& a_strPath) const noexcept {
+            Error result{ Error::NoError };
+
+            result = extractElementsFromUserEntry(a_rstrCommand, a_rvstrArguments, a_strUserEntry);
+
+            if (Error::NoError == result) {
+                string fullPath{ getCanonicalPath(a_strPath + "/" + a_rstrCommand) };
+                decltype(m_mapFunctions)::const_iterator it = m_mapFunctions.end();
+                auto it1 = m_mapFunctions.find(fullPath);
+                if (it1 != m_mapFunctions.end()) {
+                    it = it1;
+                }
+                else {
+                    auto it2 = m_mapFunctions.find("/" + a_rstrCommand);
+                    if (it2 != m_mapFunctions.end()) {
+                        it = it2;
+                    }
+                }
+                if (it != m_mapFunctions.end()) {
+                    a_rFunctor = it->second;
+                    result = Error::NoError;
+                }
+                else if (!a_rstrCommand.empty()) {
+                    result = Error::CommandNotFound;
+                }
+                else {
+                    result = Error::EmptyCommand;
+                }
+            }
+
+            return result;
+        }
+
     } // console
 } // emb

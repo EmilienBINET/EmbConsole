@@ -122,15 +122,17 @@ namespace emb {
             }
         }
 
-        void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept {
+        void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor,
+                                          UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             for (auto const& console : m_ConsolesVector) {
-                console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor);
+                console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
             }
         }
 
-        void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor) noexcept {
+        void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor,
+                                          UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             for (auto const& console : m_ConsolesVector) {
-                console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor);
+                console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
             }
         }
 

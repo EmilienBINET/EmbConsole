@@ -125,9 +125,9 @@ namespace emb {
             void setUserName(std::string const& a_strUserName) noexcept;
             void setMachineName(std::string const& a_strMachineName) noexcept;
 
-            void addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor) noexcept;
-            void addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor) noexcept;
-            void delCommand(UserCommandInfo const& a_CommandInfo) noexcept;
+            void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
+            void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
+            void delCommand(UserCommandInfo const&) noexcept;
 
             void setPromptEnabled(bool);
 
@@ -203,7 +203,7 @@ namespace emb {
             bool m_bPrintCommandEnabled{ true };
             PrintCommand::VPtr m_vpPrintCommands{};
             std::shared_ptr<Functions> m_pFunctions;
-            Functions::VCommands m_vCommands{};
+            Functions::VUserEntries m_vUserEntries{};
             bool m_bPromptEnabled{ false };
             std::string m_strCurrentPrompt{};
             std::string m_strCurrentUser{};

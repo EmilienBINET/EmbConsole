@@ -91,8 +91,17 @@ namespace emb {
             Args args;
         };
 
+        struct UserCommandAutoCompleteData {
+            using Arg = std::string;
+            using Args = std::vector<Arg>;
+
+            Args args;
+            Arg partialArg;
+        };
+
         using UserCommandFunctor0 = std::function<void(void)>;
         using UserCommandFunctor1 = std::function<void(UserCommandData const&)>;
+        using UserCommandAutoCompleteFunctor = std::function<std::vector<std::string>(UserCommandAutoCompleteData const&)>;
         using StandardOutputFunctor = std::function<void(std::string const&)>;
 
         struct UserCommandInfo {
@@ -219,8 +228,8 @@ namespace emb {
             void setUserName(std::string const&) noexcept;
             void setMachineName(std::string const&) noexcept;
 
-            void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&) noexcept;
-            void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&) noexcept;
+            void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
+            void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
             void delCommand(UserCommandInfo const&);
 
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
