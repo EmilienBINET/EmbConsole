@@ -23,13 +23,8 @@ namespace emb {
             vector<string> vecChoices{};
             string strPartialPath{a_strPartialPath};
 
-#ifdef WIN32
-            // If the home path is not given, we suppose it is C:/
-            string strHomePath{a_Options.homePath.empty() || a_Options.homePath == "/" ? "C:/" : a_Options.homePath};
-#else
             // If the home path is not given, we suppose it is /
             string strHomePath{a_Options.homePath.empty() ? "/" : a_Options.homePath};
-#endif
 
             // Test options
             assert(!(a_Options.listDirectories == false && a_Options.recursive == true)
@@ -56,11 +51,6 @@ namespace emb {
             }
             else if(0 == strPartialPath.find("/")) {
                 bAbsolutePath = true;
-            }
-            else {
-                // If relative path goes beyond the root, we use this value instead
-                strDrivePrefix = "C:";
-                bDrivePrefixPresent = true;
             }
 #else
             if(0 == strPartialPath.find("/")) {
@@ -99,7 +89,7 @@ namespace emb {
                     }
                     // If we went beyond the root, we need to stay at the root
                     if(strCurrentFolder.empty()) {
-                        strCurrentFolder = strDrivePrefix + "/";
+                        strCurrentFolder = "/";
                     }
                 }
                 // chroot enabled so the user can is kept captive in the chroot path
