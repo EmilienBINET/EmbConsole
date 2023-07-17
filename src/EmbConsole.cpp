@@ -15,13 +15,13 @@ namespace emb {
     namespace console {
         using namespace::std;
 
-        std::string version() {
+        string version() {
             return "0.1.0";
         }
 
-        std::vector<std::string> autocompleteFromFileSystem(std::string const& a_strPartialPath, std::string const& a_strRootPath,
-                                                        bool a_bListFiles, bool a_bListDirectories, bool a_bRecursive) noexcept {
-            std::vector<std::string> vecChoices{};
+        vector<string> autocompleteFromFileSystem(string const& a_strPartialPath, string const& a_strRootPath,
+                                                  bool a_bListFiles, bool a_bListDirectories, bool a_bRecursive) noexcept {
+            vector<string> vecChoices{};
 
             assert(!(a_bListDirectories == false && a_bRecursive == true) && "Cannot recurse without listing directories");
 
@@ -44,7 +44,16 @@ namespace emb {
                 strPartialArg = a_strPartialPath.substr(ulPos+1);
                 // the current folder we need to search the choices into is constructed from the current folder where the "cd"
                 // command is typed and the complete folder the user typed as an argument of "cd"
+#ifdef WIN32
+                if(string::npos != strPrefixFolderCanonized.find(':')) {
+                    strCurrentFolder = strPrefixFolderCanonized;
+                }
+                else {
+                    strCurrentFolder = Functions::getCanonicalPath(strCurrentFolder + "/" + strPrefixFolderCanonized);
+                }
+#else
                 strCurrentFolder = Functions::getCanonicalPath(strCurrentFolder + "/" + strPrefixFolderCanonized);
+#endif
                 // e.g. if the current directory is /w/x
                 // cd abcd/ef<Tab> => strPrefixFolder is "abcd/", strPartialArg is "ef", strCurrentFolder is /w/x/abcd
             }
@@ -56,12 +65,24 @@ namespace emb {
                         // If the file matches the searched type
                         if( (a_bListFiles && is_regular_file(entry)) || ((a_bListDirectories || a_bRecursive) && fs::is_directory(entry))) {
                             // We format the output and add it to the list if it starts with the partial user entry
-                            std::string path = entry.path().string().substr(strRootPath.size());
-                            std::replace(path.begin(), path.end(), '\\', '/');
+                            string path = entry.path().string();
+#ifdef WIN32
+                            replace(path.begin(), path.end(), '\\', '/');
+                            if(1 != path.find(":/")) {
+                                path = path.substr(strRootPath.size());
+                            }
+#else
+                            path = path.substr(strRootPath.size());
+#endif
                             if(0 == path.find(strPrefixFolderCanonized)) {
                                 path = path.substr(strPrefixFolderCanonized.size());
                             }
                             if(0 == path.find(strPartialArg)) {
+#ifdef WIN32
+                                if(0 == path.find(":/")) {
+                                    path = path.substr(2);
+                                }
+#endif
                                 vecChoices.push_back(strPrefixFolder + path + (fs::is_directory(entry) ? "/" : "") );
                             }
                         }
