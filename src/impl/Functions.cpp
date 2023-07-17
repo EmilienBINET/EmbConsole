@@ -272,29 +272,7 @@ namespace emb {
                     m_ullAutoCompletionPosition = 0;
                     m_vstrAutoCompletionChoices.clear();
 
-                    // Search all commands in the current folder
-                    string strSearch{ getCanonicalPath(a_strCurrentFolder + "/" + strAutoCompletionPrefix) };
-                    if (strAutoCompletionPrefix.empty()) {
-                        // If nothing is typed yet, we need to ad a "/" to avoid searching outside the folder
-                        strSearch += "/";
-                    }
-                    for (auto const& elm : m_mapFunctions) {
-                        // If it starts with the search pattern, it must be in the list
-                        if (0 == elm.first.find(strSearch)) {
-                            m_vstrAutoCompletionChoices.push_back(elm.first);
-                        }
-                    }
-
-                    // Search amongst global commands
-                    strSearch = getCanonicalPath("/" + strAutoCompletionPrefix);
-                    for (auto const& elm : m_mapFunctions) {
-                        if (isRootCommand(elm.first)) {
-                            if (0 == elm.first.find(strSearch) &&
-                                0 == count(m_vstrAutoCompletionChoices.begin(), m_vstrAutoCompletionChoices.end(), elm.first)) {
-                                m_vstrAutoCompletionChoices.push_back(elm.first);
-                            }
-                        }
-                    }
+                    m_vstrAutoCompletionChoices = getAutoCompleteChoices(strAutoCompletionPrefix, a_strCurrentFolder);
                 }
                 else {
                     if (a_bNext) {
@@ -316,32 +294,7 @@ namespace emb {
                 }
                 if (m_ullAutoCompletionPosition < m_vstrAutoCompletionChoices.size()) {
                     a_strCurrentEntry = m_vstrAutoCompletionChoices.at(m_ullAutoCompletionPosition);
-                    if (a_strCurrentFolder == "/") {
-                        if (strAutoCompletionPrefix.find_first_of('/') == std::string::npos) {
-                            a_strCurrentEntry = a_strCurrentEntry.substr(1);
-                        }
-                    }
-                    else {
-                        if (strAutoCompletionPrefix.find_first_of('/') == std::string::npos) {
-                            if (isRootCommand(a_strCurrentEntry)) {
-                                a_strCurrentEntry = a_strCurrentEntry.substr(1);
-                            }
-                            else {
-                                a_strCurrentEntry = a_strCurrentEntry.substr(a_strCurrentFolder.length() + 1);
-                            }
-                        }
-                    }
                     bRes = true;
-                    /*
-                     * case:  DIR    STR     RESULT
-                     *        /      ""      retirer le premier /
-                     *        /      ab      retirer le premier /
-                     *        /      /ab     ne rien retirer
-                     *        /a/    ""      retirer /a/ si local, retirer / si global
-                     *        /a/    ab      retirer /a/ si local, retirer / si global
-                     *        /a/    /ab     ne rien retirer
-                     *
-                     */
                 }
             }
             return bRes;
@@ -492,6 +445,46 @@ namespace emb {
             }
 
             return result;
+        }
+
+        vector<string> Functions::getAutoCompleteChoices(string const& a_strPartialCmd, string const& a_strCurrentFolder) const noexcept {
+            // We need to create a choices list among which the user can naviguate using <Tab> and <RTab> keyboard keys
+            vector<string> vecChoices{};
+
+            // We get the position of the last '/' in the argument the user is typing
+            size_t ulPos = a_strPartialCmd.find_last_of('/');
+
+            // We need to find information about what the user is typing:
+            string strPrefixFolder{}; // what complete folder the user typed
+            string strPartialCmd{a_strPartialCmd}; // what partial folder the user started to typed
+            string strCurrentFolder{a_strCurrentFolder}; // what folder we need to search the choices into
+            if(string::npos != ulPos) {
+                // if a complete folder has already been typed, it is the part before the last '/'
+                strPrefixFolder = a_strPartialCmd.substr(0, ulPos+1);
+                // and then the partial arg is now the part after the last '/'
+                strPartialCmd = a_strPartialCmd.substr(ulPos+1);
+                // the current folder we need to search the choices into is constructed from the current folder where the "cd"
+                // command is typed and the complete folder the user typed as an argument of "cd"
+                strCurrentFolder = Functions::getCanonicalPath(strCurrentFolder + "/" + strPrefixFolder);
+                // e.g. if the current directory is /w/x
+                // cd abcd/ef<Tab> => strPrefixFolder is "abcd/", strPartialCmd is "ef", strCurrentFolder is /w/x/abcd
+            }
+
+            // We search the commands available from the current folder
+            auto vecLocalCommands = getCommands(strCurrentFolder);
+
+            // We filter the found command and only keep the directories that start with strPartialCmd
+            for(auto const& elm : vecLocalCommands) {
+                if(0 == elm.strName.find(strPartialCmd)) {
+                    // We filter the root commands when using a full path
+                    if(strPrefixFolder.empty() || (!strPrefixFolder.empty() && !elm.bIsRoot) || (strCurrentFolder == "/" && elm.bIsRoot)) {
+                        vecChoices.push_back(strPrefixFolder + elm.strName);
+                    }
+                }
+            }
+
+            // We return the generated list of the possible choices to the user
+            return vecChoices;
         }
 
     } // console

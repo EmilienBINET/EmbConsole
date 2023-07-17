@@ -133,6 +133,8 @@ namespace emb {
             Error searchCommand(Functor& a_rFunctor, std::string& a_rstrCommand, std::vector<std::string>& a_rvstrArguments,
                                 std::string const& a_strUserEntry, std::string const& a_strPath) const noexcept;
 
+            std::vector<std::string> getAutoCompleteChoices(std::string const& a_strPartialCmd, std::string const& a_strCurrentFolder) const noexcept;
+
         private:
             std::reference_wrapper<ConsoleSessionWithTerminal> m_rConsole;
             std::map<std::string, Functor> m_mapFunctions;
