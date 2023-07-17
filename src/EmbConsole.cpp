@@ -49,19 +49,28 @@ namespace emb {
                 // cd abcd/ef<Tab> => strPrefixFolder is "abcd/", strPartialArg is "ef", strCurrentFolder is /w/x/abcd
             }
 
-            // We iterate (not recursively) in the current folder
-            for(const fs::directory_entry& entry: fs::directory_iterator{strCurrentFolder}) {
-                // If the file matches the searched type
-                if( (a_bListFiles && is_regular_file(entry)) || ((a_bListDirectories || a_bRecursive) && fs::is_directory(entry))) {
-                    // We format the output and add it to the list if it starts with the partial user entry
-                    std::string path = entry.path().string().substr(strRootPath.size());
-                    if(0 == path.find(strPrefixFolderCanonized)) {
-                        path = path.substr(strPrefixFolderCanonized.size());
+            try {
+                // We iterate (not recursively) in the current folder
+                for(const fs::directory_entry& entry: fs::directory_iterator{strCurrentFolder}) {
+                    try {
+                        // If the file matches the searched type
+                        if( (a_bListFiles && is_regular_file(entry)) || ((a_bListDirectories || a_bRecursive) && fs::is_directory(entry))) {
+                            // We format the output and add it to the list if it starts with the partial user entry
+                            std::string path = entry.path().string().substr(strRootPath.size());
+                            std::replace(path.begin(), path.end(), '\\', '/');
+                            if(0 == path.find(strPrefixFolderCanonized)) {
+                                path = path.substr(strPrefixFolderCanonized.size());
+                            }
+                            if(0 == path.find(strPartialArg)) {
+                                vecChoices.push_back(strPrefixFolder + path + (fs::is_directory(entry) ? "/" : "") );
+                            }
+                        }
                     }
-                    if(0 == path.find(strPartialArg)) {
-                        vecChoices.push_back(strPrefixFolder + path + (fs::is_directory(entry) ? "/" : "") );
+                    catch(...) {
                     }
                 }
+            }
+            catch(...) {
             }
 
             return vecChoices;
