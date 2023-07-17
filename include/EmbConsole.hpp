@@ -124,18 +124,22 @@ namespace emb {
             }
         };
 
+        struct AutoCompleteFromFileSystemOptions {
+            bool listFiles{true};           ///< If set, the autocompletion will propose files names
+            bool listDirectories{false};    ///< If set, the autocompletion will propose directories names
+            bool recursive{false};          ///< If set, the autocompletion will propose subelements of directories (requires listDirectories to be set)
+            std::string homePath{"/"};      ///< Home folder where the autocompletion searches subelements if the user specify a relative path
+            std::string chrootPath{};       ///< If set, it defines a folder from witch the user cannot exit when autocompleting file path
+        };
+
         /**
          * @brief Helper function to ease the autocompletion of a command that uses system files
          * @param a_strPartialPath      Partial path that the user is typing
-         * @param a_strRootPath         Root path of the system to use as base. The user cannot go above that limit.
-         * @param a_bListFiles          true to list files in the autocompletion, false otherwise
-         * @param a_bListDirectories    true to list directories in the autocompletion, false otherwise
-         * @param a_bRecursive          true to list directories reccursively, false otherwise
+         * @param a_Options             Options for the autocompletion
          * @return std::vector<std::string> List of the possible choices for the user autocompletion
          */
         EmbConsole_EXPORT std::vector<std::string> autocompleteFromFileSystem(
-            std::string const& a_strPartialPath, std::string const& a_strRootPath = {},
-            bool a_bListFiles = true, bool a_bListDirectories = false, bool a_bRecursive = false) noexcept;
+            std::string const& a_strPartialPath, AutoCompleteFromFileSystemOptions const& a_Options = {}) noexcept;
 
         //////////////////////////////////////////////////
         ///// Console stream object

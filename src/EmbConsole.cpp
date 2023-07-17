@@ -19,43 +19,104 @@ namespace emb {
             return "0.1.0";
         }
 
-        vector<string> autocompleteFromFileSystem(string const& a_strPartialPath, string const& a_strRootPath,
-                                                  bool a_bListFiles, bool a_bListDirectories, bool a_bRecursive) noexcept {
+        vector<string> autocompleteFromFileSystem(string const& a_strPartialPath, AutoCompleteFromFileSystemOptions const& a_Options) noexcept {
             vector<string> vecChoices{};
+            string strPartialPath{a_strPartialPath};
 
-            assert(!(a_bListDirectories == false && a_bRecursive == true) && "Cannot recurse without listing directories");
+#ifdef WIN32
+            // If the home path is not given, we suppose it is C:/
+            string strHomePath{a_Options.homePath.empty() || a_Options.homePath == "/" ? "C:/" : a_Options.homePath};
+#else
+            // If the home path is not given, we suppose it is /
+            string strHomePath{a_Options.homePath.empty() ? "/" : a_Options.homePath};
+#endif
 
-            // If the root path is not given, we suppose it is /
-            string strRootPath{a_strRootPath.empty() ? "/" : a_strRootPath};
+            // Test options
+            assert(!(a_Options.listDirectories == false && a_Options.recursive == true)
+                   && "Cannot recurse without listing directories");
+            assert(!(!a_Options.chrootPath.empty() && 0 != a_Options.homePath.find(a_Options.chrootPath))
+                   && "homePath is not a subdirectory of chrootPath");
+            assert(!(!a_Options.chrootPath.empty() && !fs::exists(a_Options.chrootPath))
+                   && "chrootPath does not exist");
+            assert(fs::exists(strHomePath)
+                   && "homePath does not exist");
+
+            // We need to know if user is typing an absolute path (or relative otherwise)
+            bool bAbsolutePath{false};
+            string strDrivePrefix{};
+            bool bDrivePrefixPresent{false};
+
+#ifdef WIN32
+            // We remove the drive from the path
+            if(1 == strPartialPath.find(":/")) {
+                bAbsolutePath = true;
+                bDrivePrefixPresent = true;
+                strDrivePrefix = strPartialPath.substr(0, 2);
+                strPartialPath = strPartialPath.substr(2);
+            }
+            else if(0 == strPartialPath.find("/")) {
+                bAbsolutePath = true;
+            }
+            else {
+                // If relative path goes beyond the root, we use this value instead
+                strDrivePrefix = "C:";
+                bDrivePrefixPresent = true;
+            }
+#else
+            if(0 == strPartialPath.find("/")) {
+                bAbsolutePath = true;
+            }
+#endif
+
+            // We need a custom getCanonicalPath function to use it on Windows and Unix
+            auto getCanonicalPath = [&](std::string const& a_strPath, bool a_bEndWithDelimiter = true) {
+                return Functions::getCanonicalPath(a_strPath, a_bEndWithDelimiter)
+                    .substr(bDrivePrefixPresent ? 1 : 0); // substr to avoid /C: on Windows and to get C: instead
+            };
 
             // We get the position of the last '/' in the argument the user is typing
-            size_t ulPos = a_strPartialPath.find_last_of('/');
+            size_t ulPos = strPartialPath.find_last_of('/');
 
             // We need to find information about what the user is typing:
             string strPrefixFolder{}; // what complete folder the user typed
-            string strPrefixFolderCanonized{};
-            string strPartialArg{a_strPartialPath}; // what partial folder the user started to typed
-            string strCurrentFolder{strRootPath}; // what folder we need to search the choices into
-            if(a_bRecursive && string::npos != ulPos) {
+            string strPartialArg{strPartialPath}; // what partial folder the user started to type
+            string strCurrentFolder{strHomePath}; // what folder we need to search the choices into
+            if(a_Options.recursive && string::npos != ulPos) {
                 // if a complete folder has already been typed, it is the part before the last '/'
-                strPrefixFolder = a_strPartialPath.substr(0, ulPos+1);
-                strPrefixFolderCanonized = Functions::getCanonicalPath(strPrefixFolder, true).substr(1);
+                strPrefixFolder = strPartialPath.substr(0, ulPos+1);
                 // and then the partial arg is now the part after the last '/'
-                strPartialArg = a_strPartialPath.substr(ulPos+1);
-                // the current folder we need to search the choices into is constructed from the current folder where the "cd"
-                // command is typed and the complete folder the user typed as an argument of "cd"
-#ifdef WIN32
-                if(string::npos != strPrefixFolderCanonized.find(':')) {
-                    strCurrentFolder = strPrefixFolderCanonized;
+                strPartialArg = strPartialPath.substr(ulPos+1);
+
+                // No chroot so the user can use absolute path
+                if(a_Options.chrootPath.empty()) {
+                    if(bAbsolutePath) {
+                        // the current folder we need to search the choices into is constructed from the drive and the complete folder the user typed
+                        strCurrentFolder = getCanonicalPath(strDrivePrefix + "/" + strPrefixFolder);
+                    }
+                    else {
+                        // the current folder we need to search the choices into is constructed from the homePath and the complete folder the user typed
+                        strCurrentFolder = getCanonicalPath(strHomePath + "/" + strPrefixFolder);
+                    }
+                    // If we went beyond the root, we need to stay at the root
+                    if(strCurrentFolder.empty()) {
+                        strCurrentFolder = strDrivePrefix + "/";
+                    }
                 }
+                // chroot enabled so the user can is kept captive in the chroot path
                 else {
-                    strCurrentFolder = Functions::getCanonicalPath(strCurrentFolder + "/" + strPrefixFolderCanonized);
+                    if(bAbsolutePath) {
+                        // the current folder we need to search the choices into is constructed from the chrootPath and the complete folder the user typed
+                        strCurrentFolder = getCanonicalPath(a_Options.chrootPath + "/" + strPrefixFolder);
+                    }
+                    else {
+                        // the current folder we need to search the choices into is constructed from the homePath and the complete folder the user typed
+                        strCurrentFolder = getCanonicalPath(strCurrentFolder + "/" + strPrefixFolder);
+                    }
+                    if(0 != strCurrentFolder.find(a_Options.chrootPath)) {
+                        // If we went beyond the chroot, we nee to stay in the chroot
+                        strCurrentFolder = a_Options.chrootPath;
+                    }
                 }
-#else
-                strCurrentFolder = Functions::getCanonicalPath(strCurrentFolder + "/" + strPrefixFolderCanonized);
-#endif
-                // e.g. if the current directory is /w/x
-                // cd abcd/ef<Tab> => strPrefixFolder is "abcd/", strPartialArg is "ef", strCurrentFolder is /w/x/abcd
             }
 
             try {
@@ -63,27 +124,11 @@ namespace emb {
                 for(const fs::directory_entry& entry: fs::directory_iterator{strCurrentFolder}) {
                     try {
                         // If the file matches the searched type
-                        if( (a_bListFiles && is_regular_file(entry)) || ((a_bListDirectories || a_bRecursive) && fs::is_directory(entry))) {
+                        if( (a_Options.listFiles && is_regular_file(entry)) || (a_Options.listDirectories && fs::is_directory(entry))) {
                             // We format the output and add it to the list if it starts with the partial user entry
-                            string path = entry.path().string();
-#ifdef WIN32
-                            replace(path.begin(), path.end(), '\\', '/');
-                            if(1 != path.find(":/")) {
-                                path = path.substr(strRootPath.size());
-                            }
-#else
-                            path = path.substr(strRootPath.size());
-#endif
-                            if(0 == path.find(strPrefixFolderCanonized)) {
-                                path = path.substr(strPrefixFolderCanonized.size());
-                            }
-                            if(0 == path.find(strPartialArg)) {
-#ifdef WIN32
-                                if(0 == path.find(":/")) {
-                                    path = path.substr(2);
-                                }
-#endif
-                                vecChoices.push_back(strPrefixFolder + path + (fs::is_directory(entry) ? "/" : "") );
+                            string filename = entry.path().filename().string() + (fs::is_directory(entry) ? "/" : "");
+                            if(0 == filename.find(strPartialArg)) {
+                                vecChoices.push_back((bAbsolutePath ? strDrivePrefix : "") + strPrefixFolder + filename);
                             }
                         }
                     }
