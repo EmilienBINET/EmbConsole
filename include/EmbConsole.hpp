@@ -128,6 +128,7 @@ namespace emb {
             bool listFiles{true};           ///< If set, the autocompletion will propose files names
             bool listDirectories{false};    ///< If set, the autocompletion will propose directories names
             bool recursive{false};          ///< If set, the autocompletion will propose subelements of directories (requires listDirectories to be set)
+            bool caseSensitive{true};       ///< If set, the autocompletion will propose subelements matching case
             std::string homePath{"/"};      ///< Home folder where the autocompletion searches subelements if the user specify a relative path
             std::string chrootPath{};       ///< If set, it defines a folder from witch the user cannot exit when autocompleting file path
         };

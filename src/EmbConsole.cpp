@@ -65,19 +65,21 @@ namespace emb {
             };
 
             // We also need a filename comparison function
-            auto filenameStartsWith = [](std::string const& a_strFilename, std::string const& a_strPrefix) {
-#ifdef WIN32
-                // On Windows we need to be case insensitive
+            auto filenameStartsWith = [&](std::string const& a_strFilename, std::string const& a_strPrefix) {
                 bool bRes{true};
-                for(size_t i = 0; bRes && i < a_strFilename.size() && i < a_strPrefix.size(); ++i) {
-                    if(tolower(a_strFilename[i]) != tolower(a_strPrefix[i])) {
-                        bRes = false;
+                if(a_Options.caseSensitive) {
+                    // If case sensitive comparison
+                    bRes = 0 == a_strFilename.find(a_strPrefix);
+                }
+                else {
+                    // If case insensitive comparison
+                    for(size_t i = 0; bRes && i < a_strFilename.size() && i < a_strPrefix.size(); ++i) {
+                        if(tolower(a_strFilename[i]) != tolower(a_strPrefix[i])) {
+                            bRes = false;
+                        }
                     }
                 }
                 return bRes;
-#else
-                return 0 == a_strFilename.find(a_strPrefix)
-#endif
             };
 
             // We get the position of the last '/' in the argument the user is typing
