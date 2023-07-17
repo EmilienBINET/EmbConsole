@@ -39,6 +39,7 @@ add_library(EmbConsole
     ${PLATFORM_SPECIFIC_FILES}
 )
 target_include_directories(EmbConsole PUBLIC include)
+target_include_directories(EmbConsole PRIVATE third/gulrak-filesystem/include)
 
 target_compile_definitions(EmbConsole PUBLIC _EXPORTING)
 

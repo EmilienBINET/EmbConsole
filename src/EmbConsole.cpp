@@ -1,12 +1,19 @@
 #include "EmbConsole.hpp"
 #include "impl/Functions.hpp"
-#include "impl/filesystem.hpp"
 #include <string>
+#if __cplusplus >= 201703L // >= C++17
+#include "impl/filesystem.hpp"
+namespace fs = std::filesystem;
+#elif __cplusplus >= 201103L // >= C++11
+#include <ghc/filesystem.hpp>
+namespace fs = ghc::filesystem;
+#else // < C++11
+#error Cannot use filesystem
+#endif
 
 namespace emb {
     namespace console {
         using namespace::std;
-        namespace fs = std::filesystem;
 
         std::string version() {
             return "0.1.0";
