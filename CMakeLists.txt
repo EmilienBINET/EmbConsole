@@ -16,8 +16,8 @@ if(UNIX)
     )
 endif()
 add_library(EmbConsole
-    src/EmbConsole.cpp 
-    
+    src/EmbConsole.cpp
+
     src/impl/Console.cpp
     src/impl/ConsolePrivate.hpp
     src/impl/ConsolePrivate.cpp
@@ -42,7 +42,7 @@ target_include_directories(EmbConsole PUBLIC include)
 
 target_compile_definitions(EmbConsole PUBLIC _EXPORTING)
 
-target_compile_features(EmbConsole PRIVATE cxx_std_17)
+target_compile_features(EmbConsole PRIVATE cxx_std_14)
 
 set_target_properties(EmbConsole PROPERTIES PUBLIC_HEADER "include/EmbConsole.hpp")
 install(TARGETS EmbConsole)
