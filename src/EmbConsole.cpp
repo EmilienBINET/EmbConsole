@@ -64,6 +64,22 @@ namespace emb {
                     .substr(bDrivePrefixPresent ? 1 : 0); // substr to avoid /C: on Windows and to get C: instead
             };
 
+            // We also need a filename comparison function
+            auto filenameStartsWith = [](std::string const& a_strFilename, std::string const& a_strPrefix) {
+#ifdef WIN32
+                // On Windows we need to be case insensitive
+                bool bRes{true};
+                for(size_t i = 0; bRes && i < a_strFilename.size() && i < a_strPrefix.size(); ++i) {
+                    if(tolower(a_strFilename[i]) != tolower(a_strPrefix[i])) {
+                        bRes = false;
+                    }
+                }
+                return bRes;
+#else
+                return 0 == a_strFilename.find(a_strPrefix)
+#endif
+            };
+
             // We get the position of the last '/' in the argument the user is typing
             size_t ulPos = strPartialPath.find_last_of('/');
 
@@ -117,7 +133,7 @@ namespace emb {
                         if( (a_Options.listFiles && is_regular_file(entry)) || (a_Options.listDirectories && fs::is_directory(entry))) {
                             // We format the output and add it to the list if it starts with the partial user entry
                             string filename = entry.path().filename().string() + (fs::is_directory(entry) ? "/" : "");
-                            if(0 == filename.find(strPartialArg)) {
+                            if(filenameStartsWith(filename, strPartialArg)) {
                                 vecChoices.push_back((bAbsolutePath ? strDrivePrefix : "") + strPrefixFolder + filename);
                             }
                         }
