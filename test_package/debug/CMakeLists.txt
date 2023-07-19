@@ -25,6 +25,9 @@ add_executable(example
 	../../include/EmbConsole.hpp
 	../../src/EmbConsole.cpp
 	
+	../../src/impl/Tools.hpp
+	../../src/impl/Tools.cpp
+
 	../../src/impl/Console.cpp
 	../../src/impl/ConsolePrivate.hpp
 	../../src/impl/ConsolePrivate.cpp
@@ -39,9 +42,15 @@ add_executable(example
 	../../src/impl/base/Terminal.cpp
 	../../src/impl/base/TerminalAnsi.hpp
 	../../src/impl/base/TerminalAnsi.cpp
+	../../src/impl/base/TerminalFile.hpp
+	../../src/impl/base/TerminalFile.cpp
+
+	../../src/impl/StdCapture.hpp
+	../../src/impl/StdCapture.cpp
 	${PLATFORM_SPECIFIC_FILES}
 )
 target_include_directories(example PRIVATE ../../include)
+target_include_directories(example PRIVATE ../../third/gulrak-filesystem/include)
 target_compile_definitions(example PRIVATE STATIC)
 target_link_libraries(example Threads::Threads)
 
@@ -49,4 +58,8 @@ if(WIN32)
     add_definitions(-DUSE_VLD)
     target_include_directories(example PRIVATE "C:/Program Files (x86)/Visual Leak Detector/include")
     target_link_directories(example PRIVATE "C:/Program Files (x86)/Visual Leak Detector/lib/Win64")
+endif()
+
+if(MSVC)
+    target_compile_options(example PUBLIC "/Zc:__cplusplus")
 endif()

@@ -18,6 +18,9 @@ endif()
 add_library(EmbConsole
     src/EmbConsole.cpp
 
+	src/impl/Tools.hpp
+	src/impl/Tools.cpp
+
     src/impl/Console.cpp
     src/impl/ConsolePrivate.hpp
     src/impl/ConsolePrivate.cpp
@@ -47,3 +50,7 @@ target_compile_features(EmbConsole PRIVATE cxx_std_14)
 
 set_target_properties(EmbConsole PROPERTIES PUBLIC_HEADER "include/EmbConsole.hpp")
 install(TARGETS EmbConsole)
+
+if(MSVC)
+    target_compile_options(EmbConsole PUBLIC "/Zc:__cplusplus")
+endif()

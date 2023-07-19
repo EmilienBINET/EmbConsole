@@ -8,6 +8,7 @@
 #include "unix/TerminalUnixSocket.hpp"
 #endif
 #include "base/TerminalFile.hpp"
+#include "Tools.hpp"
 
 namespace emb {
     namespace console {
@@ -81,7 +82,7 @@ namespace emb {
 #endif
             m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>("/tmp/mylogs.log"));
             m_Thread = std::thread{ &Private::run, this };
-            pthread_setname_np(m_Thread.native_handle(), "Console");
+            emb::tools::thread::set_thread_name(m_Thread, "Console");
         }
 
         Console::Private::Private(Private const& a_Obj) noexcept {
@@ -123,14 +124,14 @@ namespace emb {
         }
 
         void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor,
-                                          UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
             }
         }
 
         void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor,
-                                          UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
             }

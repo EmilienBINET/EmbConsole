@@ -19,7 +19,7 @@ class EmbConsoleConan(ConanFile):
     default_options = {"shared": True, "fPIC": True}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "src/*", "include/*"
+    exports_sources = "CMakeLists.txt", "src/*", "include/*", "third/*"
 
     def config_options(self):
         if self.settings.os == "Windows":
