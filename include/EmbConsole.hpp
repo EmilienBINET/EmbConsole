@@ -124,6 +124,10 @@ namespace emb {
             }
         };
 
+        //////////////////////////////////////////////////
+        ///// Autocompletion tools
+        //////////////////////////////////////////////////
+
         struct AutoCompleteFromFileSystemOptions {
             bool listFiles{true};           ///< If set, the autocompletion will propose files names
             bool listDirectories{false};    ///< If set, the autocompletion will propose directories names
