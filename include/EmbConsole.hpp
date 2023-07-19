@@ -146,6 +146,16 @@ namespace emb {
         EmbConsole_EXPORT std::vector<std::string> autocompleteFromFileSystem(
             std::string const& a_strPartialPath, AutoCompleteFromFileSystemOptions const& a_Options = {}) noexcept;
 
+        /**
+         * @brief Helper function to get a real path from a user argument that used \c autocompleteFromFileSystem
+         * @param a_rstrPath            output computed path
+         * @param a_strArgument         input user argument
+         * @param a_Options             Options for the autocompletion
+         * @return bool true if the argument matches the options, false otherwise
+         */
+        EmbConsole_EXPORT bool getAutocompletedFromFileSystemValue(std::string & a_rstrPath,
+            std::string const& a_strArgument, AutoCompleteFromFileSystemOptions const& a_Options = {}) noexcept;
+
         //////////////////////////////////////////////////
         ///// Console stream object
         //////////////////////////////////////////////////

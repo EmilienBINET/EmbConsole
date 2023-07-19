@@ -19,6 +19,16 @@ namespace emb {
             return "0.1.0";
         }
 
+        // We need a custom getCanonicalPath function to use it on Windows and Unix
+        string getCanonicalPath(std::string const& a_strPath, bool a_bEndWithDelimiter = true) {
+            string strCanonized =  Functions::getCanonicalPath(a_strPath, a_bEndWithDelimiter);
+            if(2 == strCanonized.find(":/") && '/' == strCanonized[0]) {
+                // substr to avoid /C:/ on Windows and to get C:/ instead
+                strCanonized = strCanonized.substr(1);
+            }
+            return strCanonized;
+        };
+
         vector<string> autocompleteFromFileSystem(string const& a_strPartialPath, AutoCompleteFromFileSystemOptions const& a_Options) noexcept {
             string strPartialPath{a_strPartialPath};
 
@@ -58,16 +68,6 @@ namespace emb {
                 bAbsolutePath = true;
             }
 #endif
-
-            // We need a custom getCanonicalPath function to use it on Windows and Unix
-            auto getCanonicalPath = [](std::string const& a_strPath, bool a_bEndWithDelimiter = true) {
-                string strCanonized =  Functions::getCanonicalPath(a_strPath, a_bEndWithDelimiter);
-                if(2 == strCanonized.find(":/") && '/' == strCanonized[0]) {
-                    // substr to avoid /C:/ on Windows and to get C:/ instead
-                    strCanonized = strCanonized.substr(1);
-                }
-                return strCanonized;
-            };
 
             // We also need a filename comparison function
             auto filenameStartsWith = [&](std::string const& a_strFilename, std::string const& a_strPrefix) {
@@ -154,5 +154,66 @@ namespace emb {
             }
             return vecChoices;
         }
+
+        bool getAutocompletedFromFileSystemValue(string & a_rstrPath, string const& a_strArgument, AutoCompleteFromFileSystemOptions const& a_Options) noexcept {
+            // If the home path is not given, we suppose it is /
+            string strHomePath{a_Options.homePath.empty() ? "/" : a_Options.homePath};
+            string strChrootPath{a_Options.chrootPath};
+
+            // We need to know if user is typing an absolute path (or relative otherwise)
+            bool bAbsolutePath{false};
+            bool bWithDriveLetter{false};
+#ifdef WIN32
+            replace(strHomePath.begin(), strHomePath.end(), '\\', '/');
+            replace(strChrootPath.begin(), strChrootPath.end(), '\\', '/');
+            bWithDriveLetter = 1 == a_strArgument.find(":/");
+            bAbsolutePath = bWithDriveLetter || 0 == a_strArgument.find("/");
+#else
+            bAbsolutePath = strPartialPath.find("/");
+#endif
+
+            bool bRes{false};
+            string strPath{};
+            // No chroot, the user is free
+            if(a_Options.chrootPath.empty()) {
+                // If absolute path, we take is as it
+                if(bAbsolutePath) {
+                    strPath = a_strArgument;
+                }
+                // If relative path, we add the home path
+                else {
+                    strPath = getCanonicalPath(strHomePath + "/" + a_strArgument, false);
+                }
+                // In both cases, we consider the input as valid
+                bRes = true;
+            }
+            // With chroot, the user must be kept captive in it
+            else {
+                // If there is a drive letter, the input is invalid
+                if(bWithDriveLetter) {
+                    bRes = false;
+                }
+                else {
+                    // If absolute path, we add it to the chroot take is as it
+                    if(bAbsolutePath) {
+                        strPath = getCanonicalPath(strChrootPath + "/" + a_strArgument, false);
+                    }
+                    // If relative path, we add the home path
+                    else {
+                        strPath = getCanonicalPath(strHomePath + "/" + a_strArgument, false);
+                    }
+                    // In both cases, we consider the input as valid if it is a subelement of the chroot
+                    bRes = 0 == strPath.find(strChrootPath);
+                }
+            }
+
+            // If the path is valid, we give it to the caller
+            if(bRes) {
+                a_rstrPath = strPath;
+            }
+
+            return bRes;
+        }
+
     } // console
 } // emb
