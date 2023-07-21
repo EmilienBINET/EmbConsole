@@ -128,33 +128,44 @@ namespace emb {
         ///// Autocompletion tools
         //////////////////////////////////////////////////
 
-        struct AutoCompleteFromFileSystemOptions {
-            bool listFiles{true};           ///< If set, the autocompletion will propose files names
-            bool listDirectories{false};    ///< If set, the autocompletion will propose directories names
-            bool recursive{false};          ///< If set, the autocompletion will propose subelements of directories (requires listDirectories to be set)
-            bool caseSensitive{true};       ///< If set, the autocompletion will propose subelements matching case
-            std::string homePath{"/"};      ///< Home folder where the autocompletion searches subelements if the user specify a relative path
-            std::string chrootPath{};       ///< If set, it defines a folder from witch the user cannot exit when autocompleting file path
-        };
+        namespace autocompletion {
+            struct FileSystemOptions {
+                bool listFiles{true};           ///< If set, the autocompletion will propose files names
+                bool listDirectories{false};    ///< If set, the autocompletion will propose directories names
+                bool recursive{false};          ///< If set, the autocompletion will propose subelements of directories (requires listDirectories to be set)
+                bool caseSensitive{true};       ///< If set, the autocompletion will propose subelements matching case
+                std::string homePath{"/"};      ///< Home folder where the autocompletion searches subelements if the user specify a relative path
+                std::string chrootPath{};       ///< If set, it defines a folder from witch the user cannot exit when autocompleting file path
+            };
 
-        /**
-         * @brief Helper function to ease the autocompletion of a command that uses system files
-         * @param a_strPartialPath      Partial path that the user is typing
-         * @param a_Options             Options for the autocompletion
-         * @return std::vector<std::string> List of the possible choices for the user autocompletion
-         */
-        EmbConsole_EXPORT std::vector<std::string> autocompleteFromFileSystem(
-            std::string const& a_strPartialPath, AutoCompleteFromFileSystemOptions const& a_Options = {}) noexcept;
+            /**
+             * @brief Helper function to ease the autocompletion of a command that uses system files
+             * @param a_strPartialPath      Partial path that the user is typing
+             * @param a_Options             Options for the autocompletion
+             * @return std::vector<std::string> List of the possible choices for the user autocompletion
+             */
+            EmbConsole_EXPORT std::vector<std::string> getChoicesFromFileSystem(
+                std::string const& a_strPartialPath, FileSystemOptions const& a_Options = {}) noexcept;
 
-        /**
-         * @brief Helper function to get a real path from a user argument that used \c autocompleteFromFileSystem
-         * @param a_rstrPath            output computed path
-         * @param a_strArgument         input user argument
-         * @param a_Options             Options for the autocompletion
-         * @return bool true if the argument matches the options, false otherwise
-         */
-        EmbConsole_EXPORT bool getAutocompletedFromFileSystemValue(std::string & a_rstrPath,
-            std::string const& a_strArgument, AutoCompleteFromFileSystemOptions const& a_Options = {}) noexcept;
+            /**
+             * @brief Helper function to get a real path from a user argument that used \c autocompleteFromFileSystem
+             * @param a_rstrPath            output computed path
+             * @param a_strArgument         input user argument
+             * @param a_Options             Options for the autocompletion
+             * @return bool true if the argument matches the options, false otherwise
+             */
+            EmbConsole_EXPORT bool getValueFromFileSystem(std::string & a_rstrPath,
+                std::string const& a_strArgument, FileSystemOptions const& a_Options = {}) noexcept;
+
+            /**
+             * @brief Helper function to ease the autocompletion of a command amonst multiple choices
+             * @param a_strPartialArg       Partial argument that the user is typing
+             * @param a_vecChoices          List of possible choices
+             * @return std::vector<std::string> List of the possible choices for the user autocompletion
+             */
+            EmbConsole_EXPORT std::vector<std::string> getChoicesFromList(
+                std::string const& a_strPartialArg, std::vector<std::string> const& a_vecChoices) noexcept;
+        }
 
         //////////////////////////////////////////////////
         ///// Console stream object
