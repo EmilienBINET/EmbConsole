@@ -170,7 +170,7 @@ namespace emb {
                 bWithDriveLetter = 1 == a_strArgument.find(":/");
                 bAbsolutePath = bWithDriveLetter || 0 == a_strArgument.find("/");
 #else
-                bAbsolutePath = strPartialPath.find("/");
+                bAbsolutePath = a_strArgument.find("/");
 #endif
 
                 bool bRes{false};
