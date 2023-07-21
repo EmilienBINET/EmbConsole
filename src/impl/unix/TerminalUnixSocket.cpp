@@ -1,4 +1,5 @@
 #include "TerminalUnixSocket.hpp"
+#include "../Tools.hpp"
 #include <fstream>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -76,7 +77,7 @@ namespace emb {
             chmod(s_strSocketPath,  S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
 
             m_ServerThread = std::thread{ &TerminalUnixSocket::serverLoop, this };
-            pthread_setname_np(m_ServerThread.native_handle(), "TrmUnxSockSrv");
+            emb::tools::thread::set_thread_name(m_ServerThread, "TrmUnxSockSrv");
 
             TerminalAnsi::start();
         }
@@ -139,7 +140,7 @@ namespace emb {
             while (!m_bStop) {
                 struct sockaddr_un remote;
                 unsigned int sock_len = 0;
-                
+
                 // Waiting connection
                 int iClientSocket = accept(m_iServerSocket, (struct sockaddr*)&remote, &sock_len);
                 if (-1 != iClientSocket) {
@@ -147,9 +148,9 @@ namespace emb {
                     m_bStopClient = false;
                     m_iClientSocket = iClientSocket;
                     m_ClientThreadRx = thread{ std::bind(&TerminalUnixSocket::clientLoopRx, this, iClientSocket) };
-                    pthread_setname_np(m_ClientThreadRx.native_handle(), "TrmUnxSockRx");
+                    emb::tools::thread::set_thread_name(m_ClientThreadRx, "TrmUnxSockRx");
                     m_ClientThreadTx = thread{ std::bind(&TerminalUnixSocket::clientLoopTx, this, iClientSocket) };
-                    pthread_setname_np(m_ClientThreadTx.native_handle(), "TrmUnxSockTx");
+                    emb::tools::thread::set_thread_name(m_ClientThreadTx, "TrmUnxSockTx");
 
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();
