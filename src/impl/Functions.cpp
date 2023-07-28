@@ -214,7 +214,7 @@ namespace emb {
             return result;
         }
 
-        bool Functions::processAutoCompletion(std::string& a_strCurrentEntry, unsigned int const& a_uiCurrentCursorPosition, std::string const& a_strCurrentFolder, bool const& a_bNext) noexcept {
+        bool Functions::processAutoCompletion(std::string& a_strCurrentEntry, unsigned int& a_uiCurrentCursorPosition, std::string const& a_strCurrentFolder, bool const& a_bNext) noexcept {
             string strAutoCompletionPrefix{ a_strCurrentEntry.substr(0, a_uiCurrentCursorPosition) };
 
             bool bRes = false;
@@ -260,6 +260,10 @@ namespace emb {
                 }
                 if (m_ullAutoCompletionPosition < m_vstrAutoCompletionChoices.size()) {
                     a_strCurrentEntry = m_strLastAutoCompletionPrefixWithoutPartialArg + m_vstrAutoCompletionChoices.at(m_ullAutoCompletionPosition);
+                    // If only one choice is possible, we move the cursor to the end of the entry
+                    if(1 == m_vstrAutoCompletionChoices.size()) {
+                        a_uiCurrentCursorPosition = a_strCurrentEntry.size();
+                    }
                     bRes = true;
                 }
             }
@@ -294,6 +298,15 @@ namespace emb {
                 }
                 if (m_ullAutoCompletionPosition < m_vstrAutoCompletionChoices.size()) {
                     a_strCurrentEntry = m_vstrAutoCompletionChoices.at(m_ullAutoCompletionPosition);
+                    // If only one choice is possible, we move the cursor to the end of the entry
+                    if(1 == m_vstrAutoCompletionChoices.size()) {
+                        a_uiCurrentCursorPosition = a_strCurrentEntry.size();
+                        // And if the entry is not a folder, we add a space to be able to entrer arguments righ now
+                        if('/' != a_strCurrentEntry.at(a_strCurrentEntry.size()-1)) {
+                            a_strCurrentEntry += " ";
+                            ++a_uiCurrentCursorPosition;
+                        }
+                    }
                     bRes = true;
                 }
             }

@@ -95,7 +95,7 @@ namespace emb {
             void delCommand(UserCommandInfo const&) noexcept;
 
             Error processEntry(UserEntry const& a_UserEntry) noexcept;
-            bool processAutoCompletion(std::string& a_strCurrentEntry, unsigned int const& a_uiCurrentCursorPosition,
+            bool processAutoCompletion(std::string& a_strCurrentEntry, unsigned int& a_uiCurrentCursorPosition,
                                        std::string const& a_strCurrentFolder, bool const& a_bNext) noexcept;
 
             bool folderExists(std::string const&) const noexcept;
