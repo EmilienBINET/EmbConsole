@@ -170,6 +170,7 @@ namespace emb {
 
             assert(questionsCount <= 1 && "PromptCommand: There cannot be more than one question.");
             assert(validatorsCount <= 1 && "PromptCommand: There cannot be more than one validator.");
+            (void)questionsCount; // Not used after so can generate a warning in release when assert is not defined
 
             // Stops print commands
             {
