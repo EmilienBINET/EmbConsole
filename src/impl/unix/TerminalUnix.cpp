@@ -19,65 +19,75 @@ namespace emb {
         //TerminalUnix::TerminalUnix(TerminalUnix&&) noexcept = default;
         TerminalUnix::~TerminalUnix() noexcept {
             _this = nullptr;
-            string key{};
-            while (read(key)) {
+            if(m_bStarted) {
+                string key{};
+                while (read(key)) {
+                }
             }
         }
         //TerminalUnix& TerminalUnix::operator= (TerminalUnix const&) noexcept = default;
         //TerminalUnix& TerminalUnix::operator= (TerminalUnix&&) noexcept = default;
 
         void TerminalUnix::start() noexcept {
-            TerminalAnsi::start();
-            struct termios old;
-            memset(&old, 0, sizeof(struct termios));
-            if(tcgetattr(STDIN_FILENO, &old) < 0) {
-                perror("TerminalUnix::start(1)");
-            }
-            old.c_lflag &= ~ICANON;
-            old.c_lflag &= ~ECHO;
-            old.c_cc[VMIN] = 1;
-            old.c_cc[VTIME] = 0;
-            if(tcsetattr(STDIN_FILENO, TCSANOW, &old) < 0) {
-                perror("TerminalUnix::start(2)");
-            }
-            Terminal::start();
-            std::signal(SIGWINCH, [](int){
-                if(_this) {
-                    _this->requestTerminalSize();
+            // Terminal unix only starts if stdin is valid, meaning the software is not launched headless
+            if(isatty(fileno(stdin))) {
+                m_bStarted = true;
+                TerminalAnsi::start();
+                struct termios old;
+                memset(&old, 0, sizeof(struct termios));
+                if(tcgetattr(STDIN_FILENO, &old) < 0) {
+                    perror("TerminalUnix::start(1)");
                 }
-            });
-            requestTerminalSize();
+                old.c_lflag &= ~ICANON;
+                old.c_lflag &= ~ECHO;
+                old.c_cc[VMIN] = 1;
+                old.c_cc[VTIME] = 0;
+                if(tcsetattr(STDIN_FILENO, TCSANOW, &old) < 0) {
+                    perror("TerminalUnix::start(2)");
+                }
+                Terminal::start();
+                std::signal(SIGWINCH, [](int){
+                    if(_this) {
+                        _this->requestTerminalSize();
+                    }
+                });
+                requestTerminalSize();
+            }
         }
 
         void TerminalUnix::processEvents() noexcept {
-            string keys{};
-            string key{};
-            while (read(key)) {
-                keys += key;
+            if(m_bStarted) {
+                string keys{};
+                string key{};
+                while (read(key)) {
+                    keys += key;
+                }
+                if (!keys.empty() && !parseTerminalSizeResponse(keys)) {
+                    processPressedKeyCode(keys);
+                }
+                processPrintCommands();
+                processUserCommands();
             }
-            if (!keys.empty() && !parseTerminalSizeResponse(keys)) {
-                processPressedKeyCode(keys);
-            }
-            processPrintCommands();
-            processUserCommands();
         }
 
         void TerminalUnix::stop() noexcept {
-            TerminalAnsi::stop();
-            struct termios old;
-            memset(&old, 0, sizeof(struct termios));
-            if (tcgetattr(STDIN_FILENO, &old) < 0) {
-                perror("TerminalUnix::stop(1)");
+            if(m_bStarted) {
+                TerminalAnsi::stop();
+                struct termios old;
+                memset(&old, 0, sizeof(struct termios));
+                if (tcgetattr(STDIN_FILENO, &old) < 0) {
+                    perror("TerminalUnix::stop(1)");
+                }
+                old.c_lflag |= ICANON;
+                old.c_lflag |= ECHO;
+                old.c_cc[VMIN] = 1;
+                old.c_cc[VTIME] = 0;
+                if (tcsetattr(STDIN_FILENO, TCSANOW, &old) < 0) {
+                    perror("TerminalUnix::stop(2)");
+                }
+                std::signal(SIGWINCH, SIG_DFL);
+                softReset();
             }
-            old.c_lflag |= ICANON;
-            old.c_lflag |= ECHO;
-            old.c_cc[VMIN] = 1;
-            old.c_cc[VTIME] = 0;
-            if (tcsetattr(STDIN_FILENO, TCSANOW, &old) < 0) {
-                perror("TerminalUnix::stop(2)");
-            }
-            std::signal(SIGWINCH, SIG_DFL);
-            softReset();
         }
 
         bool TerminalUnix::supportsInteractivity() const noexcept {
@@ -103,7 +113,7 @@ namespace emb {
             }
             return false;
         }
-        
+
         void TerminalUnix::printNewLine() const noexcept {
             write("\n");
         }

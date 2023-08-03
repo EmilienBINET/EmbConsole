@@ -26,6 +26,9 @@ namespace emb {
             bool read(std::string& a_rstrKey) const noexcept override;
 
             void printNewLine() const noexcept override;
+
+        private:
+            bool m_bStarted{false};
         };
     } // console
 } // emb
