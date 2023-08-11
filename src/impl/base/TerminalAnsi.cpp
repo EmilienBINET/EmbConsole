@@ -356,24 +356,29 @@ namespace emb {
         }
 
         void TerminalAnsi::printSymbol(PrintSymbol::Symbol const a_eSymbol, unsigned int const a_uiN) const noexcept {
-            static const unordered_map<PrintSymbol::Symbol, string> s_SymbolsMap{
-                    { PrintSymbol::Symbol::BottomRight,    "j" },
-                    { PrintSymbol::Symbol::TopRight,       "k" },
-                    { PrintSymbol::Symbol::TopLeft,        "l" },
-                    { PrintSymbol::Symbol::BottomLeft,     "m" },
-                    { PrintSymbol::Symbol::Cross,          "n" },
-                    { PrintSymbol::Symbol::HorizontalBar,  "q" },
-                    { PrintSymbol::Symbol::LeftCross,      "t" },
-                    { PrintSymbol::Symbol::RightCross,     "u" },
-                    { PrintSymbol::Symbol::BottomCross,    "v" },
-                    { PrintSymbol::Symbol::TopCross,       "w" },
-                    { PrintSymbol::Symbol::VerticalBar,    "x" },
-            };
-            write(s_ESC + "(0");
-            for (unsigned int i = 0; i < a_uiN; ++i) {
-                write(s_SymbolsMap.at(a_eSymbol));
+            if(PrintSymbol::Symbol::Space == a_eSymbol) {
+                write(" ");
             }
-            write(s_ESC + "(B");
+            else {
+                static const unordered_map<PrintSymbol::Symbol, string> s_SymbolsMap{
+                        { PrintSymbol::Symbol::BottomRight,    "j" },
+                        { PrintSymbol::Symbol::TopRight,       "k" },
+                        { PrintSymbol::Symbol::TopLeft,        "l" },
+                        { PrintSymbol::Symbol::BottomLeft,     "m" },
+                        { PrintSymbol::Symbol::Cross,          "n" },
+                        { PrintSymbol::Symbol::HorizontalBar,  "q" },
+                        { PrintSymbol::Symbol::LeftCross,      "t" },
+                        { PrintSymbol::Symbol::RightCross,     "u" },
+                        { PrintSymbol::Symbol::BottomCross,    "v" },
+                        { PrintSymbol::Symbol::TopCross,       "w" },
+                        { PrintSymbol::Symbol::VerticalBar,    "x" },
+                };
+                write(s_ESC + "(0");
+                for (unsigned int i = 0; i < a_uiN; ++i) {
+                    write(s_SymbolsMap.at(a_eSymbol));
+                }
+                write(s_ESC + "(B");
+            }
         }
 
         void TerminalAnsi::setScrollingRegion(unsigned int const a_uiT, unsigned int const a_uiB) const noexcept {
@@ -464,11 +469,11 @@ namespace emb {
             else if ("\x1b\x5b\x44" == a_strKey) {
                 Terminal::processPressedKey(Key::Left);
             }
-            else if ("\x1b\x5b\x48" == a_strKey || 
+            else if ("\x1b\x5b\x48" == a_strKey ||
                      "\x1b\x5b\x31\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::Start);
             }
-            else if ("\x1b\x5b\x46" == a_strKey || 
+            else if ("\x1b\x5b\x46" == a_strKey ||
                      "\x1b\x5b\x34\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::End);
             }
@@ -484,19 +489,19 @@ namespace emb {
             else if ("\x1b" == a_strKey) {
                 Terminal::processPressedKey(Key::Escape);
             }
-            else if ("\x1b\x4f\x50" == a_strKey || 
+            else if ("\x1b\x4f\x50" == a_strKey ||
                      "\x1b\x5b\x31\x31\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F1);
             }
-            else if ("\x1b\x4f\x51" == a_strKey || 
+            else if ("\x1b\x4f\x51" == a_strKey ||
                      "\x1b\x5b\x31\x32\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F2);
             }
-            else if ("\x1b\x4f\x52" == a_strKey || 
+            else if ("\x1b\x4f\x52" == a_strKey ||
                      "\x1b\x5b\x31\x33\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F3);
             }
-            else if ("\x1b\x4f\x53" == a_strKey || 
+            else if ("\x1b\x4f\x53" == a_strKey ||
                      "\x1b\x5b\x31\x34\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F4);
             }

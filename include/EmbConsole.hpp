@@ -752,6 +752,7 @@ namespace emb {
             : public PrintCommand{
         public:
             enum class Symbol {
+                Space,
                 BottomRight,
                 TopRight,
                 TopLeft,
