@@ -28,7 +28,8 @@ namespace emb {
             void printNewLine() const noexcept override;
 
         private:
-            bool m_bStarted{false};
+            bool m_bStarted{true}; // todo option
+            bool m_bInputEnabled{false};
         };
     } // console
 } // emb

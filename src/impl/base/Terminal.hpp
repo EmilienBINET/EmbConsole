@@ -199,7 +199,7 @@ namespace emb {
         private:
             ConsoleSessionWithTerminal& m_rConsoleSession;
             mutable std::recursive_mutex m_Mutex{};
-            mutable std::mutex m_PrintMutex{};
+            mutable std::recursive_mutex m_PrintMutex{};
             bool m_bPrintCommandEnabled{ true };
             PrintCommand::VPtr m_vpPrintCommands{};
             std::shared_ptr<Functions> m_pFunctions;
