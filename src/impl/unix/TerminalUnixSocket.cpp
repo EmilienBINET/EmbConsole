@@ -131,7 +131,9 @@ namespace emb {
 
         bool TerminalUnixSocket::write(std::string const& a_strDataToPrint) const noexcept {
             lock_guard<mutex> const l{m_Mutex};
-            m_strDataToSend += a_strDataToPrint;
+            if(!m_bStopClient) {
+                m_strDataToSend += a_strDataToPrint;
+            }
             m_ConditionVariableTx.notify_one();
             return true;
         }
@@ -151,6 +153,8 @@ namespace emb {
                     emb::tools::thread::set_thread_name(m_ClientThreadRx, "TrmUnxSockRx");
                     m_ClientThreadTx = thread{ std::bind(&TerminalUnixSocket::clientLoopTx, this, iClientSocket) };
                     emb::tools::thread::set_thread_name(m_ClientThreadTx, "TrmUnxSockTx");
+
+                    write("Connected\n");
 
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();

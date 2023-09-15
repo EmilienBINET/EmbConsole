@@ -41,7 +41,7 @@ namespace emb {
             mutable std::thread m_ClientThreadRx{};
             mutable std::thread m_ClientThreadTx{};
             mutable std::atomic<bool> m_bStop{ false };
-            mutable std::atomic<bool> m_bStopClient{ false };
+            mutable std::atomic<bool> m_bStopClient{ true };
             mutable std::mutex m_Mutex{};
             mutable std::mutex m_MutexTx{};
             mutable std::condition_variable m_ConditionVariableTx{};
