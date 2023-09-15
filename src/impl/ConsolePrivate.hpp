@@ -84,13 +84,14 @@ namespace emb {
             PromptCommand::VPtr m_PromptCommands{};
 
             bool m_bInstantPrint{ false };
+            bool m_bLocalInstantPrint{ false };
         };
 
         class Console::Private : protected ITerminal {
             friend class Console;
 
         public:
-            Private(Console&) noexcept;
+            Private(Console&, Options const& = Options{}) noexcept;
             Private(Private const&) noexcept;
             Private(Private&&) noexcept;
             virtual ~Private() noexcept;

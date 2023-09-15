@@ -137,14 +137,14 @@ namespace emb {
         std::map<int, std::weak_ptr<Console>> s_mpConsoles{};
 
         std::shared_ptr<Console> Console::create(int a_iId) noexcept {
-            assert(0 == s_mpConsoles.count(a_iId));
-            auto pResult = make_shared<Console>();
-            s_mpConsoles[a_iId] = std::weak_ptr<Console>{ pResult };
-            return pResult;
+            return create(Options{}, a_iId);
         }
 
         std::shared_ptr<Console> Console::create(Options const& aOptions, int a_iId) noexcept {
-            return make_shared<Console>(aOptions);
+            assert(0 == s_mpConsoles.count(a_iId));
+            auto pResult = make_shared<Console>(aOptions);
+            s_mpConsoles[a_iId] = std::weak_ptr<Console>{ pResult };
+            return pResult;
         }
 
         std::weak_ptr<Console> Console::instance(int a_iId) noexcept {
@@ -168,7 +168,8 @@ namespace emb {
         Console::Console(int argc, char** argv) noexcept {
         }
 
-        Console::Console(Options const& aOptions) noexcept {
+        Console::Console(Options const& aOptions) noexcept
+            : m_pPrivateImpl{ make_unique<Private>(*this, aOptions) } {
         }
 
         Console::~Console() noexcept {

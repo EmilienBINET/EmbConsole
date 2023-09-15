@@ -34,6 +34,8 @@ namespace emb {
         void Commit::process(Terminal& a_rTerminal) const noexcept {
             a_rTerminal.commit();
         }
+        void InstantPrint::process(Terminal& a_rTerminal) const noexcept {
+        }
 
         //////////////////////////////////////////////////
         ///// PrintCommands: Cursor Positioning

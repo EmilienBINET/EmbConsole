@@ -18,19 +18,23 @@ namespace emb {
     namespace console {
         using namespace std;
 
-        static constexpr char s_strSocketPath[] = "/tmp/mysocket";
-        static constexpr char s_strShellPath[] = "/tmp/myshell";
+        TerminalUnixSocket::TerminalUnixSocket(ConsoleSessionWithTerminal& a_rConsoleSession,
+                                               std::string const& a_strSocketPath,
+                                               std::string const& a_strShellPath) noexcept
+                : TerminalAnsi{ a_rConsoleSession }
+                , m_strSocketPath{ a_strSocketPath }
+                , m_strShellPath{ a_strShellPath } {
 
-        TerminalUnixSocket::TerminalUnixSocket(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : TerminalAnsi{ a_rConsoleSession } {
-
-            // Create the shell to access unix socket
-            ofstream outShell{ s_strShellPath };
-            outShell
-                << "#!/bin/bash" << endl
-                << "stty -icanon -echo" << endl
-                << "nc -U " << s_strSocketPath << endl
-                << "stty icanon echo" << endl;
-            chmod(s_strShellPath, ACCESSPERMS);
+            if(!m_strShellPath.empty()) {
+                // Create the shell to access unix socket
+                ofstream outShell{ m_strShellPath };
+                outShell
+                    << "#!/bin/bash" << endl
+                    << "stty -icanon -echo" << endl
+                    << "nc -U " << m_strSocketPath << endl
+                    << "stty icanon echo" << endl;
+                chmod(m_strShellPath.c_str(), ACCESSPERMS);
+            }
 
             addCommand(emb::console::UserCommandInfo("/exit", "Exit the current shell"), [this]{
                 if(m_iClientSocket > 0) {
@@ -46,8 +50,8 @@ namespace emb {
             string key{};
             while (read(key)) {}
 
-            unlink(s_strShellPath);
-            unlink(s_strSocketPath);
+            unlink(m_strShellPath.c_str());
+            unlink(m_strSocketPath.c_str());
         }
         //TerminalUnixSocket& TerminalUnixSocket::operator= (TerminalUnixSocket const&) noexcept = default;
         //TerminalUnixSocket& TerminalUnixSocket::operator= (TerminalUnixSocket&&) noexcept = default;
@@ -61,7 +65,7 @@ namespace emb {
 
             struct sockaddr_un local;
             local.sun_family = AF_UNIX;
-            strcpy(local.sun_path, s_strSocketPath);
+            strcpy(local.sun_path, m_strSocketPath.c_str());
             unlink(local.sun_path);
             int len = strlen(local.sun_path) + sizeof (local.sun_family);
             if (0 != bind(m_iServerSocket, (struct sockaddr*)&local, len)) {
@@ -74,7 +78,7 @@ namespace emb {
                 return;
             }
 
-            chmod(s_strSocketPath,  S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
+            chmod(m_strSocketPath.c_str(),  S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
 
             m_ServerThread = std::thread{ &TerminalUnixSocket::serverLoop, this };
             emb::tools::thread::set_thread_name(m_ServerThread, "TrmUnxSockSrv");
@@ -131,7 +135,9 @@ namespace emb {
 
         bool TerminalUnixSocket::write(std::string const& a_strDataToPrint) const noexcept {
             lock_guard<mutex> const l{m_Mutex};
-            m_strDataToSend += a_strDataToPrint;
+            if(!m_bStopClient) {
+                m_strDataToSend += a_strDataToPrint;
+            }
             m_ConditionVariableTx.notify_one();
             return true;
         }
@@ -151,6 +157,8 @@ namespace emb {
                     emb::tools::thread::set_thread_name(m_ClientThreadRx, "TrmUnxSockRx");
                     m_ClientThreadTx = thread{ std::bind(&TerminalUnixSocket::clientLoopTx, this, iClientSocket) };
                     emb::tools::thread::set_thread_name(m_ClientThreadTx, "TrmUnxSockTx");
+
+                    write("Connected\n");
 
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();
