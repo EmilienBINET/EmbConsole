@@ -12,13 +12,16 @@ namespace emb {
         {
             out = ofstream{a_strFile, std::ios::app};
         }
-        TerminalFile::~TerminalFile() noexcept {}
+        TerminalFile::~TerminalFile() noexcept {
+            out.flush();
+            out.close();
+        }
 
         void TerminalFile::start() noexcept {}
         void TerminalFile::processEvents() noexcept {
             processPrintCommands();
         }
-        void TerminalFile::stop() noexcept {}
+        //void TerminalFile::stop() noexcept {}
 
         bool TerminalFile::read(std::string& a_rstrKey) const noexcept {
             return false;
@@ -29,13 +32,17 @@ namespace emb {
         }
 
         void TerminalFile::printNewLine() const noexcept {
-            out << endl;
-            out.flush();
+            if(out.is_open()) {
+                out << endl;
+                out.flush();
+            }
         }
 
         void TerminalFile::printText(std::string const& a_strText) const noexcept {
-            out << a_strText;
-            // write(a_strText);
+            if(out.is_open()) {
+                out << a_strText;
+                out.flush();
+            }
         }
     } // console
 } // emb
