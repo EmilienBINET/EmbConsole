@@ -84,7 +84,7 @@ namespace emb {
 #endif
 #ifdef unix
             m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnix>>());
-            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>());
+            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>("", ""));
 #endif
             m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>("/tmp/mylogs.log"));
             m_Thread = std::thread{ &Private::run, this };

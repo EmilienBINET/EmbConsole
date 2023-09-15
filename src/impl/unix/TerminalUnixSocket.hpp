@@ -12,7 +12,7 @@ namespace emb {
             : public TerminalAnsi
         {
         public:
-            TerminalUnixSocket(ConsoleSessionWithTerminal&) noexcept;
+            TerminalUnixSocket(ConsoleSessionWithTerminal&, std::string const&, std::string const&) noexcept;
             TerminalUnixSocket(TerminalUnixSocket const&) noexcept;
             TerminalUnixSocket(TerminalUnixSocket&&) noexcept;
             virtual ~TerminalUnixSocket() noexcept;
@@ -37,6 +37,8 @@ namespace emb {
             void clientLoopTx(int a_iClientSocket) noexcept;
 
         private:
+            std::string const m_strSocketPath;
+            std::string const m_strShellPath;
             mutable std::thread m_ServerThread{};
             mutable std::thread m_ClientThreadRx{};
             mutable std::thread m_ClientThreadTx{};
