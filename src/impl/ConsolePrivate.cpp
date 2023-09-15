@@ -36,12 +36,18 @@ namespace emb {
             if (dynamic_pointer_cast<Begin>(a_pCmd))
             {
                 m_PrintMutex.lock();
+                m_bLocalInstantPrint = false;
             }
             lock_guard<mutex> l{ m_Mutex };
-            m_PrintCommands.push_back(a_pCmd);
+            if (dynamic_pointer_cast<InstantPrint>(a_pCmd)) {
+                m_bLocalInstantPrint = true;
+            }
+            else {
+                m_PrintCommands.push_back(a_pCmd);
+            }
             if (dynamic_pointer_cast<Commit>(a_pCmd))
             {
-                m_pTerminal->setPrintCommands(m_PrintCommands, m_bInstantPrint);
+                m_pTerminal->setPrintCommands(m_PrintCommands, m_bInstantPrint | m_bLocalInstantPrint);
                 m_PrintMutex.unlock();
                 m_PrintCommands.clear();
             }

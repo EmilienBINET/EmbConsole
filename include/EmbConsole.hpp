@@ -304,7 +304,7 @@ namespace emb {
         };
 
         //////////////////////////////////////////////////
-        ///// PrintCommands: Begin / Commit
+        ///// PrintCommands: Begin / Commit / EnableInstantPrint
         //////////////////////////////////////////////////
 
         /// Begins a session of print commands. Commands sent before Begin are not taken into consideration
@@ -319,6 +319,13 @@ namespace emb {
             : public PrintCommand{
         public:
             Ptr copy() const noexcept override { return std::make_unique<Commit>(); }
+            void process(Terminal&) const noexcept override;
+        };
+        /// Requests the console to print the current list of command instantly when receiving the commit command
+        class EmbConsole_EXPORT InstantPrint final
+            : public PrintCommand {
+        public:
+            Ptr copy() const noexcept override { return std::make_unique<InstantPrint>(); }
             void process(Terminal&) const noexcept override;
         };
 

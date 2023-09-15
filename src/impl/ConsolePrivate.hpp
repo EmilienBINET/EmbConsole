@@ -84,6 +84,7 @@ namespace emb {
             PromptCommand::VPtr m_PromptCommands{};
 
             bool m_bInstantPrint{ false };
+            bool m_bLocalInstantPrint{ false };
         };
 
         class Console::Private : protected ITerminal {
