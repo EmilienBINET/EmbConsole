@@ -1,4 +1,5 @@
 #include "ConsolePrivate.hpp"
+#include "EmbConsole.hpp"
 #include "StdCapture.hpp"
 #ifdef WIN32
 #include "win/TerminalWindows.hpp"
@@ -78,15 +79,23 @@ namespace emb {
             return m_pTerminal->getCurrentPath();
         }
 
-        Console::Private::Private(Console& a_rConsole) noexcept {
+        Console::Private::Private(Console& a_rConsole, Options const& a_Options) noexcept {
 #ifdef WIN32
-            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindows>>());
+            if(auto pOpt = a_Options.get<OptionStd>(); pOpt && pOpt->bEnabled) {
+                m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindows>>());
+            }
 #endif
 #ifdef unix
-            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnix>>());
-            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>("", ""));
+            if(auto pOpt = a_Options.get<OptionStd>(); pOpt && pOpt->bEnabled) {
+                m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnix>>());
+            }
+            if(auto pOpt = a_Options.get<OptionUnixSocket>(); pOpt && pOpt->bEnabled) {
+                m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>(pOpt->strSocketFilePath, pOpt->strShellFilePath));
+            }
 #endif
-            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>("/tmp/mylogs.log"));
+            if(auto pOpt = a_Options.get<OptionFile>(); pOpt && pOpt->bEnabled) {
+                m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>(pOpt->strFilePath));
+            }
             m_Thread = std::thread{ &Private::run, this };
             emb::tools::thread::set_thread_name(m_Thread, "Console");
         }

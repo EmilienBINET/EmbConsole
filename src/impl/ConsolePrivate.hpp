@@ -91,7 +91,7 @@ namespace emb {
             friend class Console;
 
         public:
-            Private(Console&) noexcept;
+            Private(Console&, Options const& = Options{}) noexcept;
             Private(Private const&) noexcept;
             Private(Private&&) noexcept;
             virtual ~Private() noexcept;

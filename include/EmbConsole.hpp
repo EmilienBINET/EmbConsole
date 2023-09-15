@@ -27,51 +27,14 @@ namespace emb {
          * @return std::string library's version
          */
         EmbConsole_EXPORT std::string version();
-#if 0
-        /**
-         * @brief Represents Options that can be passed to the library
-         *
-         */
-        class EmbConsole_EXPORT Option {
-            // public types
-        public:
-            using Vector = std::vector<Option>;
-            enum class Type {
-                IsInteractive,            //!< enabled by default, disable with --console-not-interactive
-                ColorEnabled,             //!< enabled by default, disable with --console-no-color
-                UnixSocketClientEnabled,  //!< disbaled by default, enable with --console-unix-client
-                UnixSocketServerEnabled,  //!< disbaled by default, enable with --console-unix-server
-                CaptureAllStdOutStdErr,
-                MonoThread
-            };
 
-            // public static members
-        public:
-            static Vector fromMainArgs(int argc, char** argv);
+        //////////////////////////////////////////////////
+        ///// Some forward declarations
+        //////////////////////////////////////////////////
 
-            // public members
-        public:
-            Option() noexcept;
-            Option(Option const&) noexcept;
-            Option(Option const&&) noexcept;
-            virtual ~Option() noexcept;
-            Option& operator= (Option&) noexcept;
-            Option& operator= (Option&&) noexcept;
-
-        private:
-            class Private;
-            std::unique_ptr<Private> m_pPrivateImpl;
-        };
-
-        /**
-         * @brief List of options to configure the console
-         */
-        using Options = Option::Vector;
-#else
-        using Options = std::vector<std::string>;
-#endif
         struct UserCommandData;
         struct UserCommandInfo;
+        class Options;
         class ConsoleSession;
         class PrintCommand;
         class PromptCommand;
@@ -282,6 +245,86 @@ namespace emb {
         private:
             class Private;
             std::unique_ptr<Private> m_pPrivateImpl;
+        };
+
+        //////////////////////////////////////////////////
+        ///// Options
+        //////////////////////////////////////////////////
+
+        class EmbConsole_EXPORT Option {
+        public:
+            Options operator+(Option const& a_other) const;
+            Options operator+(Options const& a_other) const;
+            virtual std::shared_ptr<Option> copy() const noexcept = 0;
+            std::string strDesc{};
+        };
+
+
+        /**
+         * @brief Represents Options that can be passed to the library
+         *
+         */
+        class EmbConsole_EXPORT Options {
+            // public types
+        public:
+            //enum class Type {
+            //    IsInteractive,            //!< enabled by default, disable with --console-not-interactive
+            //    ColorEnabled,             //!< enabled by default, disable with --console-no-color
+            //    UnixSocketClientEnabled,  //!< disbaled by default, enable with --console-unix-client
+            //    UnixSocketServerEnabled,  //!< disbaled by default, enable with --console-unix-server
+            //    CaptureAllStdOutStdErr,
+            //    MonoThread
+            //};
+
+            // public static members
+        public:
+            static Options fromMainArgs(int argc, char** argv);
+            Options();
+            Options(Option const& a_other);
+            Options operator+(Option const& a_other) const;
+            Options operator+(Options const& a_other) const;
+            template<typename T>
+            std::shared_ptr<T> get() const {
+                for(auto const& pElm : m_vpOptions) {
+                    if(auto pCastedElm = std::dynamic_pointer_cast<T>(pElm)) {
+                        return pCastedElm;
+                    }
+                }
+                return nullptr;
+            }
+
+        private:
+            std::vector<std::shared_ptr<Option>> m_vpOptions{};
+        };
+
+        class EmbConsole_EXPORT OptionStd : public Option {
+        public:
+            OptionStd() noexcept { strDesc = "OptionStd()"; };
+            OptionStd(bool a_bEnabled) noexcept : bEnabled{ a_bEnabled } { strDesc = "OptionStd(" + std::to_string(a_bEnabled) + ")"; }
+            std::shared_ptr<Option> copy() const noexcept override { return std::make_unique<OptionStd>(bEnabled); }
+            bool bEnabled{ true };
+        };
+
+        class EmbConsole_EXPORT OptionFile : public Option {
+        public:
+            OptionFile() noexcept { strDesc = "OptionFile()"; };
+            OptionFile(bool a_bEnabled, std::string const& a_strFilePath) noexcept : bEnabled{ a_bEnabled }, strFilePath{ a_strFilePath }
+                { strDesc = "OptionFile(" + std::to_string(a_bEnabled) + "," + a_strFilePath + ")"; }
+            std::shared_ptr<Option> copy() const noexcept override { return std::make_unique<OptionFile>(bEnabled, strFilePath); }
+            bool bEnabled{ false };
+            std::string strFilePath{};
+        };
+
+        class EmbConsole_EXPORT OptionUnixSocket : public Option {
+        public:
+            OptionUnixSocket() noexcept { strDesc = "OptionUnixSocket()"; };
+            OptionUnixSocket(bool a_bEnabled, std::string const& a_strSocketFilePath, std::string const& a_strShellFilePath) noexcept
+                : bEnabled{ a_bEnabled }, strSocketFilePath{ a_strSocketFilePath }, strShellFilePath{ a_strShellFilePath }
+                { strDesc = "OptionUnixSocket(" + std::to_string(a_bEnabled) + "," + strSocketFilePath + "," + a_strShellFilePath + ")"; }
+            std::shared_ptr<Option> copy() const noexcept override { return std::make_unique<OptionUnixSocket>(bEnabled, strSocketFilePath, strShellFilePath); }
+            bool bEnabled{ false };
+            std::string strSocketFilePath{};
+            std::string strShellFilePath{};
         };
 
         //////////////////////////////////////////////////
