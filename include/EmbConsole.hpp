@@ -142,6 +142,7 @@ namespace emb {
             // public members
         public:
             virtual IPrintableConsole& operator<< (PrintCommand const&) noexcept = 0;
+            IPrintableConsole& operator<< (char const*) noexcept;
 
             void print(std::string const& a_Data) noexcept;
             void printError(std::string const& a_Data) noexcept;

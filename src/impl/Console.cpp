@@ -11,6 +11,11 @@ namespace emb {
         ///// Console stream object
         //////////////////////////////////////////////////
 
+        IPrintableConsole& IPrintableConsole::operator<< (char const* a_szData) noexcept {
+            print(a_szData);
+            return *this;
+        }
+
         void IPrintableConsole::print(std::string const& a_Data) noexcept {
             (*this) << Begin() << ClearLine(ClearLine::Type::All);
 
