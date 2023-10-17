@@ -12,7 +12,12 @@ namespace emb {
         //////////////////////////////////////////////////
 
         IPrintableConsole& IPrintableConsole::operator<< (char const* a_szData) noexcept {
-            print(a_szData);
+            *this << PrintText(a_szData);
+            return *this;
+        }
+
+        IPrintableConsole& IPrintableConsole::operator<< (std::string const& a_strData) noexcept {
+            *this << PrintText(a_strData);
             return *this;
         }
 
@@ -29,12 +34,15 @@ namespace emb {
         }
 
         void IPrintableConsole::printError(std::string const& a_Data) noexcept {
-            (*this)
-                << Begin()
-                << ClearLine(ClearLine::Type::All)
-                << SetColor(SetColor::Color::Red) << PrintText(a_Data) << ResetTextFormat()
-                << PrintNewLine()
-                << Commit();
+            (*this) << Begin() << ClearLine(ClearLine::Type::All) << SetColor(SetColor::Color::Red);
+
+            string elm{};
+            istringstream input{ a_Data };
+            while (std::getline(input, elm, '\n')) {
+                (*this) << PrintText(elm) << PrintNewLine();
+            }
+
+            (*this) << ResetTextFormat() << Commit();
         }
 
         bool IPromptableConsole::promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator) noexcept {
@@ -190,6 +198,14 @@ namespace emb {
         IPrintableConsole& Console::operator<< (PrintCommand const& a_Cmd) noexcept {
             *m_pPrivateImpl << a_Cmd;
             return *this;
+        }
+
+        IPrintableConsole& Console::operator<< (char const* a_szData) noexcept {
+            return IPrintableConsole::operator<<(a_szData);
+        }
+
+        IPrintableConsole& Console::operator<< (std::string const& a_strData) noexcept {
+            return IPrintableConsole::operator<<(a_strData);
         }
 
         void Console::setUserName(std::string const& a_strUserName) noexcept {

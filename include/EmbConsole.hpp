@@ -143,6 +143,7 @@ namespace emb {
         public:
             virtual IPrintableConsole& operator<< (PrintCommand const&) noexcept = 0;
             IPrintableConsole& operator<< (char const*) noexcept;
+            IPrintableConsole& operator<< (std::string const&) noexcept;
 
             void print(std::string const& a_Data) noexcept;
             void printError(std::string const& a_Data) noexcept;
@@ -230,6 +231,8 @@ namespace emb {
             //void setInteractive(bool) noexcept;
 
             IPrintableConsole& operator<< (PrintCommand const&) noexcept override;
+            IPrintableConsole& operator<< (char const*) noexcept;
+            IPrintableConsole& operator<< (std::string const&) noexcept;
 
             void setPromptFormat(std::string const&) noexcept;
             void setUserName(std::string const&) noexcept;
