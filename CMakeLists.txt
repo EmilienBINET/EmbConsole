@@ -14,6 +14,9 @@ if(UNIX)
         src/impl/unix/TerminalUnixSocket.hpp
         src/impl/unix/TerminalUnixSocket.cpp
     )
+    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    find_package(Threads REQUIRED)
 endif()
 add_library(EmbConsole
     src/EmbConsole.cpp
@@ -53,4 +56,8 @@ install(TARGETS EmbConsole)
 
 if(MSVC)
     target_compile_options(EmbConsole PUBLIC "/Zc:__cplusplus")
+endif()
+if(UNIX)
+    target_link_libraries(EmbConsole Threads::Threads)
+    target_link_libraries(EmbConsole stdc++fs)
 endif()
