@@ -51,6 +51,13 @@ namespace emb {
              */
             static bool isAbsolutePath(std::string const& a_Path) noexcept;
             /**
+             * @brief Indicates if a given path is simple or a composed command
+             * @param a_Path    Path to test
+             * @return true     If it is a simple command
+             * @return false    If is is a composed command
+             */
+            static bool isSimpleCommand(std::string const& a_Path) noexcept;
+            /**
              * @brief Indicates if a command is a root command (accessible from everywhere)
              * @param a_CommandPath Complete path of the command to test
              * @return true         If the command is a root command

@@ -13,6 +13,11 @@ namespace emb {
             return a_Path.size() > 0 && '/' == a_Path.at(0);
         }
 
+        bool Functions::isSimpleCommand(std::string const& a_Path) noexcept {
+            // Is a simple command if path does not contain any '/'
+            return string::npos == a_Path.find("/");
+        }
+
         bool Functions::isRootCommand(string const& a_CommandPath) noexcept {
             // Root command only one '/' is found and and it is the 1st character
             return 0 == a_CommandPath.find_last_of('/');
@@ -433,16 +438,24 @@ namespace emb {
             result = extractElementsFromUserEntry(a_rstrCommand, a_rvstrArguments, a_strUserEntry);
 
             if (Error::NoError == result) {
-                string fullPath{ getCanonicalPath(a_strPath + "/" + a_rstrCommand) };
-                decltype(m_mapFunctions)::const_iterator it = m_mapFunctions.end();
-                auto it1 = m_mapFunctions.find(fullPath);
-                if (it1 != m_mapFunctions.end()) {
-                    it = it1;
+                auto it = m_mapFunctions.end();
+                if (isAbsolutePath(a_rstrCommand)) {
+                    auto it1 = m_mapFunctions.find(getCanonicalPath(a_rstrCommand));
+                    if (it1 != m_mapFunctions.end()) {
+                        it = it1;
+                    }
                 }
-                else {
-                    auto it2 = m_mapFunctions.find("/" + a_rstrCommand);
-                    if (it2 != m_mapFunctions.end()) {
-                        it = it2;
+                else { // relative path
+                    string fullPath{ getCanonicalPath(a_strPath + "/" + a_rstrCommand) };
+                    auto it1 = m_mapFunctions.find(fullPath);
+                    if (it1 != m_mapFunctions.end()) {
+                        it = it1;
+                    }
+                    else if (isSimpleCommand(a_rstrCommand)) {
+                        auto it2 = m_mapFunctions.find("/" + a_rstrCommand);
+                        if (it2 != m_mapFunctions.end()) {
+                            it = it2;
+                        }
                     }
                 }
                 if (it != m_mapFunctions.end()) {
