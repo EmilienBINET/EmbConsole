@@ -490,10 +490,17 @@ namespace emb {
                 // and then the partial arg is now the part after the last '/'
                 strPartialCmd = a_strPartialCmd.substr(ulPos+1);
                 // the current folder we need to search the choices into is constructed from the current folder where the "cd"
-                // command is typed and the complete folder the user typed as an argument of "cd"
-                strCurrentFolder = Functions::getCanonicalPath(strCurrentFolder + "/" + strPrefixFolder);
+                // command is typed and the complete folder the user typed as an argument of "cd". However, if the prefix
+                // folder is an absolute directory, the current folder is not used.
                 // e.g. if the current directory is /w/x
                 // cd abcd/ef<Tab> => strPrefixFolder is "abcd/", strPartialCmd is "ef", strCurrentFolder is /w/x/abcd
+                // cd /abcd/ef<Tab> => strPrefixFolder is "/abcd/", strPartialCmd is "ef", strCurrentFolder is /abcd
+                if (isAbsolutePath(strPrefixFolder)) {
+                    strCurrentFolder = Functions::getCanonicalPath(strPrefixFolder);
+                }
+                else {
+                    strCurrentFolder = Functions::getCanonicalPath(strCurrentFolder + "/" + strPrefixFolder);
+                }
             }
 
             // We search the commands available from the current folder
