@@ -529,12 +529,16 @@ namespace emb {
             else if ("\x1b\x5b\x32\x34\x7e" == a_strKey) {
                 Terminal::processPressedKey(Key::F12);
             }
-            else if (1 == a_strKey.size() && stdWrapper(std::isprint, a_strKey.at(0))) {
-                Terminal::processPressedKey(Key::Printable, a_strKey);
-            }
             else {
-                //cerr << "Unknown key pressed : " << a_strKey << " 0x" << string_to_hex(a_strKey) << endl;
-                //system("pause");
+                for (char const c : a_strKey) {
+                    if(stdWrapper(std::isprint, c)) {
+                        Terminal::processPressedKey(Key::Printable, std::string{ c });
+                    }
+                    else {
+                        //cerr << "Unknown key pressed : " << a_strKey << " 0x" << string_to_hex(a_strKey) << endl;
+                        //system("pause");
+                    }
+                }
             }
         }
     } // console
