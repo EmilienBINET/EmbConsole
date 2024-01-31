@@ -3,6 +3,7 @@
 #include "StdCapture.hpp"
 #ifdef WIN32
 #include "win/TerminalWindows.hpp"
+#include "win/TerminalWindowsLegacy.hpp"
 #endif
 #ifdef unix
 #include "unix/TerminalUnix.hpp"
@@ -82,22 +83,27 @@ namespace emb {
         Console::Private::Private(Console& a_rConsole, Options const& a_Options) noexcept {
 #ifdef WIN32
             auto pOptStd = a_Options.get<OptionStd>();
-            if(pOptStd && pOptStd->bEnabled) {
-                m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindows>>());
+            if (pOptStd && pOptStd->bEnabled) {
+                if (TerminalWindows::isSupported()) {
+                    m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindows>>());
+                }
+                else {
+                    m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindowsLegacy>>());
+                }
             }
 #endif
 #ifdef unix
             auto pOptStd = a_Options.get<OptionStd>();
-            if(pOptStd && pOptStd->bEnabled) {
+            if (pOptStd && pOptStd->bEnabled) {
                 m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnix>>());
             }
             auto pOptUnixSocket = a_Options.get<OptionUnixSocket>();
-            if(pOptUnixSocket && pOptUnixSocket->bEnabled) {
+            if (pOptUnixSocket && pOptUnixSocket->bEnabled) {
                 m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>(pOptUnixSocket->strSocketFilePath, pOptUnixSocket->strShellFilePath));
             }
 #endif
             auto pOptFile = a_Options.get<OptionFile>();
-            if(pOptFile && pOptFile->bEnabled) {
+            if (pOptFile && pOptFile->bEnabled) {
                 m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>(pOptFile->strFilePath));
             }
             m_Thread = std::thread{ &Private::run, this };

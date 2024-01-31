@@ -5,6 +5,8 @@ if(WIN32)
     set(PLATFORM_SPECIFIC_FILES
         src/impl/win/TerminalWindows.hpp
         src/impl/win/TerminalWindows.cpp
+        src/impl/win/TerminalWindowsLegacy.hpp
+        src/impl/win/TerminalWindowsLegacy.cpp
     )
 endif()
 if(UNIX)

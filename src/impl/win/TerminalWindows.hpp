@@ -16,6 +16,7 @@ namespace emb {
             virtual ~TerminalWindows() noexcept;
             TerminalWindows& operator= (TerminalWindows const&) noexcept = delete;
             TerminalWindows& operator= (TerminalWindows&&) noexcept = delete;
+            static bool isSupported();
 
         protected:
             void start() noexcept override;

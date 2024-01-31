@@ -24,6 +24,31 @@ namespace emb {
         TerminalWindows::~TerminalWindows() noexcept = default;
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows const&) noexcept = default;
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows&&) noexcept = default;
+        
+        bool TerminalWindows::isSupported() {
+            bool bRes{ false };
+
+            HANDLE hConsoleIn{ GetStdHandle(STD_INPUT_HANDLE) };
+            DWORD ulBackupIn{ 0 };
+
+            if (TRUE == GetConsoleMode(hConsoleIn, &ulBackupIn)) {
+
+                if (ENABLE_VIRTUAL_TERMINAL_INPUT == (ulBackupIn & ENABLE_VIRTUAL_TERMINAL_INPUT)) {
+                    // Virtual terminal already enabled => supported
+                    bRes = true;
+                }
+                else {
+                    // Virtual terminal not already enables => we need to try to enable it
+                    if (TRUE == SetConsoleMode(hConsoleIn, ulBackupIn | ENABLE_VIRTUAL_TERMINAL_INPUT)) {
+                        bRes = true;
+                        SetConsoleMode(hConsoleIn, ulBackupIn);
+                    }
+                }
+
+            }
+
+            return bRes;
+        }
 
         void TerminalWindows::start() noexcept {
             GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &m_ulPreviousInputMode);
