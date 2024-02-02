@@ -207,8 +207,8 @@ namespace emb {
 
         void TerminalUnixSocket::clientLoopRx(int a_iClientSocket) noexcept {
             while (!m_bStopClient) {
-                char recv_buf[100];
-                memset(recv_buf, 0, 100*sizeof(char));
+                char recv_buf[100+1];
+                memset(recv_buf, 0, sizeof(recv_buf));
 
                 int data_recv = recv(a_iClientSocket, recv_buf, 100, 0);
                 if(data_recv > 0) {
