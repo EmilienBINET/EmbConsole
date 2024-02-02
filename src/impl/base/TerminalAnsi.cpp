@@ -114,50 +114,89 @@ namespace emb {
         }
 
         void TerminalAnsi::moveCursorUp(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "A");
         }
 
         void TerminalAnsi::moveCursorDown(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "B");
         }
 
         void TerminalAnsi::moveCursorForward(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "C");
         }
 
         void TerminalAnsi::moveCursorBackward(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "D");
         }
 
         void TerminalAnsi::moveCursorToNextLine(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "E");
         }
 
         void TerminalAnsi::moveCursorToPreviousLine(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "F");
         }
 
         void TerminalAnsi::moveCursorToRow(unsigned int const a_uiR) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiR) + "G");
         }
 
         void TerminalAnsi::moveCursorToColumn(unsigned int const a_uiC) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiC) + "d");
         }
 
         void TerminalAnsi::moveCursorToPosition(unsigned int const a_uiR, unsigned int const a_uiC) const noexcept {
+            if(!supportsColor()) {
+                if(1 == a_uiC) {
+                    write("\r");
+                }
+                return;
+            }
             write(s_CSI + to_string(a_uiR) + ";" + to_string(a_uiC) + "H");
         }
 
         void TerminalAnsi::saveCursor() const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_ESC + "7");
         }
 
         void TerminalAnsi::restoreCursor() const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_ESC + "8");
         }
 
         void TerminalAnsi::setCursorBlinking(bool const a_bBlinking) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if (a_bBlinking) {
                 write(s_CSI + "?12h");
             }
@@ -167,6 +206,9 @@ namespace emb {
         }
 
         void TerminalAnsi::setCursorVisible(bool const a_bVisible) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if (a_bVisible) {
                 write(s_CSI + "?25h");
             }
@@ -176,6 +218,9 @@ namespace emb {
         }
 
         void TerminalAnsi::setCursorShape(SetCursorShape::Shape const a_eShape) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             switch (a_eShape)
             {
             case SetCursorShape::Shape::UserDefault:        ///< Default cursor shape configured by the user
@@ -203,34 +248,58 @@ namespace emb {
         }
 
         void TerminalAnsi::scrollUp(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "S");
         }
 
         void TerminalAnsi::scrollDown(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "T");
         }
 
         void TerminalAnsi::insertCharacter(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "@");
         }
 
         void TerminalAnsi::deleteCharacter(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "P");
         }
 
         void TerminalAnsi::eraseCharacter(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "X");
         }
 
         void TerminalAnsi::insertLine(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "L");
         }
 
         void TerminalAnsi::deleteLine(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "M");
         }
 
         void TerminalAnsi::clearDisplay(ClearDisplay::Type const a_eType) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             switch (a_eType)
             {
             case ClearDisplay::Type::FromCursorToEnd:
@@ -246,6 +315,9 @@ namespace emb {
         }
 
         void TerminalAnsi::clearLine(ClearLine::Type const a_eType) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             switch (a_eType)
             {
             case ClearLine::Type::FromCursorToEnd:
@@ -261,10 +333,16 @@ namespace emb {
         }
 
         void TerminalAnsi::resetTextFormat() const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + "0m");
         }
 
         void TerminalAnsi::setColor(SetColor::Color const a_eFgColor, SetColor::Color const a_eBgColor) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             static const unordered_map<SetColor::Color, pair<string, string>> s_Colors{
                 { SetColor::Color::Black,          make_pair("30", "40")   },
                 { SetColor::Color::Red,            make_pair("31", "41")   },
@@ -287,6 +365,9 @@ namespace emb {
         }
 
         void TerminalAnsi::setNegativeColors(bool const a_bEnabled) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if (a_bEnabled) {
                 write(s_CSI + "7m");
             }
@@ -296,6 +377,9 @@ namespace emb {
         }
 
         void TerminalAnsi::setBold(bool const a_bEnabled) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if (a_bEnabled) {
                 write(s_CSI + "1m");
             }
@@ -305,6 +389,9 @@ namespace emb {
         }
 
         void TerminalAnsi::setItalic(bool const a_bEnabled) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if (a_bEnabled) {
                 write(s_CSI + "3m");
             }
@@ -314,6 +401,9 @@ namespace emb {
         }
 
         void TerminalAnsi::setUnderline(bool const a_bEnabled) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if (a_bEnabled) {
                 write(s_CSI + "4m");
             }
@@ -323,18 +413,30 @@ namespace emb {
         }
 
         void TerminalAnsi::setHorizontalTab() const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_ESC + "H");
         }
 
         void TerminalAnsi::goToHorizontalTabForward(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "I");
         }
 
         void TerminalAnsi::goToHorizontalTabBackward(unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiN) + "Z");
         }
 
         void TerminalAnsi::clearHorizontalTab(ClearHorizontalTab::Type const a_eType) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             switch (a_eType)
             {
             case ClearHorizontalTab::Type::CurrentColumn:
@@ -347,6 +449,9 @@ namespace emb {
         }
 
         void TerminalAnsi::setDecCharacterSet(bool const a_bEnabled) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if (a_bEnabled) {
                 write(s_ESC + "(0");
             }
@@ -356,6 +461,9 @@ namespace emb {
         }
 
         void TerminalAnsi::printSymbol(PrintSymbol::Symbol const a_eSymbol, unsigned int const a_uiN) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if(PrintSymbol::Symbol::Space == a_eSymbol) {
                 write(" ");
             }
@@ -382,15 +490,24 @@ namespace emb {
         }
 
         void TerminalAnsi::setScrollingRegion(unsigned int const a_uiT, unsigned int const a_uiB) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + to_string(a_uiT) + ";" + to_string(a_uiB) + "r");
         }
 
         void TerminalAnsi::setWindowTitle(std::string const& a_strTitle) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_OSC + "0;" + a_strTitle + s_ST);
             // or ? write(s_OSC + "2;" + a_strTitle + s_ST);
         }
 
         void TerminalAnsi::useAlternateScreenBuffer(bool const& a_bEnabled) const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             if (a_bEnabled) {
                 write(s_CSI + "?1049h");
             }
@@ -400,6 +517,9 @@ namespace emb {
         }
 
         void TerminalAnsi::softReset() const noexcept {
+            if(!supportsColor()) {
+                return;
+            }
             write(s_CSI + "!p");
         }
 
@@ -533,6 +653,9 @@ namespace emb {
                 for (char const c : a_strKey) {
                     if(stdWrapper(std::isprint, c)) {
                         Terminal::processPressedKey(Key::Printable, std::string{ c });
+                    }
+                    else if ('\x0d' == c || '\x0a' == c) {
+                        Terminal::processPressedKey(Key::Enter);
                     }
                     else {
                         //cerr << "Unknown key pressed : " << a_strKey << " 0x" << string_to_hex(a_strKey) << endl;

@@ -43,6 +43,39 @@ namespace emb {
                 }
             });
 
+            addCommand(emb::console::UserCommandInfo("/color", "Enable or disable color codes usage"),
+                [this](emb::console::UserCommandData const& d){
+                    bool bPrintUsage{false};
+                    if(0 == d.args.size()) {
+                        bPrintUsage = true;
+                    }
+                    else if("on" == d.args.at(0)) {
+                        m_bSupportsColor = true;
+                    }
+                    else if("off" == d.args.at(0)) {
+                        m_bSupportsColor = false;
+                    }
+                    else {
+                        d.console.printError(
+                            "Unknown option " + d.args.at(0)
+                        );
+                        bPrintUsage = true;
+                    }
+                    if(bPrintUsage) {
+                        d.console.printError(
+                            "Usage: color on|off"
+                        );
+                    }
+                },
+                [](emb::console::UserCommandAutoCompleteData const& d) -> vector<string> {
+                    if(0 == d.args.size()) {
+                        // first argument
+                        return emb::console::autocompletion::getChoicesFromList(d.partialArg, {"on", "off"});
+                    }
+                    // other arguments
+                    return {};
+                }
+            );
         }
         //TerminalUnixSocket::TerminalUnixSocket(TerminalUnixSocket const&) noexcept = default;
         //TerminalUnixSocket::TerminalUnixSocket(TerminalUnixSocket&&) noexcept = default;
@@ -99,7 +132,11 @@ namespace emb {
             processUserCommands();
 
             static chrono::time_point<chrono::steady_clock> timepoint{chrono::steady_clock::now()};
-            if(timepoint <= chrono::steady_clock::now()) {
+            if(!m_bSupportsColor) {
+                setCurrentSize(Size{ 999, 999 });
+                write(" \b");
+            }
+            else if(timepoint <= chrono::steady_clock::now()) {
                 requestTerminalSize();
                 timepoint = chrono::steady_clock::now() + chrono::milliseconds(1000);
             }
@@ -120,7 +157,7 @@ namespace emb {
         }
 
         bool TerminalUnixSocket::supportsColor() const noexcept {
-            return true;
+            return m_bSupportsColor;
         }
 
         bool TerminalUnixSocket::read(std::string& a_rstrKey) const noexcept {
@@ -170,8 +207,8 @@ namespace emb {
 
         void TerminalUnixSocket::clientLoopRx(int a_iClientSocket) noexcept {
             while (!m_bStopClient) {
-                char recv_buf[100];
-                memset(recv_buf, 0, 100*sizeof(char));
+                char recv_buf[100+1];
+                memset(recv_buf, 0, sizeof(recv_buf));
 
                 int data_recv = recv(a_iClientSocket, recv_buf, 100, 0);
                 if(data_recv > 0) {
