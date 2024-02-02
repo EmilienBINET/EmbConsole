@@ -87,7 +87,7 @@ namespace emb {
 #ifdef WIN32
             auto pOptStd = a_Options.get<OptionStd>();
             if (pOptStd && pOptStd->bEnabled) {
-                if (!TerminalWindows::isSupported()) {
+                if (TerminalWindows::isSupported()) {
                     m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindows>>());
                 }
                 else {
