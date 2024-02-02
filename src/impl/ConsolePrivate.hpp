@@ -26,7 +26,9 @@ namespace emb {
                     m_bStopThread = false;
                     m_CaptureThread = std::thread{[]{
                         while(!m_bStopThread) {
-                            m_funcPeriodicCapture();
+                            if(m_funcPeriodicCapture) {
+                                m_funcPeriodicCapture();
+                            }
                             std::this_thread::sleep_for(std::chrono::milliseconds(100));
                         }
                     }};
