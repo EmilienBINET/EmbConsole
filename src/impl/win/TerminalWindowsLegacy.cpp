@@ -4,6 +4,10 @@
 #include <conio.h>
 #include <unordered_map>
 #include <windows.h>
+#include <io.h>
+#define flockfile _lock_file
+#define ftrylockfile 0; flockfile
+#define funlockfile _unlock_file
 
 // MinGW 8.1 does not define these
 #ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
@@ -18,6 +22,9 @@ namespace emb {
         using namespace std;
 
         TerminalWindowsLegacy::TerminalWindowsLegacy(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : Terminal{ a_rConsoleSession } {
+            a_rConsoleSession.setPeriodicCapture([this]{
+                processCapture();
+            });
         }
         //TerminalWindowsLegacy::TerminalWindowsLegacy(TerminalWindowsLegacy const&) noexcept = default;
         //TerminalWindowsLegacy::TerminalWindowsLegacy(TerminalWindowsLegacy&&) noexcept = default;
@@ -55,9 +62,25 @@ namespace emb {
         }
 
         bool TerminalWindowsLegacy::write(std::string const& a_strDataToPrint) const noexcept {
-            std::cout << a_strDataToPrint;
-            std::cout.flush();
-            return false;
+            bool bLockOk = 0 == ftrylockfile(stdout);
+            ConsoleSessionWithTerminal::endStdCapture();
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), wAttributes);
+            fprintf(stdout, "%s", a_strDataToPrint.c_str());
+            fflush(stdout);
+            ConsoleSessionWithTerminal::beginStdCapture();
+            if(bLockOk) {
+                funlockfile(stdout);
+            }
+            return true;
+        }
+
+        void TerminalWindowsLegacy::processCapture() const noexcept {
+            bool bLockOk = 0 == ftrylockfile(stdout);
+            ConsoleSessionWithTerminal::endStdCapture();
+            ConsoleSessionWithTerminal::beginStdCapture();
+            if(bLockOk) {
+                funlockfile(stdout);
+            }
         }
 
         WORD getAttributes(SetColor::Color const a_eFgColor, SetColor::Color const a_eBgColor)
@@ -106,8 +129,14 @@ namespace emb {
             return wAttributes;
         }
 
-        void TerminalWindowsLegacy::begin() const noexcept {}
-        void TerminalWindowsLegacy::commit() const noexcept {}
+        void TerminalWindowsLegacy::begin() const noexcept {
+            Terminal::begin();
+        }
+
+        void TerminalWindowsLegacy::commit() const noexcept {
+            Terminal::commit();
+        }
+
         void TerminalWindowsLegacy::moveCursorUp(unsigned int const a_uiN) const noexcept {}
         void TerminalWindowsLegacy::moveCursorDown(unsigned int const a_uiN) const noexcept {}
         void TerminalWindowsLegacy::moveCursorForward(unsigned int const a_uiN) const noexcept {}
@@ -117,7 +146,7 @@ namespace emb {
         void TerminalWindowsLegacy::moveCursorToRow(unsigned int const a_uiR) const noexcept {}
         void TerminalWindowsLegacy::moveCursorToColumn(unsigned int const a_uiC) const noexcept {}
         void TerminalWindowsLegacy::moveCursorToPosition(unsigned int const a_uiR, unsigned int const a_uiC) const noexcept {
-            COORD pos = { a_uiC - 1, a_uiR - 1 };
+            COORD pos = { static_cast<SHORT>(a_uiC - 1), static_cast<SHORT>(a_uiR - 1) };
             HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
             CONSOLE_SCREEN_BUFFER_INFO info{};
             GetConsoleScreenBufferInfo(output, &info);
@@ -245,13 +274,11 @@ namespace emb {
             }
         }
         void TerminalWindowsLegacy::resetTextFormat() const noexcept {
-            HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-            SetConsoleTextAttribute(hConsole, getAttributes(SetColor::Color::White, SetColor::Color::Black));
+            wAttributes = getAttributes(SetColor::Color::White, SetColor::Color::Black);
         }
 
         void TerminalWindowsLegacy::setColor(SetColor::Color const a_eFgColor, SetColor::Color const a_eBgColor) const noexcept {
-            HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-            SetConsoleTextAttribute(hConsole, getAttributes(a_eFgColor, a_eBgColor));
+            wAttributes = getAttributes(a_eFgColor, a_eBgColor);
         }
 
         void TerminalWindowsLegacy::setNegativeColors(bool const a_bEnabled) const noexcept {}

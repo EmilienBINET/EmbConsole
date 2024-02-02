@@ -28,6 +28,8 @@ namespace emb {
             bool read(std::string& a_rstrKey) const noexcept override;
             bool write(std::string const& a_strDataToPrint) const noexcept override;
 
+            void processCapture() const noexcept;
+
             void begin() const noexcept override;
             void commit() const noexcept override;
             void moveCursorUp(unsigned int const a_uiN) const noexcept override;
@@ -78,6 +80,7 @@ namespace emb {
         private:
             mutable short wCursorPositionX{};
             mutable short wCursorPositionY{};
+            mutable short wAttributes{};
         };
     } // console
 } // emb

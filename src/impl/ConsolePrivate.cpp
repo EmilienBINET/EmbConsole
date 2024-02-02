@@ -19,6 +19,9 @@ namespace emb {
 
         StdCapture ConsoleSessionWithTerminal::m_StdCapture{};
         StandardOutputFunctor ConsoleSessionWithTerminal::m_funcCaptureFunctor{};
+        std::thread ConsoleSessionWithTerminal::m_CaptureThread{};
+        std::atomic<bool> ConsoleSessionWithTerminal::m_bStopThread{true};
+        std::function<void(void)> ConsoleSessionWithTerminal::m_funcPeriodicCapture{};
 
         ConsoleSession::Private::Private(TerminalPtr a_pTerminal) noexcept
             : m_pTerminal{ a_pTerminal } {
