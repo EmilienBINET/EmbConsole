@@ -51,6 +51,7 @@ namespace emb {
             mutable std::string m_strDataToSend{};
             mutable int m_iServerSocket{ 0 };
             mutable int m_iClientSocket{ 0 };
+            mutable bool m_bSupportsColor{true};
         };
     } // console
 } // emb
