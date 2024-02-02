@@ -117,7 +117,7 @@ namespace emb {
         void TerminalWindowsLegacy::moveCursorToRow(unsigned int const a_uiR) const noexcept {}
         void TerminalWindowsLegacy::moveCursorToColumn(unsigned int const a_uiC) const noexcept {}
         void TerminalWindowsLegacy::moveCursorToPosition(unsigned int const a_uiR, unsigned int const a_uiC) const noexcept {
-            COORD pos = { a_uiC - 1, a_uiR - 1 };
+            COORD pos = { static_cast<SHORT>(a_uiC - 1), static_cast<SHORT>(a_uiR - 1) };
             HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
             CONSOLE_SCREEN_BUFFER_INFO info{};
             GetConsoleScreenBufferInfo(output, &info);
