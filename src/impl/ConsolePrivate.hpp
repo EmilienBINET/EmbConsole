@@ -18,6 +18,19 @@ namespace emb {
             }
             static void setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) {
                 m_funcCaptureFunctor = a_funcCaptureFunctor;
+                m_bStopThread = true;
+                if(m_CaptureThread.joinable()) {
+                    m_CaptureThread.join();
+                }
+                if(m_funcCaptureFunctor) {
+                    m_bStopThread = false;
+                    m_CaptureThread = std::thread{[]{
+                        while(!m_bStopThread) {
+                            m_funcPeriodicCapture();
+                            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                        }
+                    }};
+                }
             }
             static void beginStdCapture() {
                 if(m_funcCaptureFunctor) {
@@ -37,6 +50,15 @@ namespace emb {
             static void setCaptureEndEvt(std::function<void(void)> const& a_fctCaptureEnd) {
                 m_StdCapture.setCaptureEndEvt(a_fctCaptureEnd);
             }
+            static void setPeriodicCapture(std::function<void(void)> const& a_funcPeriodicCaptureFunctor) {
+                m_funcPeriodicCapture = a_funcPeriodicCaptureFunctor;
+            }
+            ~ConsoleSessionWithTerminal() {
+                m_bStopThread = true;
+                if(m_CaptureThread.joinable()) {
+                    m_CaptureThread.join();
+                }
+            }
         protected:
             ConsoleSessionWithTerminal(TerminalPtr a_pTerminal)
                 : ConsoleSession{ a_pTerminal }
@@ -46,6 +68,9 @@ namespace emb {
             TerminalPtr m_pTerminal{};
             static StdCapture m_StdCapture;
             static StandardOutputFunctor m_funcCaptureFunctor;
+            static std::thread m_CaptureThread;
+            static std::atomic<bool> m_bStopThread;
+            static std::function<void(void)> m_funcPeriodicCapture;
         };
 
         template<typename TerminalType>

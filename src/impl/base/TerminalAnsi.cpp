@@ -22,6 +22,9 @@ namespace emb {
         static const string s_ST{ "\033\\" };
 
         TerminalAnsi::TerminalAnsi(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : Terminal{ a_rConsoleSession } {
+            a_rConsoleSession.setPeriodicCapture([this]{
+                processCapture();
+            });
         }
         //TerminalAnsi::TerminalAnsi(TerminalAnsi const&) noexcept = default;
         //TerminalAnsi::TerminalAnsi(TerminalAnsi&&) noexcept = default;
