@@ -331,6 +331,40 @@ namespace emb {
             std::string strShellFilePath{};
         };
 
+        class EmbConsole_EXPORT OptionSyslog : public Option {
+        public:
+            enum class Criticity {
+                Emergency,
+                Alert,
+                Critical,
+                Error,
+                Warning,
+                Notice,
+                Informational,
+                Debugging
+            };
+            struct Info {
+                bool bSendTimestamp{ false };
+                time_t ulTimestamp{ 0 };
+                Criticity eCriticity{ Criticity::Informational };
+                std::string strHostName{ "host" };
+                std::string strTag{ "tag" };
+                std::string strMessage{};
+                Info(std::string const& a_strRawMessage) : strMessage{ a_strRawMessage } {}
+            };
+        public:
+            OptionSyslog() noexcept { strDesc = "OptionSyslog()"; };
+            OptionSyslog(bool a_bEnabled, std::string const& a_strDestination, std::function<Info(std::string const&)> const& a_fctGetInfo=nullptr) noexcept
+                : bEnabled{ a_bEnabled }, strDestination{ a_strDestination }, m_fctGetInfo{ a_fctGetInfo }
+            { strDesc = "OptionSyslog(" + std::to_string(a_bEnabled) + "," + strDestination + ")"; }
+            std::shared_ptr<Option> copy() const noexcept override { return std::make_unique<OptionSyslog>(bEnabled, strDestination, m_fctGetInfo); }
+            Info getInfo(std::string const& a_strRawMessage) const noexcept { if (m_fctGetInfo) { return m_fctGetInfo(a_strRawMessage); } return Info{ a_strRawMessage }; }
+            bool bEnabled{ false };
+            std::string strDestination{};
+        private:
+            std::function<Info(std::string const&)> m_fctGetInfo{};
+        };
+
         //////////////////////////////////////////////////
         ///// PrintCommand Base
         //////////////////////////////////////////////////

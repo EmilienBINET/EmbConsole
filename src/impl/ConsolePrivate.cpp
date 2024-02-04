@@ -10,6 +10,7 @@
 #include "unix/TerminalUnixSocket.hpp"
 #endif
 #include "base/TerminalFile.hpp"
+#include "base/TerminalSyslog.hpp"
 #include "Tools.hpp"
 
 namespace emb {
@@ -108,6 +109,10 @@ namespace emb {
             auto pOptFile = a_Options.get<OptionFile>();
             if (pOptFile && pOptFile->bEnabled) {
                 m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>(pOptFile->strFilePath));
+            }
+            auto pOptSyslog = a_Options.get<OptionSyslog>();
+            if (pOptSyslog && pOptSyslog->bEnabled) {
+                m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalSyslog>>(pOptSyslog));
             }
             m_Thread = std::thread{ &Private::run, this };
             emb::tools::thread::set_thread_name(m_Thread, "Console");

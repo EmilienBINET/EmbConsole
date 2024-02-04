@@ -44,6 +44,8 @@ add_library(EmbConsole
     src/impl/base/TerminalAnsi.cpp
     src/impl/base/TerminalFile.hpp
     src/impl/base/TerminalFile.cpp
+    src/impl/base/TerminalSyslog.hpp
+    src/impl/base/TerminalSyslog.cpp
     ${PLATFORM_SPECIFIC_FILES}
 )
 target_include_directories(EmbConsole PUBLIC include)
@@ -63,3 +65,7 @@ if(UNIX)
     target_link_libraries(EmbConsole Threads::Threads)
     target_link_libraries(EmbConsole stdc++fs)
 endif()
+if(WIN32)
+	target_link_libraries(EmbConsole Ws2_32)
+endif()
+

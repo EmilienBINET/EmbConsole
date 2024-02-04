@@ -24,10 +24,11 @@ namespace emb {
             m_vpOptions.push_back(std::make_shared<OptionStd>());
             m_vpOptions.push_back(std::make_shared<OptionFile>());
             m_vpOptions.push_back(std::make_shared<OptionUnixSocket>());
+            m_vpOptions.push_back(std::make_shared<OptionSyslog>());
         }
 
         Options::Options(Option const& a_other) : Options() {
-            operator+(a_other);
+            *this = operator+(a_other);
         }
 
         Options Options::operator+(Option const& a_other) const {

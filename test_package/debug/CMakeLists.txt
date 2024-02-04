@@ -46,6 +46,8 @@ add_executable(example
 	../../src/impl/base/TerminalAnsi.cpp
 	../../src/impl/base/TerminalFile.hpp
 	../../src/impl/base/TerminalFile.cpp
+	../../src/impl/base/TerminalSyslog.hpp
+	../../src/impl/base/TerminalSyslog.cpp
 
 	../../src/impl/StdCapture.hpp
 	../../src/impl/StdCapture.cpp
@@ -55,6 +57,10 @@ target_include_directories(example PRIVATE ../../include)
 target_include_directories(example PRIVATE ../../third/gulrak-filesystem/include)
 target_compile_definitions(example PRIVATE STATIC)
 target_link_libraries(example Threads::Threads)
+
+if(WIN32)
+	target_link_libraries(example Ws2_32)
+endif()
 
 if(WIN32)
     add_definitions(-DUSE_VLD)
