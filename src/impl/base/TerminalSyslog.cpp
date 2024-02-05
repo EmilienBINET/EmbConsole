@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>  /* Needed for getaddrinfo() and freeaddrinfo() */
 #include <unistd.h> /* Needed for close() */
+#include <cstring>
 #endif
 
 namespace emb {
@@ -39,15 +40,15 @@ namespace emb {
 #ifdef _WIN32
             WSACleanup();
 #endif
-            if (m_pDestination) {
-                delete m_pDestination;
+            if (auto pDest = static_cast<sockaddr_in*>(m_pDestination)) {
+                delete pDest;
             }
         }
 
         void TerminalSyslog::start() noexcept {
             m_iSocket = socket(AF_INET, SOCK_DGRAM, 0);
             bool bc = true;
-            int ret = setsockopt(m_iSocket, SOL_SOCKET, SO_BROADCAST, (const char*)&bc, sizeof(bool));
+            setsockopt(m_iSocket, SOL_SOCKET, SO_BROADCAST, (const char*)&bc, sizeof(bool));
         }
         void TerminalSyslog::processEvents() noexcept {
             processPrintCommands();
@@ -60,9 +61,9 @@ namespace emb {
                 status = closesocket(m_iSocket);
             }
 #else
-            status = shutdown(sock, SHUT_RDWR);
+            status = shutdown(m_iSocket, SHUT_RDWR);
             if (status == 0) {
-                status = close(sock);
+                status = close(m_iSocket);
             }
 #endif
         }
