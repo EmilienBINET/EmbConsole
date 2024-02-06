@@ -363,8 +363,14 @@ namespace emb {
                 { SetColor::Color::BrightMagenta,  make_pair("95", "105")  },
                 { SetColor::Color::BrightCyan,     make_pair("96", "106")  },
                 { SetColor::Color::BrightWhite,    make_pair("97", "107")  },
+                { SetColor::Color::Default,        make_pair("37", "")     },
             };
-            write(s_CSI + s_Colors.at(a_eFgColor).first + ";" + s_Colors.at(a_eBgColor).second + "m");
+            if(!s_Colors.at(a_eBgColor).second.empty()) {
+                write(s_CSI + s_Colors.at(a_eFgColor).first + ";" + s_Colors.at(a_eBgColor).second + "m");
+            }
+            else {
+                write(s_CSI + s_Colors.at(a_eFgColor).first + "m");
+            }
         }
 
         void TerminalAnsi::setNegativeColors(bool const a_bEnabled) const noexcept {

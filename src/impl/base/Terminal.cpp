@@ -192,7 +192,7 @@ namespace emb {
                 setPromptMode(PromptMode::QuestionNormal, [&](bool const& a_bValid, std::string const& a_strUserEntry) {
                     begin();
 
-                    setColor(SetColor::Color::BrightBlue, SetColor::Color::Black);
+                    setColor(SetColor::Color::BrightBlue, SetColor::Color::Default);
                     printText(" " + a_strUserEntry);
                     resetTextFormat();
                     printNewLine();
@@ -211,7 +211,7 @@ namespace emb {
                         cv.notify_one();
                     }
                     else {
-                        setColor(SetColor::Color::BrightRed, SetColor::Color::Black);
+                        setColor(SetColor::Color::BrightRed, SetColor::Color::Default);
                         printText(validator->m_strErrorMessage.empty() ? "User entry did not pass validation." : validator->m_strErrorMessage);
                         resetTextFormat();
                         printNewLine();
@@ -226,7 +226,7 @@ namespace emb {
                 }, [&](Key const& a_eKey, std::string const& a_strPrintableData) {
                     if (Key::Escape == a_eKey) {
                         begin();
-                        setColor(SetColor::Color::BrightYellow, SetColor::Color::Black);
+                        setColor(SetColor::Color::BrightYellow, SetColor::Color::Default);
                         printText("<CANCELED>");
                         resetTextFormat();
                         printNewLine();
@@ -276,7 +276,7 @@ namespace emb {
                                 moveCursorToRow(1);
                                 clearLine(ClearLine::Type::All);
                                 printText(question->m_strQuestion);
-                                setColor(SetColor::Color::BrightBlue, SetColor::Color::Black);
+                                setColor(SetColor::Color::BrightBlue, SetColor::Color::Default);
                                 printText(" " + choice->visibleString(true));
                                 resetTextFormat();
                                 printNewLine();
@@ -294,7 +294,7 @@ namespace emb {
                     }
                     else if (Key::Escape == a_eKey) {
                         begin();
-                        setColor(SetColor::Color::BrightYellow, SetColor::Color::Black);
+                        setColor(SetColor::Color::BrightYellow, SetColor::Color::Default);
                         printText("<CANCELED>");
                         resetTextFormat();
                         printNewLine();
@@ -354,7 +354,7 @@ namespace emb {
                                     clearLine(ClearLine::Type::All);
                                     printText(" - ");
                                     if (choice->isChosen(a_strPrintableData.at(0))) {
-                                        setColor(SetColor::Color::BrightBlue, SetColor::Color::Black);
+                                        setColor(SetColor::Color::BrightBlue, SetColor::Color::Default);
                                         printText(choice->visibleString(true));
                                         resetTextFormat();
                                     }
@@ -377,7 +377,7 @@ namespace emb {
                     }
                     else if (Key::Escape == a_eKey) {
                         begin();
-                        setColor(SetColor::Color::BrightYellow, SetColor::Color::Black);
+                        setColor(SetColor::Color::BrightYellow, SetColor::Color::Default);
                         printText("<CANCELED>");
                         resetTextFormat();
                         printNewLine();
@@ -769,13 +769,13 @@ namespace emb {
 
             auto printCommonPart = [&] {
                 if (m_strCurrentPrompt.empty()) {
-                    setColor(SetColor::Color::BrightGreen, SetColor::Color::Black);
+                    setColor(SetColor::Color::BrightGreen, SetColor::Color::Default);
                     printText(m_strCurrentUser + "@" + m_strCurrentMachine);
                     resetTextFormat();
 
                     printText(":");
 
-                    setColor(SetColor::Color::BrightBlue, SetColor::Color::Black);
+                    setColor(SetColor::Color::BrightBlue, SetColor::Color::Default);
                     printText(m_strCurrentFolder);
                     resetTextFormat();
 
@@ -812,7 +812,7 @@ namespace emb {
                 moveCursorDown(1);
                 clearDisplay(ClearDisplay::Type::FromCursorToEnd);
                 moveCursorToPosition(999, 1);
-                setColor(SetColor::Color::Red, SetColor::Color::Black);
+                setColor(SetColor::Color::Red, SetColor::Color::Default);
                 printText(" <== INCREASE ==> ");
                 resetTextFormat();
                 restoreCursor();

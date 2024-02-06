@@ -717,9 +717,10 @@ namespace emb {
                 BrightMagenta,
                 BrightCyan,
                 BrightWhite,
+                Default
             };
         public:
-            SetColor(Color const a_eFgColor, Color const a_eBgColor = Color::Black) : m_eFgColor{ a_eFgColor }, m_eBgColor{ a_eBgColor } {}
+            SetColor(Color const a_eFgColor, Color const a_eBgColor = Color::Default) : m_eFgColor{ a_eFgColor }, m_eBgColor{ a_eBgColor } {}
             Ptr copy() const noexcept override { return std::make_unique<SetColor>(m_eFgColor, m_eBgColor); }
             void process(Terminal&) const noexcept override;
         private:
