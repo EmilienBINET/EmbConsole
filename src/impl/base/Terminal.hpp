@@ -119,6 +119,10 @@ namespace emb {
                 std::lock_guard<std::recursive_mutex> l(m_Mutex);
                 return m_bPromptEnabled;
             }
+            bool isPrintCommandEnabled() const noexcept {
+                std::lock_guard<std::recursive_mutex> l(m_Mutex);
+                return m_bPrintCommandEnabled;
+            }
 
             virtual void onTerminalSizeChanged() noexcept;
 

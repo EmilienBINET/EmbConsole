@@ -408,6 +408,7 @@ namespace emb {
         }
 
         void Terminal::onTerminalSizeChanged() noexcept {
+            lock_guard<recursive_mutex> const l{ m_Mutex };
             if (m_strCurrentPrompt.empty()) {
                 m_uiMaxPromptSize =
                     m_CurrentSize.iWidth
@@ -498,7 +499,7 @@ namespace emb {
         }
 
         void Terminal::processPrintCommands(PrintCommand::VPtr const& a_vpPrintCommands) noexcept {
-            if (m_bPrintCommandEnabled && !isTerminalBeingResized()) {
+            if (isPrintCommandEnabled() && !isTerminalBeingResized()) {
                 PrintCommand::VPtr vpPrintCommands{ a_vpPrintCommands };
                 if (vpPrintCommands.size() <= 0) {
                     lock_guard<recursive_mutex> l{ m_Mutex };
