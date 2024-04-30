@@ -228,9 +228,13 @@ namespace emb {
             m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }
 
-        void Console::delCommand(UserCommandInfo const& a_CommandInfo) {
+        void Console::delCommand(UserCommandInfo const& a_CommandInfo) noexcept {
             a_CommandInfo.validate();
             m_pPrivateImpl->delCommand(a_CommandInfo);
+        }
+
+        void Console::execCommand(UserCommandInfo const& a_CommandInfo, UserCommandData::Args const& a_CommandArgs) noexcept {
+            m_pPrivateImpl->execCommand(a_CommandInfo, a_CommandArgs);
         }
 
         void Console::setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) noexcept {

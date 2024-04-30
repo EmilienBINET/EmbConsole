@@ -1,8 +1,10 @@
 #include "Terminal.hpp"
 #include <iostream>
 #include <algorithm>
+#include <iterator>
 #include <unordered_map>
 #include <condition_variable>
+#include <sstream>
 
 namespace emb {
     namespace console {
@@ -490,6 +492,14 @@ namespace emb {
 
         void Terminal::delCommand(UserCommandInfo const& a_CommandInfo) noexcept {
             return m_pFunctions->delCommand(a_CommandInfo);
+        }
+
+        void Terminal::execCommand(UserCommandInfo const& a_CommandInfo, UserCommandData::Args const& a_CommandArgs) noexcept {
+            std::ostringstream joinedArgs;
+            std::copy(a_CommandArgs.begin(), a_CommandArgs.end(), std::ostream_iterator<std::string>(joinedArgs, " "));
+
+            lock_guard<recursive_mutex> l{ m_Mutex };
+            m_vUserEntries.push_back(Functions::UserEntry{ a_CommandInfo.path + " " + joinedArgs.str(), m_strCurrentFolder });
         }
 
         void Terminal::setPromptEnabled(bool a_bPromptEnabled) {
