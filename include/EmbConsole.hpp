@@ -156,6 +156,7 @@ namespace emb {
         class EmbConsole_EXPORT IPromptableConsole : public IPrintableConsole {
             // public members
         public:
+            virtual IPrintableConsole& operator<< (PrintCommand const&) noexcept = 0;
             virtual IPromptableConsole& operator<< (PromptCommand const&) noexcept = 0;
 
             bool promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator = "") noexcept;
