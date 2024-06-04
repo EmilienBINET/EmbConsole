@@ -113,7 +113,8 @@ namespace emb {
 
             if(bKeyPressed) {
                 unsigned char c;
-                ::read(STDIN_FILENO, &c, sizeof(c));
+                auto r = ::read(STDIN_FILENO, &c, sizeof(c));
+                (void)r;
                 a_rstrKey = c;
                 return true;
             }
