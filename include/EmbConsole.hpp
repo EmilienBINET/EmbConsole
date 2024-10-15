@@ -1080,5 +1080,46 @@ namespace emb {
                 : OnValidString{ [a_clbkValid](std::string const& a_strResult) { a_clbkValid("1" == a_strResult); } } {
             }
         };
+
+        //////////////////////////////////////////////////
+        ///// Table tools
+        //////////////////////////////////////////////////
+
+        namespace table {
+
+            /**
+             * @brief Represent a cell of a table
+             */
+            struct Cell {
+                std::string strText{};
+                SetColor::Color eColor{SetColor::Color::White};
+                Cell(std::string const & a_strText, SetColor::Color a_eColor = SetColor::Color::White)
+                    : strText{ a_strText }, eColor{ a_eColor }
+                {}
+            };
+
+            /**
+             * @brief Represent a row of a table
+             *
+             */
+            using Row = std::vector<Cell>;
+
+            /**
+             * @brief Represent a table
+             */
+            struct Table {
+                std::string strTitle{};                         ///< Title of the table
+                std::vector<std::string> vstrColumnsTitles{};   ///< List of the titles
+                std::vector<Row> vvstrRows{};                   ///< List of the rows
+            };
+
+            /**
+             * @brief Print a table on the given console session
+             * @param a_rConsole    Console to print the table onto
+             * @param a_stTable     Table to print
+             */
+            void print(ConsoleSession& a_rConsole, Table const& a_stTable);
+        }
+
     } // console
 } // emb

@@ -227,5 +227,134 @@ namespace emb {
             }
 
         } // autocompletion
+
+        namespace table {
+
+            void print(ConsoleSession& a_rConsole, Table const& a_stTable) {
+
+                // Calculate the width of each column
+                size_t const ulMaxColumnWidth{100};
+                std::vector<size_t> vulColumnsSize{};
+                for(auto const& columnTitle : a_stTable.vstrColumnsTitles) {
+                    vulColumnsSize.push_back(columnTitle.size());
+                }
+                for(auto const& row : a_stTable.vvstrRows) {
+                    for(size_t ulIdx=0; ulIdx<row.size(); ++ulIdx) {
+                        vulColumnsSize[ulIdx] = std::min(ulMaxColumnWidth, std::max(vulColumnsSize[ulIdx], row[ulIdx].strText.size()));
+                    }
+                }
+
+                // Calculate the total width of the columns
+                size_t ulTotalSize{0};
+                for(size_t const ulSize : vulColumnsSize) {
+                    ulTotalSize += ulSize + 2 + 1; // 2 spaces (one on each side) + one vertical bar
+                }
+                ulTotalSize += 1; // one final vertical bar
+
+                // Print the header
+                a_rConsole
+                    << PrintNewLine()
+                    // 1st line : lines
+                    << PrintSymbol(PrintSymbol::Symbol::TopLeft)
+                    << PrintSymbol(PrintSymbol::Symbol::HorizontalBar, ulTotalSize-2)
+                    << PrintSymbol(PrintSymbol::Symbol::TopRight)
+                    << PrintNewLine()
+                    // 2nd line : texts
+                    << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
+                    << PrintText(" FILE    ")
+                    << SetColor(SetColor::Color::BrightMagenta)
+                    << PrintText(a_stTable.strTitle)
+                    << ResetTextFormat()
+                    << PrintText(std::string(ulTotalSize-9-a_stTable.strTitle.size()-2, ' '))
+                    << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
+                    << PrintNewLine();
+
+                // Print the columns names : 1st line : lines
+                bool bFirst{true};
+                for(size_t const ulSize : vulColumnsSize) {
+                    a_rConsole
+                        << PrintSymbol(bFirst ? PrintSymbol::Symbol::LeftCross : PrintSymbol::Symbol::TopCross)
+                        << PrintSymbol(PrintSymbol::Symbol::HorizontalBar, ulSize+2);
+                    bFirst = false;
+                }
+                a_rConsole
+                    << PrintSymbol(PrintSymbol::Symbol::RightCross)
+                    << PrintNewLine();
+
+                // Print the columns names : 2nd line : columns titles
+                for(size_t ulIdx=0; ulIdx<vulColumnsSize.size(); ++ulIdx) {
+                    auto columnTitle = a_stTable.vstrColumnsTitles.at(ulIdx);
+                    columnTitle = " " + columnTitle;
+                    columnTitle.resize(vulColumnsSize.at(ulIdx) + 2, ' ');
+                    a_rConsole
+                        << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
+                        << PrintText(columnTitle);
+                }
+                a_rConsole
+                    << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
+                    << PrintNewLine();
+
+                // Print the columns names : 3rd line : line
+                bFirst = true;
+                for(size_t const ulSize : vulColumnsSize) {
+                    a_rConsole
+                        << PrintSymbol(bFirst ? PrintSymbol::Symbol::LeftCross : PrintSymbol::Symbol::Cross)
+                        << PrintSymbol(PrintSymbol::Symbol::HorizontalBar, ulSize+2);
+                    bFirst = false;
+                }
+                a_rConsole
+                    << PrintSymbol(PrintSymbol::Symbol::RightCross)
+                    << PrintNewLine();
+
+                // Print the data
+                for(auto const& row : a_stTable.vvstrRows) {
+                    for(size_t ulIdx=0; ulIdx<vulColumnsSize.size(); ++ulIdx) {
+                        auto columnText = row.at(ulIdx);
+                        bool bEllipsis{false};
+                        if(columnText.strText.size() > vulColumnsSize.at(ulIdx)) {
+                            columnText.strText.resize(vulColumnsSize.at(ulIdx) - 3);
+                            bEllipsis = true;
+                        }
+                        else {
+                            columnText.strText.resize(vulColumnsSize.at(ulIdx), ' ');
+                        }
+                        columnText.strText = " " + columnText.strText;
+                        a_rConsole
+                            << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
+                            << SetColor(columnText.eColor)
+                            << PrintText(columnText.strText);
+                        if(bEllipsis) {
+                            a_rConsole
+                                << SetColor(SetColor::Color::BrightRed)
+                                << PrintText("... ");
+                        }
+                        else {
+                            a_rConsole
+                                << PrintText(" ");
+                        }
+                        a_rConsole
+                            << ResetTextFormat();
+                    }
+                    a_rConsole
+                        << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
+                        << PrintNewLine();
+                }
+
+                // Print the last line
+                bFirst = true;
+                for(size_t const ulSize : vulColumnsSize) {
+                    a_rConsole
+                        << PrintSymbol(bFirst ? PrintSymbol::Symbol::BottomLeft : PrintSymbol::Symbol::BottomCross)
+                        << PrintSymbol(PrintSymbol::Symbol::HorizontalBar, ulSize+2);
+                    bFirst = false;
+                }
+                a_rConsole
+                    << PrintSymbol(PrintSymbol::Symbol::BottomRight)
+                    << PrintNewLine();
+
+            }
+
+        } // table
+
     } // console
 } // emb
