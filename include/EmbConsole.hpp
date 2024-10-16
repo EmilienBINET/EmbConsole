@@ -156,6 +156,7 @@ namespace emb {
         class EmbConsole_EXPORT IPromptableConsole : public IPrintableConsole {
             // public members
         public:
+            virtual IPrintableConsole& operator<< (PrintCommand const&) noexcept = 0;
             virtual IPromptableConsole& operator<< (PromptCommand const&) noexcept = 0;
 
             bool promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator = "") noexcept;
@@ -240,7 +241,9 @@ namespace emb {
 
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
-            void delCommand(UserCommandInfo const&);
+            void delCommand(UserCommandInfo const&) noexcept;
+
+            void execCommand(UserCommandInfo const&, UserCommandData::Args const& = {}) noexcept;
 
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
 
@@ -717,9 +720,10 @@ namespace emb {
                 BrightMagenta,
                 BrightCyan,
                 BrightWhite,
+                Default
             };
         public:
-            SetColor(Color const a_eFgColor, Color const a_eBgColor = Color::Black) : m_eFgColor{ a_eFgColor }, m_eBgColor{ a_eBgColor } {}
+            SetColor(Color const a_eFgColor, Color const a_eBgColor = Color::Default) : m_eFgColor{ a_eFgColor }, m_eBgColor{ a_eBgColor } {}
             Ptr copy() const noexcept override { return std::make_unique<SetColor>(m_eFgColor, m_eBgColor); }
             void process(Terminal&) const noexcept override;
         private:
@@ -1076,5 +1080,46 @@ namespace emb {
                 : OnValidString{ [a_clbkValid](std::string const& a_strResult) { a_clbkValid("1" == a_strResult); } } {
             }
         };
+
+        //////////////////////////////////////////////////
+        ///// Table tools
+        //////////////////////////////////////////////////
+
+        namespace table {
+
+            /**
+             * @brief Represent a cell of a table
+             */
+            struct Cell {
+                std::string strText{};
+                SetColor::Color eColor{SetColor::Color::White};
+                Cell(std::string const & a_strText, SetColor::Color a_eColor = SetColor::Color::White)
+                    : strText{ a_strText }, eColor{ a_eColor }
+                {}
+            };
+
+            /**
+             * @brief Represent a row of a table
+             *
+             */
+            using Row = std::vector<Cell>;
+
+            /**
+             * @brief Represent a table
+             */
+            struct Table {
+                std::string strTitle{};                         ///< Title of the table
+                std::vector<std::string> vstrColumnsTitles{};   ///< List of the titles
+                std::vector<Row> vvstrRows{};                   ///< List of the rows
+            };
+
+            /**
+             * @brief Print a table on the given console session
+             * @param a_rConsole    Console to print the table onto
+             * @param a_stTable     Table to print
+             */
+            void print(ConsoleSession& a_rConsole, Table const& a_stTable);
+        }
+
     } // console
 } // emb

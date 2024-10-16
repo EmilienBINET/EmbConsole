@@ -119,6 +119,10 @@ namespace emb {
                 std::lock_guard<std::recursive_mutex> l(m_Mutex);
                 return m_bPromptEnabled;
             }
+            bool isPrintCommandEnabled() const noexcept {
+                std::lock_guard<std::recursive_mutex> l(m_Mutex);
+                return m_bPrintCommandEnabled;
+            }
 
             virtual void onTerminalSizeChanged() noexcept;
 
@@ -128,6 +132,7 @@ namespace emb {
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
             void delCommand(UserCommandInfo const&) noexcept;
+            void execCommand(UserCommandInfo const&, UserCommandData::Args const&) noexcept;
 
             void setPromptEnabled(bool);
 

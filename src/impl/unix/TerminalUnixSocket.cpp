@@ -149,7 +149,9 @@ namespace emb {
             m_bStopClient = true;
             m_bStop = true;
             m_ConditionVariableTx.notify_one();
-            m_ServerThread.join();
+            if(m_ServerThread.joinable()) {
+                m_ServerThread.join();
+            }
         }
 
         bool TerminalUnixSocket::supportsInteractivity() const noexcept {

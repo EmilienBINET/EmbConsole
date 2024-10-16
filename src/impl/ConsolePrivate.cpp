@@ -176,6 +176,13 @@ namespace emb {
             }
         }
 
+        void Console::Private::execCommand(UserCommandInfo const& a_CommandInfo, UserCommandData::Args const& a_CommandArgs) noexcept {
+            for (auto const& console : m_ConsolesVector) {
+                console->terminal()->execCommand(a_CommandInfo, a_CommandArgs);
+                break;
+            }
+        }
+
         void Console::Private::setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) noexcept {
             ConsoleSessionWithTerminal::setStandardOutputCapture(a_funcCaptureFunctor);
         }
