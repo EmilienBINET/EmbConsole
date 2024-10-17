@@ -176,6 +176,12 @@ namespace emb {
             }
         }
 
+        void Console::Private::delAllCommands() noexcept {
+            for (auto const& console : m_ConsolesVector) {
+                console->terminal()->delAllCommands();
+            }
+        }
+
         void Console::Private::execCommand(UserCommandInfo const& a_CommandInfo, UserCommandData::Args const& a_CommandArgs) noexcept {
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->execCommand(a_CommandInfo, a_CommandArgs);

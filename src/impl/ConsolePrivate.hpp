@@ -130,6 +130,7 @@ namespace emb {
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&, UserCommandAutoCompleteFunctor const&) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&, UserCommandAutoCompleteFunctor const&) noexcept;
             void delCommand(UserCommandInfo const&) noexcept;
+            void delAllCommands() noexcept;
             void execCommand(UserCommandInfo const&, UserCommandData::Args const&) noexcept;
             void setStandardOutputCapture(StandardOutputFunctor const&) noexcept;
             void setPromptEnabled(bool) noexcept;

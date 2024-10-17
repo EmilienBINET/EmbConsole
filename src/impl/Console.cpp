@@ -233,6 +233,10 @@ namespace emb {
             m_pPrivateImpl->delCommand(a_CommandInfo);
         }
 
+        void Console::delAllCommands() noexcept {
+            m_pPrivateImpl->delAllCommands();
+        }
+
         void Console::execCommand(UserCommandInfo const& a_CommandInfo, UserCommandData::Args const& a_CommandArgs) noexcept {
             m_pPrivateImpl->execCommand(a_CommandInfo, a_CommandArgs);
         }
