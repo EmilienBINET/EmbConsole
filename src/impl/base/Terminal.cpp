@@ -106,6 +106,9 @@ namespace emb {
         }*/
 
         void Terminal::start() noexcept {
+            begin();
+            setCursorVisible(false);
+            commit();
             onTerminalSizeChanged();
         }
 
@@ -808,7 +811,6 @@ namespace emb {
             };
 
             begin();
-            setCursorVisible(false); // do once
             if (a_bPrintInText) {
                 printCommonPart();
 
