@@ -100,6 +100,7 @@ namespace emb {
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor1 const&, UserCommandAutoCompleteFunctor const& = nullptr) noexcept;
             void delCommand(UserCommandInfo const&) noexcept;
+            void delAllCommands() noexcept;
 
             Error processEntry(UserEntry const& a_UserEntry) noexcept;
             bool processAutoCompletion(std::string& a_strCurrentEntry, unsigned int& a_uiCurrentCursorPosition,

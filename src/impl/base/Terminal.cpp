@@ -106,6 +106,9 @@ namespace emb {
         }*/
 
         void Terminal::start() noexcept {
+            begin();
+            setCursorVisible(false);
+            commit();
             onTerminalSizeChanged();
         }
 
@@ -494,6 +497,10 @@ namespace emb {
             return m_pFunctions->delCommand(a_CommandInfo);
         }
 
+        void Terminal::delAllCommands() noexcept {
+            return m_pFunctions->delAllCommands();
+        }
+
         void Terminal::execCommand(UserCommandInfo const& a_CommandInfo, UserCommandData::Args const& a_CommandArgs) noexcept {
             std::ostringstream joinedArgs;
             std::copy(a_CommandArgs.begin(), a_CommandArgs.end(), std::ostream_iterator<std::string>(joinedArgs, " "));
@@ -804,7 +811,6 @@ namespace emb {
             };
 
             begin();
-            setCursorVisible(false); // do once
             if (a_bPrintInText) {
                 printCommonPart();
 

@@ -191,6 +191,10 @@ namespace emb {
             m_mapFunctions.erase(a_CommandInfo.path);
         }
 
+        void Functions::delAllCommands() noexcept {
+            m_mapFunctions.clear();
+        }
+
         Functions::Error Functions::processEntry(UserEntry const& a_UserEntry) noexcept {
             Functor f;
             string strCommand{};
