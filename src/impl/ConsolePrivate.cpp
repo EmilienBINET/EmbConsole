@@ -17,7 +17,6 @@
 namespace emb {
     namespace console {
         using namespace std;
-        using namespace std::chrono_literals;
 
         StdCapture ConsoleSessionWithTerminal::m_StdCapture{};
         StandardOutputFunctor ConsoleSessionWithTerminal::m_funcCaptureFunctor{};
@@ -240,7 +239,7 @@ namespace emb {
             start();
             while (!m_Stop) {
                 processEvents();
-                this_thread::sleep_for(10ms);
+                this_thread::sleep_for(std::chrono::milliseconds(10));
             }
             stop();
         }

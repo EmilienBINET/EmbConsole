@@ -10,7 +10,7 @@ namespace emb {
         TerminalFile::TerminalFile(ConsoleSessionWithTerminal& a_Console, std::string const& a_strFile) noexcept
             : Terminal{a_Console}
         {
-            out = ofstream{a_strFile, std::ios::app};
+            out.open(a_strFile, std::ios::app);
         }
         TerminalFile::~TerminalFile() noexcept {
             out.flush();

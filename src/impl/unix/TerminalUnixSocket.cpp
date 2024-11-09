@@ -133,7 +133,10 @@ namespace emb {
 
             static chrono::time_point<chrono::steady_clock> timepoint{chrono::steady_clock::now()};
             if(!m_bSupportsColor) {
-                setCurrentSize(Size{ 999, 999 });
+                Size s;
+                s.iWidth = 999;
+                s.iHeight = 999;
+                setCurrentSize(s);
                 write(" \b");
             }
             else if(timepoint <= chrono::steady_clock::now()) {
