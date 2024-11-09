@@ -93,11 +93,11 @@ namespace emb {
 
         namespace autocompletion {
             struct FileSystemOptions {
-                bool listFiles{true};           ///< If set, the autocompletion will propose files names
-                bool listDirectories{false};    ///< If set, the autocompletion will propose directories names
-                bool recursive{false};          ///< If set, the autocompletion will propose subelements of directories (requires listDirectories to be set)
-                bool caseSensitive{true};       ///< If set, the autocompletion will propose subelements matching case
-                std::string homePath{"/"};      ///< Home folder where the autocompletion searches subelements if the user specify a relative path
+                bool listFiles{ true };           ///< If set, the autocompletion will propose files names
+                bool listDirectories{ false };    ///< If set, the autocompletion will propose directories names
+                bool recursive{ false };          ///< If set, the autocompletion will propose subelements of directories (requires listDirectories to be set)
+                bool caseSensitive{ true };       ///< If set, the autocompletion will propose subelements matching case
+                std::string homePath{ "/" };      ///< Home folder where the autocompletion searches subelements if the user specify a relative path
                 std::string chrootPath{};       ///< If set, it defines a folder from witch the user cannot exit when autocompleting file path
             };
 
@@ -117,7 +117,7 @@ namespace emb {
              * @param a_Options             Options for the autocompletion
              * @return bool true if the argument matches the options, false otherwise
              */
-            EmbConsole_EXPORT bool getValueFromFileSystem(std::string & a_rstrPath,
+            EmbConsole_EXPORT bool getValueFromFileSystem(std::string& a_rstrPath,
                 std::string const& a_strArgument, FileSystemOptions const& a_Options = {}) noexcept;
 
             /**
@@ -216,6 +216,9 @@ namespace emb {
             static std::shared_ptr<Console> create(Options const&, int a_iId = 0) noexcept;
             static std::weak_ptr<Console> instance(int a_iId = 0) noexcept;
 
+            static void showWindowsStdConsole() noexcept;
+            static void hideWindowsStdConsole() noexcept;
+
             // public members
         public:
             Console() noexcept;
@@ -267,7 +270,6 @@ namespace emb {
             std::string strDesc{};
         };
 
-
         /**
          * @brief Represents Options that can be passed to the library
          *
@@ -293,8 +295,8 @@ namespace emb {
             Options operator+(Options const& a_other) const;
             template<typename T>
             std::shared_ptr<T> get() const {
-                for(auto const& pElm : m_vpOptions) {
-                    if(auto pCastedElm = std::dynamic_pointer_cast<T>(pElm)) {
+                for (auto const& pElm : m_vpOptions) {
+                    if (auto pCastedElm = std::dynamic_pointer_cast<T>(pElm)) {
                         return pCastedElm;
                     }
                 }
@@ -317,7 +319,7 @@ namespace emb {
         public:
             OptionFile() noexcept { strDesc = "OptionFile()"; };
             OptionFile(bool a_bEnabled, std::string const& a_strFilePath) noexcept : bEnabled{ a_bEnabled }, strFilePath{ a_strFilePath }
-                { strDesc = "OptionFile(" + std::to_string(a_bEnabled) + "," + a_strFilePath + ")"; }
+            { strDesc = "OptionFile(" + std::to_string(a_bEnabled) + "," + a_strFilePath + ")"; }
             std::shared_ptr<Option> copy() const noexcept override { return std::make_unique<OptionFile>(bEnabled, strFilePath); }
             bool bEnabled{ false };
             std::string strFilePath{};
@@ -328,7 +330,7 @@ namespace emb {
             OptionUnixSocket() noexcept { strDesc = "OptionUnixSocket()"; };
             OptionUnixSocket(bool a_bEnabled, std::string const& a_strSocketFilePath, std::string const& a_strShellFilePath) noexcept
                 : bEnabled{ a_bEnabled }, strSocketFilePath{ a_strSocketFilePath }, strShellFilePath{ a_strShellFilePath }
-                { strDesc = "OptionUnixSocket(" + std::to_string(a_bEnabled) + "," + strSocketFilePath + "," + a_strShellFilePath + ")"; }
+            { strDesc = "OptionUnixSocket(" + std::to_string(a_bEnabled) + "," + strSocketFilePath + "," + a_strShellFilePath + ")"; }
             std::shared_ptr<Option> copy() const noexcept override { return std::make_unique<OptionUnixSocket>(bEnabled, strSocketFilePath, strShellFilePath); }
             bool bEnabled{ false };
             std::string strSocketFilePath{};
@@ -358,7 +360,7 @@ namespace emb {
             };
         public:
             OptionSyslog() noexcept { strDesc = "OptionSyslog()"; };
-            OptionSyslog(bool a_bEnabled, std::string const& a_strDestination, std::function<Info(std::string const&)> const& a_fctGetInfo=nullptr) noexcept
+            OptionSyslog(bool a_bEnabled, std::string const& a_strDestination, std::function<Info(std::string const&)> const& a_fctGetInfo = nullptr) noexcept
                 : bEnabled{ a_bEnabled }, strDestination{ a_strDestination }, m_fctGetInfo{ a_fctGetInfo }
             { strDesc = "OptionSyslog(" + std::to_string(a_bEnabled) + "," + strDestination + ")"; }
             std::shared_ptr<Option> copy() const noexcept override { return std::make_unique<OptionSyslog>(bEnabled, strDestination, m_fctGetInfo); }
@@ -408,7 +410,7 @@ namespace emb {
         };
         /// Requests the console to print the current list of command instantly when receiving the commit command
         class EmbConsole_EXPORT InstantPrint final
-            : public PrintCommand {
+            : public PrintCommand{
         public:
             Ptr copy() const noexcept override { return std::make_unique<InstantPrint>(); }
             void process(Terminal&) const noexcept override;
@@ -1087,14 +1089,13 @@ namespace emb {
         //////////////////////////////////////////////////
 
         namespace table {
-
             /**
              * @brief Represent a cell of a table
              */
             struct Cell {
                 std::string strText{};
-                SetColor::Color eColor{SetColor::Color::White};
-                Cell(std::string const & a_strText, SetColor::Color a_eColor = SetColor::Color::White)
+                SetColor::Color eColor{ SetColor::Color::White };
+                Cell(std::string const& a_strText, SetColor::Color a_eColor = SetColor::Color::White)
                     : strText{ a_strText }, eColor{ a_eColor }
                 {}
             };
@@ -1121,6 +1122,5 @@ namespace emb {
              */
             void print(ConsoleSession& a_rConsole, Table const& a_stTable);
         }
-
     } // console
 } // emb

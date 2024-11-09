@@ -168,6 +168,22 @@ namespace emb {
             return std::weak_ptr<Console>{};
         }
 
+        void Console::showWindowsStdConsole() noexcept {
+            for (auto const& elm : s_mpConsoles) {
+                if (auto pConsole = elm.second.lock()) {
+                    pConsole->m_pPrivateImpl->showWindowsStdConsole();
+                }
+            }
+        }
+
+        void Console::hideWindowsStdConsole() noexcept {
+            for (auto const& elm : s_mpConsoles) {
+                if (auto pConsole = elm.second.lock()) {
+                    pConsole->m_pPrivateImpl->hideWindowsStdConsole();
+                }
+            }
+        }
+
         Console::Console() noexcept
             : m_pPrivateImpl{ make_unique<Private>(*this) } {
         }
@@ -217,13 +233,13 @@ namespace emb {
         }
 
         void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor,
-                                 UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             a_CommandInfo.validate();
             m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }
 
         void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor,
-                                 UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             a_CommandInfo.validate();
             m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }
