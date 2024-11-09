@@ -101,6 +101,7 @@ namespace emb {
             TerminalAnsi::start();
             m_bStopThread = false;
             m_InputThread = std::thread{ &TerminalWindows::inputLoop, this };
+            requestTerminalSize();
         }
 
         void TerminalWindows::processEvents() noexcept {
@@ -164,6 +165,7 @@ namespace emb {
                                 break;
 
                             case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing
+                                requestTerminalSize();
                                 processCapture();
                                 break;
 
