@@ -106,11 +106,11 @@ namespace emb {
         //////////////////////////////////////////////////
 
         ConsoleSession::ConsoleSession(TerminalPtr a_pTerminal) noexcept
-            : m_pPrivateImpl{ make_unique<Private>(a_pTerminal) } {
+            : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(a_pTerminal) } {
         }
 
         //ConsoleSession::ConsoleSession(ConsoleSession const& aOther) noexcept
-        //    : m_pPrivateImpl{ make_unique<Private>(*aOther.m_pPrivateImpl) } {
+        //    : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(*aOther.m_pPrivateImpl) } {
         //}
 
         ConsoleSession::ConsoleSession(ConsoleSession&&) noexcept = default;
@@ -185,11 +185,11 @@ namespace emb {
         }
 
         Console::Console() noexcept
-            : m_pPrivateImpl{ make_unique<Private>(*this) } {
+            : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(*this) } {
         }
 
         Console::Console(Console const& aOther) noexcept
-            : m_pPrivateImpl{ make_unique<Private>(*aOther.m_pPrivateImpl) } {
+            : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(*aOther.m_pPrivateImpl) } {
         }
 
         Console::Console(Console&&) noexcept = default;
@@ -198,7 +198,7 @@ namespace emb {
         }
 
         Console::Console(Options const& aOptions) noexcept
-            : m_pPrivateImpl{ make_unique<Private>(*this, aOptions) } {
+            : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(*this, aOptions) } {
         }
 
         Console::~Console() noexcept {

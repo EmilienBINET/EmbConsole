@@ -79,11 +79,11 @@ namespace emb {
         class TConsoleSessionWithTerminal : public ConsoleSessionWithTerminal {
         public:
             TConsoleSessionWithTerminal()
-                : ConsoleSessionWithTerminal{ std::make_unique<TerminalType>(*this) } {
+                : ConsoleSessionWithTerminal{ emb::tools::memory::make_unique<TerminalType>(*this) } {
             }
             template<typename... U>
             TConsoleSessionWithTerminal(U&&... u)
-                : ConsoleSessionWithTerminal{ std::make_unique<TerminalType>(*this, std::forward<U>(u)...) } {
+                : ConsoleSessionWithTerminal{ emb::tools::memory::make_unique<TerminalType>(*this, std::forward<U>(u)...) } {
             }
         };
 

@@ -255,10 +255,10 @@ namespace emb {
                     // Create terminal only if another one does not already exist
                     if (!pTerminalWindows && !pTerminalWindowsLegacy) {
                         if (TerminalWindows::isSupported()) {
-                            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindows>>());
+                            m_ConsolesVector.push_back(emb::tools::memory::make_unique<TConsoleSessionWithTerminal<TerminalWindows>>());
                         }
                         else {
-                            m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalWindowsLegacy>>());
+                            m_ConsolesVector.push_back(emb::tools::memory::make_unique<TConsoleSessionWithTerminal<TerminalWindowsLegacy>>());
                         }
                         if (a_bAutoStart) {
                             if (auto pAddedTerminal = m_ConsolesVector.back()->terminal()) {
@@ -278,7 +278,7 @@ namespace emb {
             auto pOptStd = m_Options.get<OptionStd>();
             if (pOptStd) {
                 if (pOptStd->bEnabled && !getTerminal<TerminalUnix>(m_ConsolesVector)) {
-                    m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnix>>());
+                    m_ConsolesVector.push_back(emb::tools::memory::make_unique<TConsoleSessionWithTerminal<TerminalUnix>>());
                 }
                 else {
                     removeTerminalIfExists<TerminalUnix>(m_ConsolesVector);
@@ -287,7 +287,7 @@ namespace emb {
             auto pOptUnixSocket = m_Options.get<OptionUnixSocket>();
             if (pOptUnixSocket) {
                 if (pOptUnixSocket->bEnabled && !getTerminal<TerminalUnixSocket>(m_ConsolesVector)) {
-                    m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>(
+                    m_ConsolesVector.push_back(emb::tools::memory::make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>(
                         pOptUnixSocket->strSocketFilePath, pOptUnixSocket->strShellFilePath));
                 }
                 else {
@@ -298,7 +298,7 @@ namespace emb {
             auto pOptFile = m_Options.get<OptionFile>();
             if (pOptFile) {
                 if (pOptFile->bEnabled && !getTerminal<TerminalFile>(m_ConsolesVector)) {
-                    m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>(pOptFile->strFilePath));
+                    m_ConsolesVector.push_back(emb::tools::memory::make_unique<TConsoleSessionWithTerminal<TerminalFile>>(pOptFile->strFilePath));
                 }
                 else {
                     removeTerminalIfExists<TerminalFile>(m_ConsolesVector);
@@ -307,7 +307,7 @@ namespace emb {
             auto pOptSyslog = m_Options.get<OptionSyslog>();
             if (pOptSyslog) {
                 if (pOptSyslog->bEnabled && !getTerminal<TerminalSyslog>(m_ConsolesVector)) {
-                    m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalSyslog>>(pOptSyslog));
+                    m_ConsolesVector.push_back(emb::tools::memory::make_unique<TConsoleSessionWithTerminal<TerminalSyslog>>(pOptSyslog));
                 }
                 else {
                     removeTerminalIfExists<TerminalSyslog>(m_ConsolesVector);
@@ -316,7 +316,7 @@ namespace emb {
             auto pOptTcp = m_Options.get<OptionLocalTcpServer>();
             if (pOptTcp) {
                 if (pOptTcp->bEnabled && !getTerminal<TerminalLocalTcp>(m_ConsolesVector)) {
-                    m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalLocalTcp>>(pOptTcp));
+                    m_ConsolesVector.push_back(emb::tools::memory::make_unique<TConsoleSessionWithTerminal<TerminalLocalTcp>>(pOptTcp));
                 }
                 else {
                     removeTerminalIfExists<TerminalLocalTcp>(m_ConsolesVector);
