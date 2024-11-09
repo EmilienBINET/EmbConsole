@@ -25,6 +25,29 @@ namespace emb {
         std::atomic<bool> ConsoleSessionWithTerminal::m_bStopThread{ true };
         std::function<void(void)> ConsoleSessionWithTerminal::m_funcPeriodicCapture{};
 
+        template<typename T>
+        std::shared_ptr<T> getTerminal(std::vector<std::unique_ptr<ConsoleSessionWithTerminal>>& a_rConsoleVector) {
+            std::shared_ptr<T> pOut{};
+            for (auto const& elm : a_rConsoleVector) {
+                if (auto pTerminal = std::dynamic_pointer_cast<T>(elm->terminal())) {
+                    pOut = pTerminal;
+                }
+            }
+            return pOut;
+        }
+
+        template<typename T>
+        void removeTerminalIfExists(std::vector<std::unique_ptr<ConsoleSessionWithTerminal>>& a_rConsoleVector) {
+            for (std::vector<std::unique_ptr<ConsoleSessionWithTerminal>>::reverse_iterator it = a_rConsoleVector.rbegin();
+                it != a_rConsoleVector.rend();
+                ++it) {
+                if (auto pTerminal = std::dynamic_pointer_cast<T>((*it)->terminal())) {
+                    (*it)->terminal()->stop();
+                    a_rConsoleVector.erase(std::next(it).base());
+                }
+            }
+        }
+
         ConsoleSession::Private::Private(TerminalPtr a_pTerminal) noexcept
             : m_pTerminal{ a_pTerminal } {
         }
@@ -130,8 +153,8 @@ namespace emb {
         void Console::Private::hideWindowsStdConsole() noexcept {
 #ifdef WIN32
             // Remove the windows terminal from the list
-            removeTerminalIfExists<TerminalWindows>();
-            removeTerminalIfExists<TerminalWindowsLegacy>();
+            removeTerminalIfExists<TerminalWindows>(m_ConsolesVector);
+            removeTerminalIfExists<TerminalWindowsLegacy>(m_ConsolesVector);
             // Destroy the external STD console
             TerminalWindows::destroyStdConsole();
 #endif
@@ -222,35 +245,12 @@ namespace emb {
             stop();
         }
 
-        template<typename T>
-        std::shared_ptr<T> getTerminal(std::vector<std::unique_ptr<ConsoleSessionWithTerminal>> & a_rConsoleVector) {
-            std::shared_ptr<T> pOut{};
-            for (auto const& elm : a_rConsoleVector) {
-                if (auto pTerminal = std::dynamic_pointer_cast<T>(elm->terminal())) {
-                    pOut = pTerminal;
-                }
-            }
-            return pOut;
-        }
-
-        template<typename T>
-        void removeTerminalIfExists(std::vector<std::unique_ptr<ConsoleSessionWithTerminal>> & a_rConsoleVector) {
-            for (std::vector<std::unique_ptr<ConsoleSessionWithTerminal>>::reverse_iterator it = a_rConsoleVector.rbegin();
-                it != a_rConsoleVector.rend();
-                ++it) {
-                if (auto pTerminal = std::dynamic_pointer_cast<T>((*it)->terminal())) {
-                    (*it)->terminal()->stop();
-                    a_rConsoleVector.erase(std::next(it).base());
-                }
-            }
-        }
-
         void Console::Private::applyOptions(bool a_bAutoStart) {
 #ifdef WIN32
             auto pOptStd = m_Options.get<OptionStd>();
             if (pOptStd) {
-                auto pTerminalWindows = getTerminal<TerminalWindows>();
-                auto pTerminalWindowsLegacy = getTerminal<TerminalWindowsLegacy>();
+                auto pTerminalWindows = getTerminal<TerminalWindows>(m_ConsolesVector);
+                auto pTerminalWindowsLegacy = getTerminal<TerminalWindowsLegacy>(m_ConsolesVector);
                 if (pOptStd->bEnabled && TerminalWindows::isCreatable()) {
                     // Create terminal only if another one does not already exist
                     if (!pTerminalWindows && !pTerminalWindowsLegacy) {
@@ -269,8 +269,8 @@ namespace emb {
                     }
                 }
                 else {
-                    removeTerminalIfExists<TerminalWindows>();
-                    removeTerminalIfExists<TerminalWindowsLegacy>();
+                    removeTerminalIfExists<TerminalWindows>(m_ConsolesVector);
+                    removeTerminalIfExists<TerminalWindowsLegacy>(m_ConsolesVector);
                 }
             }
 #endif
