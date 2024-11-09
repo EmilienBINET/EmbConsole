@@ -10,12 +10,16 @@
 #endif
 #include <winsock2.h>
 #include <Ws2tcpip.h>
+#define shutdown_socket(__sock) shutdown(__sock, SD_BOTH)
+#define close_socket(__sock) closesocket(__sock)
 #else
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/types.h>
+#define shutdown_socket(__sock) shutdown(__sock, SHUT_RDWR)
+#define close_socket(__sock) close(__sock)
 #endif
 
 /* CLIENT:
@@ -46,17 +50,10 @@ namespace emb {
 
             addCommand(emb::console::UserCommandInfo("/exit", "Exit the current shell"), [this] {
                 if (m_iClientSocket > 0) {
-#ifdef _WIN32
-                    int status = shutdown(m_iClientSocket, SD_BOTH);
+                    int status = shutdown_socket(m_iClientSocket);
                     if (status == 0) {
-                        status = closesocket(m_iClientSocket);
+                        status = close_socket(m_iClientSocket);
                     }
-#else
-                    int status = shutdown(m_iClientSocket, SHUT_RDWR);
-                    if (status == 0) {
-                        status = close(m_iClientSocket);
-                    }
-#endif
                     m_bStopClient = true;
                 }
             });
@@ -127,25 +124,14 @@ namespace emb {
 
         void TerminalLocalTcp::stop() noexcept {
             TerminalAnsi::stop();
-#ifdef _WIN32
-            int status = shutdown(m_iServerSocket, SD_BOTH);
+            int status = shutdown_socket(m_iServerSocket);
             if (status == 0) {
-                status = closesocket(m_iServerSocket);
+                status = close_socket(m_iServerSocket);
             }
-            status = shutdown(m_iClientSocket, SD_BOTH);
+            status = shutdown_socket(m_iClientSocket);
             if (status == 0) {
-                status = closesocket(m_iClientSocket);
+                status = close_socket(m_iClientSocket);
             }
-#else
-            int status = shutdown(m_iServerSocket, SHUT_RDWR);
-            if (status == 0) {
-                status = close(m_iServerSocket);
-            }
-            status = shutdown(m_iClientSocket, SHUT_RDWR);
-            if (status == 0) {
-                status = close(m_iClientSocket);
-            }
-#endif
             m_bStopClient = true;
             m_bStop = true;
             m_ConditionVariableTx.notify_one();
@@ -197,11 +183,7 @@ namespace emb {
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();
 
-#ifdef _WIN32
-                    closesocket(iClientSocket);
-#else
-                    close(iClientSocket);
-#endif
+                    close_socket(iClientSocket);
                 }
             }
         }
