@@ -11,6 +11,7 @@
 #endif
 #include "base/TerminalFile.hpp"
 #include "base/TerminalSyslog.hpp"
+#include "base/TerminalLocalTcp.hpp"
 #include "Tools.hpp"
 
 namespace emb {
@@ -287,6 +288,15 @@ namespace emb {
                 }
                 else {
                     removeTerminalIfExists<TerminalSyslog>();
+                }
+            }
+            auto pOptTcp = m_Options.get<OptionLocalTcpServer>();
+            if (pOptTcp) {
+                if (pOptTcp->bEnabled && !getTerminal<TerminalLocalTcp>()) {
+                    m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalLocalTcp>>(pOptTcp));
+                }
+                else {
+                    removeTerminalIfExists<TerminalLocalTcp>();
                 }
             }
         }

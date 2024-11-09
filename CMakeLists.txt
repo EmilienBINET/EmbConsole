@@ -46,6 +46,8 @@ add_library(EmbConsole
     src/impl/base/TerminalFile.cpp
     src/impl/base/TerminalSyslog.hpp
     src/impl/base/TerminalSyslog.cpp
+    src/impl/base/TerminalLocalTcp.hpp
+    src/impl/base/TerminalLocalTcp.cpp
     ${PLATFORM_SPECIFIC_FILES}
 )
 target_include_directories(EmbConsole PUBLIC include)

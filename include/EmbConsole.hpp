@@ -337,6 +337,18 @@ namespace emb {
             std::string strShellFilePath{};
         };
 
+        class EmbConsole_EXPORT OptionLocalTcpServer : public Option {
+        public:
+            OptionLocalTcpServer() noexcept { strDesc = "OptionLocalTcpServer()"; };
+            OptionLocalTcpServer(bool a_bEnabled, int a_iPort, std::string const& a_strShellFilePath) noexcept
+                : bEnabled{ a_bEnabled }, iPort{ a_iPort }, strShellFilePath{ a_strShellFilePath }
+            { strDesc = "OptionLocalTcpServer(" + std::to_string(a_bEnabled) + ",127.0.0.1:" + std::to_string(iPort) + "," + strShellFilePath + ")"; }
+            std::shared_ptr<Option> copy() const noexcept override { return std::make_unique<OptionLocalTcpServer>(bEnabled, iPort, strShellFilePath); }
+            bool bEnabled{ false };
+            int iPort{};
+            std::string strShellFilePath{};
+        };
+
         class EmbConsole_EXPORT OptionSyslog : public Option {
         public:
             enum class Criticity {
