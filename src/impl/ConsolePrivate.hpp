@@ -143,30 +143,7 @@ namespace emb {
             void stop() noexcept override;
             void run();
             void applyOptions(bool a_bAutoStart);
-
-            template<typename T>
-            std::shared_ptr<T> getTerminal() {
-                std::shared_ptr<T> pOut{};
-                for (auto const& elm : m_ConsolesVector) {
-                    if (auto pTerminal = std::dynamic_pointer_cast<T>(elm->terminal())) {
-                        pOut = pTerminal;
-                    }
-                }
-                return pOut;
-            }
-
-            template<typename T>
-            void removeTerminalIfExists() {
-                for (decltype(m_ConsolesVector)::reverse_iterator it = m_ConsolesVector.rbegin();
-                    it != m_ConsolesVector.rend();
-                    ++it) {
-                    if (auto pTerminal = std::dynamic_pointer_cast<T>((*it)->terminal())) {
-                        (*it)->terminal()->stop();
-                        m_ConsolesVector.erase(std::next(it).base());
-                    }
-                }
-            }
-
+            
         private:
             std::thread m_Thread{};
             volatile std::atomic_bool m_Stop{ false };

@@ -222,6 +222,29 @@ namespace emb {
             stop();
         }
 
+        template<typename T>
+        std::shared_ptr<T> getTerminal(std::vector<std::unique_ptr<ConsoleSessionWithTerminal>> & a_rConsoleVector) {
+            std::shared_ptr<T> pOut{};
+            for (auto const& elm : a_rConsoleVector) {
+                if (auto pTerminal = std::dynamic_pointer_cast<T>(elm->terminal())) {
+                    pOut = pTerminal;
+                }
+            }
+            return pOut;
+        }
+
+        template<typename T>
+        void removeTerminalIfExists(std::vector<std::unique_ptr<ConsoleSessionWithTerminal>> & a_rConsoleVector) {
+            for (std::vector<std::unique_ptr<ConsoleSessionWithTerminal>>::reverse_iterator it = a_rConsoleVector.rbegin();
+                it != a_rConsoleVector.rend();
+                ++it) {
+                if (auto pTerminal = std::dynamic_pointer_cast<T>((*it)->terminal())) {
+                    (*it)->terminal()->stop();
+                    a_rConsoleVector.erase(std::next(it).base());
+                }
+            }
+        }
+
         void Console::Private::applyOptions(bool a_bAutoStart) {
 #ifdef WIN32
             auto pOptStd = m_Options.get<OptionStd>();
@@ -254,49 +277,49 @@ namespace emb {
 #ifdef unix
             auto pOptStd = m_Options.get<OptionStd>();
             if (pOptStd) {
-                if (pOptStd->bEnabled && !getTerminal<TerminalUnix>()) {
+                if (pOptStd->bEnabled && !getTerminal<TerminalUnix>(m_ConsolesVector)) {
                     m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnix>>());
                 }
                 else {
-                    removeTerminalIfExists<TerminalUnix>();
+                    removeTerminalIfExists<TerminalUnix>(m_ConsolesVector);
                 }
             }
             auto pOptUnixSocket = m_Options.get<OptionUnixSocket>();
             if (pOptUnixSocket) {
-                if (pOptUnixSocket->bEnabled && !getTerminal<TerminalUnixSocket>()) {
+                if (pOptUnixSocket->bEnabled && !getTerminal<TerminalUnixSocket>(m_ConsolesVector)) {
                     m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalUnixSocket>>(
                         pOptUnixSocket->strSocketFilePath, pOptUnixSocket->strShellFilePath));
                 }
                 else {
-                    removeTerminalIfExists<TerminalUnixSocket>();
+                    removeTerminalIfExists<TerminalUnixSocket>(m_ConsolesVector);
                 }
             }
 #endif
             auto pOptFile = m_Options.get<OptionFile>();
             if (pOptFile) {
-                if (pOptFile->bEnabled && !getTerminal<TerminalFile>()) {
+                if (pOptFile->bEnabled && !getTerminal<TerminalFile>(m_ConsolesVector)) {
                     m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalFile>>(pOptFile->strFilePath));
                 }
                 else {
-                    removeTerminalIfExists<TerminalFile>();
+                    removeTerminalIfExists<TerminalFile>(m_ConsolesVector);
                 }
             }
             auto pOptSyslog = m_Options.get<OptionSyslog>();
             if (pOptSyslog) {
-                if (pOptSyslog->bEnabled && !getTerminal<TerminalSyslog>()) {
+                if (pOptSyslog->bEnabled && !getTerminal<TerminalSyslog>(m_ConsolesVector)) {
                     m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalSyslog>>(pOptSyslog));
                 }
                 else {
-                    removeTerminalIfExists<TerminalSyslog>();
+                    removeTerminalIfExists<TerminalSyslog>(m_ConsolesVector);
                 }
             }
             auto pOptTcp = m_Options.get<OptionLocalTcpServer>();
             if (pOptTcp) {
-                if (pOptTcp->bEnabled && !getTerminal<TerminalLocalTcp>()) {
+                if (pOptTcp->bEnabled && !getTerminal<TerminalLocalTcp>(m_ConsolesVector)) {
                     m_ConsolesVector.push_back(make_unique<TConsoleSessionWithTerminal<TerminalLocalTcp>>(pOptTcp));
                 }
                 else {
-                    removeTerminalIfExists<TerminalLocalTcp>();
+                    removeTerminalIfExists<TerminalLocalTcp>(m_ConsolesVector);
                 }
             }
         }
