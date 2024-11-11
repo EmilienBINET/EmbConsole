@@ -1,7 +1,11 @@
 #include "Tools.hpp"
+#ifndef _USE_PCRE2
 #include <regex>
+#else
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
+#define STR2STPR8(__str) reinterpret_cast<unsigned char const*>(__str.c_str())
+#endif
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -20,7 +24,7 @@ namespace emb {
             }
         }
         namespace regex {
-#if 0
+#ifndef _USE_PCRE2
             bool match(std::string const& a_strStringToTest, std::string const& a_strRegexPattern) {
                 return std::regex_match(a_strStringToTest, std::regex{ a_strRegexPattern });
             }
@@ -40,8 +44,6 @@ namespace emb {
                 return std::regex_replace(a_strStringToTest, std::regex{ a_strRegexPattern }, a_strStringReplacement);
             }
 #else
-#define STR2STPR8(__str) reinterpret_cast<unsigned char const*>(__str.c_str())
-
             bool match(std::string const& a_strStringToTest, std::string const& a_strRegexPattern) {
                 std::vector<std::string> vstrMatches{};
                 return search(vstrMatches, a_strStringToTest, "^" + a_strRegexPattern + "$");
@@ -194,7 +196,7 @@ namespace emb {
 
                 return strRes;
             }
-        }
 #endif
+        }
     }
 }
