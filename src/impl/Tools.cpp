@@ -34,7 +34,7 @@ namespace emb {
                 bool bRes = std::regex_search(a_strStringToTest, sm, rx);
                 if (bRes) {
                     a_rvstrMatches.clear();
-                    for (int i = 0; i < sm.size(); ++i) {
+                    for (size_t i = 0; i < sm.size(); ++i) {
                         a_rvstrMatches.push_back(sm[i].str());
                     }
                 }
