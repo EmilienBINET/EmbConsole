@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
 project(EmbConsole CXX)
 
+set(PCRE2_SHOW_REPORT OFF)
+set(PCRE2_SUPPORT_LIBBZ2 OFF)
+set(PCRE2_SUPPORT_LIBZ OFF)
+set(PCRE2_SUPPORT_LIBREADLINE OFF)
+set(PCRE2_SUPPORT_LIBEDIT OFF)
+add_subdirectory(third/pcre2)
+
 if(WIN32)
     set(PLATFORM_SPECIFIC_FILES
         src/impl/win/TerminalWindows.hpp
@@ -66,6 +73,7 @@ endif()
 if(UNIX)
     target_link_libraries(EmbConsole Threads::Threads)
     target_link_libraries(EmbConsole stdc++fs)
+    target_link_libraries(EmbConsole PCRE2::pcre2-8)
 endif()
 if(WIN32)
 	target_link_libraries(EmbConsole Ws2_32)

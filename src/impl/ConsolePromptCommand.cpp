@@ -1,9 +1,9 @@
 #include "EmbConsole.hpp"
 #include "ConsolePrivate.hpp"
 #include "base/Terminal.hpp"
+#include "Tools.hpp"
 #include <iostream>
 #include <mutex>
-#include <regex>
 
 using namespace std;
 
@@ -62,7 +62,7 @@ namespace emb {
             return cResult;
         }
         bool Validator::isValid(std::string const& a_strStrToValidate) const noexcept {
-            return std::regex_match(a_strStrToValidate, std::regex{ m_strRegexValidator });
+            return emb::tools::regex::match(a_strStrToValidate, m_strRegexValidator);
         }
     } // console
 } // emb
