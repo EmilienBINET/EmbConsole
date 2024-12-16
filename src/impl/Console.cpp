@@ -45,17 +45,17 @@ namespace emb {
             (*this) << ResetTextFormat() << Commit();
         }
 
-        bool IPromptableConsole::promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator) noexcept {
+        bool IPromptableConsole::promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator, std::string const& a_strErrorMessage) noexcept {
             bool bRes = false;
             (*this)
                 << BeginPrompt()
                 << Question(a_strQuestion)
                 << OnCancel([&] { bRes = false; })
                 << OnValid([&](std::string const& a_strResult) { bRes = true; a_rstrResult = a_strResult; });
-            //if (!a_strRegexValidator.empty()) {
-            //    (*this)
-            //        << Validator(a_strRegexValidator);
-            //}
+            if (!a_strRegexValidator.empty()) {
+                (*this)
+                    << Validator(a_strRegexValidator, a_strErrorMessage);
+            }
             (*this)
                 << CommitPrompt();
             return bRes;
