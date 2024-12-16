@@ -175,6 +175,7 @@ namespace emb {
             virtual IPromptableConsole& operator<< (PromptCommand const&) noexcept = 0;
 
             bool promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator = "", std::string const& a_strErrorMessage = "Invalid entry") noexcept;
+            bool promptIpv4(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strErrorMessage = "Invalid IP") noexcept;
             bool promptNumber(std::string const& a_strQuestion, long&) noexcept;
             bool promptYesNo(std::string const& a_strQuestion, bool&) noexcept;
             bool promptChoice(std::string const& a_strQuestion, std::unordered_map<std::string, std::string> const& a_mapChoices, std::string& a_rstrResult);

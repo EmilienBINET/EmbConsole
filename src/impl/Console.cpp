@@ -61,6 +61,10 @@ namespace emb {
             return bRes;
         }
 
+        bool IPromptableConsole::promptIpv4(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strErrorMessage) noexcept {
+            return promptString(a_strQuestion, a_rstrResult, "((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}", a_strErrorMessage);
+        }
+
         bool IPromptableConsole::promptNumber(std::string const& a_strQuestion, long& a_rlResult) noexcept {
             bool bRes = false;
             (*this)
