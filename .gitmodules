@@ -1,3 +1,6 @@
 [submodule "third/gulrak-filesystem"]
 	path = third/gulrak-filesystem
 	url = https://github.com/gulrak/filesystem.git
+[submodule "third/pcre2"]
+	path = third/pcre2
+	url = https://github.com/PCRE2Project/pcre2.git

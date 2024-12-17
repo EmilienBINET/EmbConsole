@@ -1,8 +1,8 @@
 #include "TerminalAnsi.hpp"
 #include "../ConsolePrivate.hpp"
+#include "../Tools.hpp"
 #include <string>
 #include <unordered_map>
-#include <regex>
 #if defined _MSC_VER || defined __MINGW32__
 #include <io.h>
 #define flockfile _lock_file
@@ -66,26 +66,26 @@ namespace emb {
         }
 
         bool TerminalAnsi::parseTerminalSizeResponse(std::string& a_strResponse) noexcept {
-            regex const terminalSizeRegex{ "\x1b\\[([0-9]+);([0-9]+)R" };
-            smatch sm;
-            bool bRes = regex_search(a_strResponse, sm, terminalSizeRegex);
+            string const strTerminalSizeRegex{ "\x1b\\[([0-9]+);([0-9]+)R" };
+            vector<string> vstrMatches;
+            bool bRes = emb::tools::regex::search(vstrMatches, a_strResponse, strTerminalSizeRegex);
             if (bRes) {
-                bRes = 3 == sm.size();
+                bRes = 3 == vstrMatches.size();
             }
             if (bRes) {
                 switch (m_eDSRState) {
                 case DSRState::PositionRequest: {
                     Position newPosition;
-                    newPosition.iX = stoi(sm[2].str());
-                    newPosition.iY = stoi(sm[1].str());
+                    newPosition.iX = stoi(vstrMatches[2]);
+                    newPosition.iY = stoi(vstrMatches[1]);
                     setCurrentCursorPosition(newPosition);
                     m_eDSRState = DSRState::SizeRequest;
                     break;
                 }
                 case DSRState::SizeRequest: {
                     Size newSize;
-                    newSize.iWidth = stoi(sm[2].str());
-                    newSize.iHeight = stoi(sm[1].str());
+                    newSize.iWidth = stoi(vstrMatches[2]);
+                    newSize.iHeight = stoi(vstrMatches[1]);
                     bool bSizeChanged = getCurrentSize() != newSize;
                     setCurrentSize(newSize);
                     if (bSizeChanged) {
@@ -95,7 +95,7 @@ namespace emb {
                     break;
                 }
                 }
-                a_strResponse = regex_replace(a_strResponse, terminalSizeRegex, string(""));
+                a_strResponse = emb::tools::regex::replace(a_strResponse, strTerminalSizeRegex, "");
 
                 if (DSRState::SizeRequest == m_eDSRState) {
                     requestTerminalSize();
