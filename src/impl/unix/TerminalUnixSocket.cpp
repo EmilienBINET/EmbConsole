@@ -38,6 +38,7 @@ namespace emb {
 
             addCommand(emb::console::UserCommandInfo("/exit", "Exit the current shell"), [this]{
                 if(m_iClientSocket > 0) {
+                    TerminalAnsi::stop();
                     shutdown(m_iClientSocket, SHUT_RDWR);
                     m_bStopClient = true;
                 }
@@ -115,8 +116,6 @@ namespace emb {
 
             m_ServerThread = std::thread{ &TerminalUnixSocket::serverLoop, this };
             emb::tools::thread::set_thread_name(m_ServerThread, "TrmUnxSockSrv");
-
-            TerminalAnsi::start();
         }
 
         void TerminalUnixSocket::processEvents() noexcept {
@@ -146,7 +145,6 @@ namespace emb {
         }
 
         void TerminalUnixSocket::stop() noexcept {
-            TerminalAnsi::stop();
             shutdown(m_iServerSocket, SHUT_RDWR);
             shutdown(m_iClientSocket, SHUT_RDWR);
             m_bStopClient = true;
@@ -200,7 +198,8 @@ namespace emb {
                     m_ClientThreadTx = thread{ std::bind(&TerminalUnixSocket::clientLoopTx, this, iClientSocket) };
                     emb::tools::thread::set_thread_name(m_ClientThreadTx, "TrmUnxSockTx");
 
-                    write("Connected\n");
+                    write("Connected\n\r");
+                    TerminalAnsi::start();
 
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();

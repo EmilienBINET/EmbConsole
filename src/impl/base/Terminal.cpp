@@ -109,6 +109,7 @@ namespace emb {
             begin();
             setCursorVisible(false);
             commit();
+            resetScrollingRegion();
             onTerminalSizeChanged();
         }
 
