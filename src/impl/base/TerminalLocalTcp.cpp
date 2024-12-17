@@ -213,7 +213,7 @@ namespace emb {
 
                 lock_guard<mutex> const l{ m_Mutex };
                 if (!m_strDataToSend.empty()) {
-                    if (-1 == send(a_iClientSocket, m_strDataToSend.c_str(), m_strDataToSend.size() * sizeof(char), 0)) {
+                    if (-1 == send(a_iClientSocket, m_strDataToSend.c_str(), m_strDataToSend.size() * sizeof(char), MSG_NOSIGNAL)) {
                         //printf("Error on send() call \n");
                         m_bStopClient = true;
                     }
