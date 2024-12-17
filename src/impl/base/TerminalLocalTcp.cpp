@@ -178,7 +178,10 @@ namespace emb {
                     m_ClientThreadTx = thread{ std::bind(&TerminalLocalTcp::clientLoopTx, this, iClientSocket) };
                     emb::tools::thread::set_thread_name(m_ClientThreadTx, "TrmTcpSockTx");
 
-                    write("Connected\n");
+                    write("Connected\n\r");
+                    begin();
+                    setCursorVisible(false);
+                    commit();
 
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();
