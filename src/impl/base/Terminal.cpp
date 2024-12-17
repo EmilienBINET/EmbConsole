@@ -11,7 +11,7 @@ namespace emb {
         using namespace std;
 
         Terminal::Terminal(ConsoleSessionWithTerminal& a_Console) noexcept
-            : m_rConsoleSession{a_Console}
+            : m_rConsoleSession(a_Console)
             , m_pFunctions{ make_shared<Functions>(m_rConsoleSession) }
             , m_strCurrentUser{ "user" }
             , m_strCurrentMachine{ "machine" }

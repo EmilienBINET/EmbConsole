@@ -17,14 +17,35 @@ namespace emb {
     namespace console {
         using namespace std;
 
-        TerminalWindows::TerminalWindows(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : TerminalAnsi{ a_rConsoleSession } {
+        FILE* TerminalWindows::m_pStdConsoleFile{ NULL };
+
+        TerminalWindows::TerminalWindows::TerminalWindows(ConsoleSessionWithTerminal& a_rConsoleSession) noexcept : TerminalAnsi{ a_rConsoleSession } {
         }
         //TerminalWindows::TerminalWindows(TerminalWindows const&) noexcept = default;
         //TerminalWindows::TerminalWindows(TerminalWindows&&) noexcept = default;
         TerminalWindows::~TerminalWindows() noexcept = default;
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows const&) noexcept = default;
         //TerminalWindows& TerminalWindows::operator= (TerminalWindows&&) noexcept = default;
-        
+
+        void TerminalWindows::createStdConsole() {
+            if (!m_pStdConsoleFile && AllocConsole()) {
+                freopen_s(&m_pStdConsoleFile, "CONOUT$", "w", stdout);
+            }
+        }
+
+        void TerminalWindows::destroyStdConsole() {
+            if (m_pStdConsoleFile) {
+                fclose(m_pStdConsoleFile);
+                m_pStdConsoleFile = NULL;
+                FreeConsole();
+            }
+        }
+
+        bool TerminalWindows::isCreatable() {
+            DWORD ulDummy{ 0 };
+            return TRUE == GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &ulDummy);
+        }
+
         bool TerminalWindows::isSupported() {
             bool bRes{ false };
 
@@ -32,7 +53,6 @@ namespace emb {
             DWORD ulBackupIn{ 0 };
 
             if (TRUE == GetConsoleMode(hConsoleIn, &ulBackupIn)) {
-
                 if (ENABLE_VIRTUAL_TERMINAL_INPUT == (ulBackupIn & ENABLE_VIRTUAL_TERMINAL_INPUT)) {
                     // Virtual terminal already enabled => supported
                     bRes = true;
@@ -44,15 +64,16 @@ namespace emb {
                         SetConsoleMode(hConsoleIn, ulBackupIn);
                     }
                 }
-
             }
 
             return bRes;
         }
 
         void TerminalWindows::start() noexcept {
-            GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &m_ulPreviousInputMode);
-            SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE),
+            HANDLE hConsoleIn{ GetStdHandle(STD_INPUT_HANDLE) };
+            HANDLE hConsoleOut{ GetStdHandle(STD_OUTPUT_HANDLE) };
+            GetConsoleMode(hConsoleIn, &m_ulPreviousInputMode);
+            SetConsoleMode(hConsoleIn,
                 //ENABLE_ECHO_INPUT |
                 //ENABLE_INSERT_MODE |
                 //ENABLE_LINE_INPUT |
@@ -63,7 +84,7 @@ namespace emb {
                 //ENABLE_WINDOW_INPUT |
                 ENABLE_VIRTUAL_TERMINAL_INPUT |
                 0);
-            GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &m_ulPreviousOutputMode);
+            GetConsoleMode(hConsoleOut, &m_ulPreviousOutputMode);
             DWORD ulOutputMode =
                 ENABLE_PROCESSED_OUTPUT |
                 //ENABLE_WRAP_AT_EOL_OUTPUT |
@@ -71,21 +92,23 @@ namespace emb {
                 //DISABLE_NEWLINE_AUTO_RETURN |
                 //ENABLE_LVB_GRID_WORLDWIDE |
                 0;
-            SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ulOutputMode);
-            ConsoleSessionWithTerminal::setCaptureEndEvt([this, ulOutputMode]{
+            SetConsoleMode(hConsoleOut, ulOutputMode);
+            ConsoleSessionWithTerminal::setCaptureEndEvt([this, ulOutputMode] {
                 SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ulOutputMode);
                 requestTerminalSize();
             });
 
             TerminalAnsi::start();
+            m_bStopThread = false;
             m_InputThread = std::thread{ &TerminalWindows::inputLoop, this };
+            requestTerminalSize();
         }
 
         void TerminalWindows::processEvents() noexcept {
             processPrintCommands();
             processUserCommands();
 
-            if(m_bSizeChanged) {
+            if (m_bSizeChanged) {
                 m_bSizeChanged = false;
                 onTerminalSizeChanged();
             }
@@ -101,7 +124,7 @@ namespace emb {
             {
                 INPUT_RECORD irInBuf{};
                 irInBuf.EventType = FOCUS_EVENT; // That event is discarded later
-                DWORD wNumberOfEventsWritten{0};
+                DWORD wNumberOfEventsWritten{ 0 };
                 WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), &irInBuf, 1, &wNumberOfEventsWritten);
             }
             m_InputThread.join();
@@ -121,18 +144,18 @@ namespace emb {
 
         void TerminalWindows::inputLoop() noexcept {
             HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-            if(hStdin != INVALID_HANDLE_VALUE) {
+            if (hStdin != INVALID_HANDLE_VALUE) {
                 DWORD cNumRead;
-                size_t const sizeBuf{128};
+                size_t const sizeBuf{ 128 };
                 INPUT_RECORD irInBuf[sizeBuf];
-                while(!m_bStopThread) {
-                    if(ReadConsoleInput(hStdin, irInBuf, sizeBuf, &cNumRead)) {
+                while (!m_bStopThread) {
+                    if (ReadConsoleInput(hStdin, irInBuf, sizeBuf, &cNumRead)) {
                         string strKeyCode{};
-                        for (DWORD i=0; i<cNumRead; ++i) {
-                            switch(irInBuf[i].EventType) {
+                        for (DWORD i = 0; i < cNumRead; ++i) {
+                            switch (irInBuf[i].EventType) {
                             case KEY_EVENT: // keyboard input
-                                if(TRUE == irInBuf[i].Event.KeyEvent.bKeyDown) {
-                                    for(WORD j=0; j<irInBuf[i].Event.KeyEvent.wRepeatCount; ++j) {
+                                if (TRUE == irInBuf[i].Event.KeyEvent.bKeyDown) {
+                                    for (WORD j = 0; j < irInBuf[i].Event.KeyEvent.wRepeatCount; ++j) {
                                         strKeyCode += irInBuf[i].Event.KeyEvent.uChar.AsciiChar;
                                     }
                                 }
@@ -142,6 +165,7 @@ namespace emb {
                                 break;
 
                             case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing
+                                requestTerminalSize();
                                 processCapture();
                                 break;
 
@@ -155,7 +179,7 @@ namespace emb {
                                 break;
                             }
                         }
-                        if(!strKeyCode.empty()) {
+                        if (!strKeyCode.empty()) {
                             processPressedKeyCode(strKeyCode);
                         }
                     }
@@ -165,14 +189,13 @@ namespace emb {
 
         void TerminalWindows::requestTerminalSize() noexcept {
             CONSOLE_SCREEN_BUFFER_INFO csbi;
-            if(TRUE == GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+            if (TRUE == GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
                 Size newSize{ csbi.srWindow.Right - csbi.srWindow.Left + 1, csbi.srWindow.Bottom - csbi.srWindow.Top + 1 };
-                if(getCurrentSize() != newSize) {
+                if (getCurrentSize() != newSize) {
                     setCurrentSize(newSize);
                     m_bSizeChanged = true;
                 }
             }
         }
-
     } // console
 } // emb

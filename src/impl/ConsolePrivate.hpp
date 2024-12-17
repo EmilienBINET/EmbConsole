@@ -19,33 +19,33 @@ namespace emb {
             static void setStandardOutputCapture(StandardOutputFunctor const& a_funcCaptureFunctor) {
                 m_funcCaptureFunctor = a_funcCaptureFunctor;
                 m_bStopThread = true;
-                if(m_CaptureThread.joinable()) {
+                if (m_CaptureThread.joinable()) {
                     m_CaptureThread.join();
                 }
-                if(m_funcCaptureFunctor) {
+                if (m_funcCaptureFunctor) {
                     m_bStopThread = false;
-                    m_CaptureThread = std::thread{[]{
-                        while(!m_bStopThread) {
-                            if(m_funcPeriodicCapture) {
+                    m_CaptureThread = std::thread{ [] {
+                        while (!m_bStopThread) {
+                            if (m_funcPeriodicCapture) {
                                 m_funcPeriodicCapture();
                             }
                             std::this_thread::sleep_for(std::chrono::milliseconds(100));
                         }
-                    }};
+                    } };
                 }
             }
             static void beginStdCapture() {
-                if(m_funcCaptureFunctor) {
+                if (m_funcCaptureFunctor) {
                     m_StdCapture.BeginCapture();
 
                     std::string strCaptured = m_StdCapture.GetCapture();
-                    if(strCaptured.size() > 0) {
+                    if (strCaptured.size() > 0) {
                         m_funcCaptureFunctor(strCaptured);
                     }
                 }
             }
             static void endStdCapture() {
-                if(m_funcCaptureFunctor) {
+                if (m_funcCaptureFunctor) {
                     m_StdCapture.EndCapture();
                 }
             }
@@ -57,7 +57,7 @@ namespace emb {
             }
             ~ConsoleSessionWithTerminal() {
                 m_bStopThread = true;
-                if(m_CaptureThread.joinable()) {
+                if (m_CaptureThread.joinable()) {
                     m_CaptureThread.join();
                 }
             }
@@ -79,11 +79,11 @@ namespace emb {
         class TConsoleSessionWithTerminal : public ConsoleSessionWithTerminal {
         public:
             TConsoleSessionWithTerminal()
-                : ConsoleSessionWithTerminal{ std::make_unique<TerminalType>(*this) } {
+                : ConsoleSessionWithTerminal{ emb::tools::memory::make_unique<TerminalType>(*this) } {
             }
             template<typename... U>
             TConsoleSessionWithTerminal(U&&... u)
-                : ConsoleSessionWithTerminal{ std::make_unique<TerminalType>(*this, std::forward<U>(u)...) } {
+                : ConsoleSessionWithTerminal{ emb::tools::memory::make_unique<TerminalType>(*this, std::forward<U>(u)...) } {
             }
         };
 
@@ -125,6 +125,8 @@ namespace emb {
             Private& operator= (Private const&) noexcept;
             Private& operator= (Private&&) noexcept;
             Private& operator<< (PrintCommand const& a_Cmd) noexcept;
+            void showWindowsStdConsole() noexcept;
+            void hideWindowsStdConsole() noexcept;
             void setUserName(std::string const&) noexcept;
             void setMachineName(std::string const&) noexcept;
             void addCommand(UserCommandInfo const&, UserCommandFunctor0 const&, UserCommandAutoCompleteFunctor const&) noexcept;
@@ -140,11 +142,14 @@ namespace emb {
             void processEvents() noexcept override;
             void stop() noexcept override;
             void run();
-
+            void applyOptions(bool a_bAutoStart);
+            
         private:
             std::thread m_Thread{};
             volatile std::atomic_bool m_Stop{ false };
             std::vector<std::unique_ptr<ConsoleSessionWithTerminal>> m_ConsolesVector{};
+            Options m_Options{};
+            bool m_bPromptEnabled{ false };
         };
     } // console
 } // emb

@@ -1,6 +1,21 @@
 cmake_minimum_required(VERSION 3.15)
 project(EmbConsole CXX)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL 4.9)
+    set(NEED_PCRE2 ON)
+endif()
+
+if(NEED_PCRE2)
+    set(PCRE2_SHOW_REPORT           OFF CACHE BOOL "Show the final configuration report")
+    set(PCRE2_SUPPORT_LIBBZ2        OFF CACHE BOOL "Enable support for linking pcre2grep with libbz2.")
+    set(PCRE2_SUPPORT_LIBZ          OFF CACHE BOOL "Enable support for linking pcre2grep with libz.")
+    set(PCRE2_SUPPORT_LIBREADLINE   OFF CACHE BOOL "Enable support for linking pcre2test with libreadline.")
+    set(PCRE2_SUPPORT_LIBEDIT       OFF CACHE BOOL "Enable support for linking pcre2test with libedit.")
+    set(PCRE2_BUILD_PCRE2GREP       OFF CACHE BOOL "Build pcre2grep")
+    set(PCRE2_BUILD_TESTS           OFF CACHE BOOL "Build the tests")
+    add_subdirectory(third/pcre2)
+endif()
+
 if(WIN32)
     set(PLATFORM_SPECIFIC_FILES
         src/impl/win/TerminalWindows.hpp
@@ -46,6 +61,8 @@ add_library(EmbConsole
     src/impl/base/TerminalFile.cpp
     src/impl/base/TerminalSyslog.hpp
     src/impl/base/TerminalSyslog.cpp
+    src/impl/base/TerminalLocalTcp.hpp
+    src/impl/base/TerminalLocalTcp.cpp
     ${PLATFORM_SPECIFIC_FILES}
 )
 target_include_directories(EmbConsole PUBLIC include)
@@ -69,3 +86,7 @@ if(WIN32)
 	target_link_libraries(EmbConsole Ws2_32)
 endif()
 
+if(NEED_PCRE2)
+    target_link_libraries(EmbConsole pcre2-posix-static)
+    target_compile_definitions(EmbConsole PRIVATE "_USE_PCRE2")
+endif()

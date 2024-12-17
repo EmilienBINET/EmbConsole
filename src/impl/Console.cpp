@@ -45,20 +45,24 @@ namespace emb {
             (*this) << ResetTextFormat() << Commit();
         }
 
-        bool IPromptableConsole::promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator) noexcept {
+        bool IPromptableConsole::promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator, std::string const& a_strErrorMessage) noexcept {
             bool bRes = false;
             (*this)
                 << BeginPrompt()
                 << Question(a_strQuestion)
                 << OnCancel([&] { bRes = false; })
                 << OnValid([&](std::string const& a_strResult) { bRes = true; a_rstrResult = a_strResult; });
-            //if (!a_strRegexValidator.empty()) {
-            //    (*this)
-            //        << Validator(a_strRegexValidator);
-            //}
+            if (!a_strRegexValidator.empty()) {
+                (*this)
+                    << Validator(a_strRegexValidator, a_strErrorMessage);
+            }
             (*this)
                 << CommitPrompt();
             return bRes;
+        }
+
+        bool IPromptableConsole::promptIpv4(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strErrorMessage) noexcept {
+            return promptString(a_strQuestion, a_rstrResult, "((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}", a_strErrorMessage);
         }
 
         bool IPromptableConsole::promptNumber(std::string const& a_strQuestion, long& a_rlResult) noexcept {
@@ -106,11 +110,11 @@ namespace emb {
         //////////////////////////////////////////////////
 
         ConsoleSession::ConsoleSession(TerminalPtr a_pTerminal) noexcept
-            : m_pPrivateImpl{ make_unique<Private>(a_pTerminal) } {
+            : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(a_pTerminal) } {
         }
 
         //ConsoleSession::ConsoleSession(ConsoleSession const& aOther) noexcept
-        //    : m_pPrivateImpl{ make_unique<Private>(*aOther.m_pPrivateImpl) } {
+        //    : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(*aOther.m_pPrivateImpl) } {
         //}
 
         ConsoleSession::ConsoleSession(ConsoleSession&&) noexcept = default;
@@ -168,12 +172,28 @@ namespace emb {
             return std::weak_ptr<Console>{};
         }
 
+        void Console::showWindowsStdConsole() noexcept {
+            for (auto const& elm : s_mpConsoles) {
+                if (auto pConsole = elm.second.lock()) {
+                    pConsole->m_pPrivateImpl->showWindowsStdConsole();
+                }
+            }
+        }
+
+        void Console::hideWindowsStdConsole() noexcept {
+            for (auto const& elm : s_mpConsoles) {
+                if (auto pConsole = elm.second.lock()) {
+                    pConsole->m_pPrivateImpl->hideWindowsStdConsole();
+                }
+            }
+        }
+
         Console::Console() noexcept
-            : m_pPrivateImpl{ make_unique<Private>(*this) } {
+            : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(*this) } {
         }
 
         Console::Console(Console const& aOther) noexcept
-            : m_pPrivateImpl{ make_unique<Private>(*aOther.m_pPrivateImpl) } {
+            : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(*aOther.m_pPrivateImpl) } {
         }
 
         Console::Console(Console&&) noexcept = default;
@@ -182,7 +202,7 @@ namespace emb {
         }
 
         Console::Console(Options const& aOptions) noexcept
-            : m_pPrivateImpl{ make_unique<Private>(*this, aOptions) } {
+            : m_pPrivateImpl{ emb::tools::memory::make_unique<Private>(*this, aOptions) } {
         }
 
         Console::~Console() noexcept {
@@ -217,13 +237,13 @@ namespace emb {
         }
 
         void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor,
-                                 UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             a_CommandInfo.validate();
             m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }
 
         void Console::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor,
-                                 UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
             a_CommandInfo.validate();
             m_pPrivateImpl->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
         }

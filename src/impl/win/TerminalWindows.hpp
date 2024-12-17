@@ -16,6 +16,9 @@ namespace emb {
             virtual ~TerminalWindows() noexcept;
             TerminalWindows& operator= (TerminalWindows const&) noexcept = delete;
             TerminalWindows& operator= (TerminalWindows&&) noexcept = delete;
+            static void createStdConsole();
+            static void destroyStdConsole();
+            static bool isCreatable();
             static bool isSupported();
 
         protected:
@@ -35,9 +38,10 @@ namespace emb {
         private:
             mutable unsigned long m_ulPreviousInputMode{};
             mutable unsigned long m_ulPreviousOutputMode{};
-            std::atomic<bool> m_bStopThread{false};
+            std::atomic<bool> m_bStopThread{ false };
             std::thread m_InputThread{};
-            std::atomic<bool> m_bSizeChanged{false};
+            std::atomic<bool> m_bSizeChanged{ false };
+            static FILE* m_pStdConsoleFile;
         };
     } // console
 } // emb

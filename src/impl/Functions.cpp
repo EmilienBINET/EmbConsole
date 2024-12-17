@@ -337,7 +337,12 @@ namespace emb {
 
             for (auto const& elm : m_mapFunctions) {
                 if (isRootCommand(elm.first)) { // root command => available from anywhere
-                    vecCmds.push_back(LocalCommandInfo{false, true, elm.first.substr(1), elm.second.i.description});
+                    LocalCommandInfo i;
+                    i.bIsDirectory = false;
+                    i.bIsRoot = true;
+                    i.strName = elm.first.substr(1);
+                    i.strDescription = elm.second.i.description;
+                    vecCmds.push_back(i);
                 }
             }
 
@@ -349,10 +354,20 @@ namespace emb {
                     if(std::count(vecPrintedFolders.begin(), vecPrintedFolders.end(), folder) == 0) {
                         vecPrintedFolders.push_back(folder);
                         if(string::npos == folder.find('/')) { // command
-                            vecCmds.push_back(LocalCommandInfo{false, false, folder, elm.second.i.description});
+                            LocalCommandInfo i;
+                            i.bIsDirectory = false;
+                            i.bIsRoot = false;
+                            i.strName = folder;
+                            i.strDescription = elm.second.i.description;
+                            vecCmds.push_back(i);
                         }
                         else { // folder
-                            vecCmds.push_back(LocalCommandInfo{true, false, folder, elm.second.i.description});
+                            LocalCommandInfo i;
+                            i.bIsDirectory = true;
+                            i.bIsRoot = false;
+                            i.strName = folder;
+                            i.strDescription = elm.second.i.description;
+                            vecCmds.push_back(i);
                         }
                     }
                 }
