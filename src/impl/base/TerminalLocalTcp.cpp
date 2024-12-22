@@ -12,6 +12,7 @@
 #include <Ws2tcpip.h>
 #define shutdown_socket(__sock) shutdown(__sock, SD_BOTH)
 #define close_socket(__sock) closesocket(__sock)
+#define MSG_NOSIGNAL 0
 #else
 #include <unistd.h>
 #include <sys/stat.h>
@@ -45,7 +46,7 @@ namespace emb {
                     << "nc 127.0.0.1 " << m_pOption->iPort << endl
                     << "stty icanon echo" << endl;
                 chmod(m_pOption->strShellFilePath.c_str(), ACCESSPERMS);
-            }
+    }
 #endif
 
             addCommand(emb::console::UserCommandInfo("/exit", "Exit the current shell"), [this] {
@@ -58,7 +59,7 @@ namespace emb {
                     m_bStopClient = true;
                 }
             });
-        }
+}
         //TerminalLocalTcp::TerminalLocalTcp(TerminalLocalTcp const&) noexcept = default;
         //TerminalLocalTcp::TerminalLocalTcp(TerminalLocalTcp&&) noexcept = default;
         TerminalLocalTcp::~TerminalLocalTcp() noexcept {
