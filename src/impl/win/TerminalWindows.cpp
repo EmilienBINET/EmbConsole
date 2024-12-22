@@ -30,6 +30,11 @@ namespace emb {
         void TerminalWindows::createStdConsole() {
             if (!m_pStdConsoleFile && AllocConsole()) {
                 freopen_s(&m_pStdConsoleFile, "CONOUT$", "w", stdout);
+                if (HWND hwnd = GetConsoleWindow()) {
+                    if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
+                        EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+                    }
+                }
             }
         }
 
