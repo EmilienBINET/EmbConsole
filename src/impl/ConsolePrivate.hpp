@@ -125,7 +125,7 @@ namespace emb {
             Private& operator= (Private const&) noexcept;
             Private& operator= (Private&&) noexcept;
             Private& operator<< (PrintCommand const& a_Cmd) noexcept;
-            void showWindowsStdConsole() noexcept;
+            void showWindowsStdConsole(std::string const& a_strTitle) noexcept;
             void hideWindowsStdConsole() noexcept;
             void setUserName(std::string const&) noexcept;
             void setMachineName(std::string const&) noexcept;

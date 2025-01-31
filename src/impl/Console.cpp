@@ -172,10 +172,10 @@ namespace emb {
             return std::weak_ptr<Console>{};
         }
 
-        void Console::showWindowsStdConsole() noexcept {
+        void Console::showWindowsStdConsole(std::string const& a_strTitle) noexcept {
             for (auto const& elm : s_mpConsoles) {
                 if (auto pConsole = elm.second.lock()) {
-                    pConsole->m_pPrivateImpl->showWindowsStdConsole();
+                    pConsole->m_pPrivateImpl->showWindowsStdConsole(a_strTitle);
                 }
             }
         }

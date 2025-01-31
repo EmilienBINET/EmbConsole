@@ -140,12 +140,27 @@ namespace emb {
             return *this;
         }
 
-        void Console::Private::showWindowsStdConsole() noexcept {
+        void Console::Private::showWindowsStdConsole(std::string const& a_strTitle) noexcept {
 #ifdef WIN32
             // Create the external STD console
             TerminalWindows::createStdConsole();
             // Reapply options so that the windows terminal can be created
             applyOptions(true);
+            // Set the title
+            if (!a_strTitle.empty()) {
+                std::shared_ptr<Terminal> pTerm{};
+                if (auto pTerminalWindows = getTerminal<TerminalWindows>(m_ConsolesVector)) {
+                    pTerm = pTerminalWindows;
+                }
+                else if (auto pTerminalWindowsLegacy = getTerminal<TerminalWindowsLegacy>(m_ConsolesVector)) {
+                    pTerm = pTerminalWindows;
+                }
+                if (pTerm) {
+                    pTerm->begin();
+                    pTerm->setWindowTitle(a_strTitle);
+                    pTerm->commit();
+                }
+            }
 #endif
         }
 

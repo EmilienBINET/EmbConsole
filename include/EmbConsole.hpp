@@ -232,7 +232,7 @@ namespace emb {
             static std::shared_ptr<Console> create(Options const&, int a_iId = 0) noexcept;
             static std::weak_ptr<Console> instance(int a_iId = 0) noexcept;
 
-            static void showWindowsStdConsole() noexcept;
+            static void showWindowsStdConsole(std::string const& a_strTitle="") noexcept;
             static void hideWindowsStdConsole() noexcept;
 
             // public members
