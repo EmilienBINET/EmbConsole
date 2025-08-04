@@ -21,6 +21,11 @@ namespace emb {
             return *this;
         }
 
+        IPrintableConsole& IPrintableConsole::operator<< (table::Table const& a_stTable) noexcept {
+            table::print(*this, a_stTable);
+            return *this;
+        }
+
         void IPrintableConsole::print(std::string const& a_Data) noexcept {
             (*this) << Begin() << ClearLine(ClearLine::Type::All);
 
@@ -43,6 +48,15 @@ namespace emb {
             }
 
             (*this) << ResetTextFormat() << Commit();
+        }
+
+        void IPrintableConsole::printTable(table::Table const& a_stTable) noexcept {
+            (*this)
+                << Begin()
+                << ClearLine(ClearLine::Type::All)
+                << a_stTable
+                << PrintNewLine()
+                << Commit();
         }
 
         bool IPromptableConsole::promptString(std::string const& a_strQuestion, std::string& a_rstrResult, std::string const& a_strRegexValidator, std::string const& a_strErrorMessage) noexcept {
