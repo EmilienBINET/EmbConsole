@@ -55,6 +55,7 @@ namespace emb {
         class PromptCommand;
         class Terminal;
         using TerminalPtr = std::shared_ptr<Terminal>;
+        namespace table { struct Table; }
 
         //////////////////////////////////////////////////
         ///// User Console Commands
@@ -159,9 +160,11 @@ namespace emb {
             virtual IPrintableConsole& operator<< (PrintCommand const&) noexcept = 0;
             IPrintableConsole& operator<< (char const*) noexcept;
             IPrintableConsole& operator<< (std::string const&) noexcept;
+            IPrintableConsole& operator<< (table::Table const&) noexcept;
 
             void print(std::string const& a_Data) noexcept;
             void printError(std::string const& a_Data) noexcept;
+            void printTable(table::Table const& a_stTable) noexcept;
         };
 
         /**
@@ -232,7 +235,7 @@ namespace emb {
             static std::shared_ptr<Console> create(Options const&, int a_iId = 0) noexcept;
             static std::weak_ptr<Console> instance(int a_iId = 0) noexcept;
 
-            static void showWindowsStdConsole() noexcept;
+            static void showWindowsStdConsole(std::string const& a_strTitle="") noexcept;
             static void hideWindowsStdConsole() noexcept;
 
             // public members
@@ -1148,7 +1151,7 @@ namespace emb {
              * @param a_rConsole    Console to print the table onto
              * @param a_stTable     Table to print
              */
-            void print(ConsoleSession& a_rConsole, Table const& a_stTable);
+            void print(IPrintableConsole& a_rConsole, Table const& a_stTable);
         }
     } // console
 } // emb

@@ -230,7 +230,7 @@ namespace emb {
 
         namespace table {
 
-            void print(ConsoleSession& a_rConsole, Table const& a_stTable) {
+            void print(IPrintableConsole& a_rConsole, Table const& a_stTable) {
 
                 // Calculate the width of each column
                 size_t const ulMaxColumnWidth{100};

@@ -125,7 +125,7 @@ namespace emb {
             Private& operator= (Private const&) noexcept;
             Private& operator= (Private&&) noexcept;
             Private& operator<< (PrintCommand const& a_Cmd) noexcept;
-            void showWindowsStdConsole() noexcept;
+            void showWindowsStdConsole(std::string const& a_strTitle) noexcept;
             void hideWindowsStdConsole() noexcept;
             void setUserName(std::string const&) noexcept;
             void setMachineName(std::string const&) noexcept;
@@ -143,13 +143,22 @@ namespace emb {
             void stop() noexcept override;
             void run();
             void applyOptions(bool a_bAutoStart);
-            
+
+        private:
+            struct UserCommand {
+                UserCommandInfo i;
+                UserCommandFunctor0 f0;
+                UserCommandFunctor1 f1;
+                UserCommandAutoCompleteFunctor fa;
+            };
+
         private:
             std::thread m_Thread{};
             volatile std::atomic_bool m_Stop{ false };
             std::vector<std::unique_ptr<ConsoleSessionWithTerminal>> m_ConsolesVector{};
             Options m_Options{};
             bool m_bPromptEnabled{ false };
+            std::vector<UserCommand> m_vecCommonUserCommands{};
         };
     } // console
 } // emb

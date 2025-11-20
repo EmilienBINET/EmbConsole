@@ -181,8 +181,12 @@ namespace emb {
                 m_CurrentSize = a_NewSize;
             }
             void setCurrentCursorPosition(Position const& a_NewPosition) noexcept {
-                std::lock_guard<std::recursive_mutex> l(m_Mutex);
+                std::lock_guard<std::recursive_mutex> const l(m_Mutex);
                 m_CurrentCursorPosition = a_NewPosition;
+            }
+            void resetScrollingRegion() noexcept {
+                std::lock_guard<std::recursive_mutex> const l{ m_Mutex };
+                m_bScrollingRegionSet = false;
             }
 
         private:

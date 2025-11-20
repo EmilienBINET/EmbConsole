@@ -12,6 +12,7 @@
 #include <Ws2tcpip.h>
 #define shutdown_socket(__sock) shutdown(__sock, SD_BOTH)
 #define close_socket(__sock) closesocket(__sock)
+#define MSG_NOSIGNAL 0
 #else
 #include <unistd.h>
 #include <sys/stat.h>
@@ -45,11 +46,12 @@ namespace emb {
                     << "nc 127.0.0.1 " << m_pOption->iPort << endl
                     << "stty icanon echo" << endl;
                 chmod(m_pOption->strShellFilePath.c_str(), ACCESSPERMS);
-            }
+    }
 #endif
 
             addCommand(emb::console::UserCommandInfo("/exit", "Exit the current shell"), [this] {
                 if (m_iClientSocket > 0) {
+                    TerminalAnsi::stop();
                     int status = shutdown_socket(m_iClientSocket);
                     if (status == 0) {
                         status = close_socket(m_iClientSocket);
@@ -57,7 +59,7 @@ namespace emb {
                     m_bStopClient = true;
                 }
             });
-        }
+}
         //TerminalLocalTcp::TerminalLocalTcp(TerminalLocalTcp const&) noexcept = default;
         //TerminalLocalTcp::TerminalLocalTcp(TerminalLocalTcp&&) noexcept = default;
         TerminalLocalTcp::~TerminalLocalTcp() noexcept {
@@ -92,8 +94,6 @@ namespace emb {
 
             m_ServerThread = std::thread{ &TerminalLocalTcp::serverLoop, this };
             emb::tools::thread::set_thread_name(m_ServerThread, "TrmTcpSockSrv");
-
-            TerminalAnsi::start();
         }
 
         void TerminalLocalTcp::processEvents() noexcept {
@@ -123,7 +123,6 @@ namespace emb {
         }
 
         void TerminalLocalTcp::stop() noexcept {
-            TerminalAnsi::stop();
             int status = shutdown_socket(m_iServerSocket);
             if (status == 0) {
                 status = close_socket(m_iServerSocket);
@@ -178,7 +177,8 @@ namespace emb {
                     m_ClientThreadTx = thread{ std::bind(&TerminalLocalTcp::clientLoopTx, this, iClientSocket) };
                     emb::tools::thread::set_thread_name(m_ClientThreadTx, "TrmTcpSockTx");
 
-                    write("Connected\n");
+                    write("Connected\n\r");
+                    TerminalAnsi::start();
 
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();
@@ -210,7 +210,7 @@ namespace emb {
 
                 lock_guard<mutex> const l{ m_Mutex };
                 if (!m_strDataToSend.empty()) {
-                    if (-1 == send(a_iClientSocket, m_strDataToSend.c_str(), m_strDataToSend.size() * sizeof(char), 0)) {
+                    if (-1 == send(a_iClientSocket, m_strDataToSend.c_str(), m_strDataToSend.size() * sizeof(char), MSG_NOSIGNAL)) {
                         //printf("Error on send() call \n");
                         m_bStopClient = true;
                     }

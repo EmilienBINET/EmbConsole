@@ -140,12 +140,27 @@ namespace emb {
             return *this;
         }
 
-        void Console::Private::showWindowsStdConsole() noexcept {
+        void Console::Private::showWindowsStdConsole(std::string const& a_strTitle) noexcept {
 #ifdef WIN32
             // Create the external STD console
             TerminalWindows::createStdConsole();
             // Reapply options so that the windows terminal can be created
             applyOptions(true);
+            // Set the title
+            if (!a_strTitle.empty()) {
+                std::shared_ptr<Terminal> pTerm{};
+                if (auto pTerminalWindows = getTerminal<TerminalWindows>(m_ConsolesVector)) {
+                    pTerm = pTerminalWindows;
+                }
+                else if (auto pTerminalWindowsLegacy = getTerminal<TerminalWindowsLegacy>(m_ConsolesVector)) {
+                    pTerm = pTerminalWindows;
+                }
+                if (pTerm) {
+                    pTerm->begin();
+                    pTerm->setWindowTitle(a_strTitle);
+                    pTerm->commit();
+                }
+            }
 #endif
         }
 
@@ -173,6 +188,14 @@ namespace emb {
 
         void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor0 const& a_funcCommandFunctor,
             UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            m_vecCommonUserCommands.push_back(
+                UserCommand{
+                    a_CommandInfo,
+                    a_funcCommandFunctor,
+                    nullptr,
+                    a_funcAutoCompleteFunctor
+                }
+            );
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
             }
@@ -180,12 +203,28 @@ namespace emb {
 
         void Console::Private::addCommand(UserCommandInfo const& a_CommandInfo, UserCommandFunctor1 const& a_funcCommandFunctor,
             UserCommandAutoCompleteFunctor const& a_funcAutoCompleteFunctor) noexcept {
+            m_vecCommonUserCommands.push_back(
+                UserCommand{
+                    a_CommandInfo,
+                    nullptr,
+                    a_funcCommandFunctor,
+                    a_funcAutoCompleteFunctor
+                }
+            );
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->addCommand(a_CommandInfo, a_funcCommandFunctor, a_funcAutoCompleteFunctor);
             }
         }
 
         void Console::Private::delCommand(UserCommandInfo const& a_CommandInfo) noexcept {
+            m_vecCommonUserCommands.erase(
+                std::remove_if(
+                    m_vecCommonUserCommands.begin(),
+                    m_vecCommonUserCommands.end(),
+                    [a_CommandInfo](UserCommand const& userCommand) { return userCommand.i.path == a_CommandInfo.path; }
+                ),
+                m_vecCommonUserCommands.end()
+            );
             for (auto const& console : m_ConsolesVector) {
                 console->terminal()->delCommand(a_CommandInfo);
             }
@@ -263,6 +302,14 @@ namespace emb {
                             if (auto pAddedTerminal = m_ConsolesVector.back()->terminal()) {
                                 pAddedTerminal->start();
                                 pAddedTerminal->setPromptEnabled(m_bPromptEnabled);
+                                for (auto const& userCommand : m_vecCommonUserCommands) {
+                                    if (userCommand.f0) {
+                                        pAddedTerminal->addCommand(userCommand.i, userCommand.f0, userCommand.fa);
+                                    }
+                                    else if (userCommand.f1) {
+                                        pAddedTerminal->addCommand(userCommand.i, userCommand.f1, userCommand.fa);
+                                    }
+                                }
                             }
                         }
                     }
