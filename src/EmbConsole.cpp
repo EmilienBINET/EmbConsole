@@ -37,14 +37,16 @@ namespace emb {
                 string strHomePath{a_Options.homePath.empty() ? "/" : a_Options.homePath};
                 string strChrootPath{a_Options.chrootPath};
 
+                std::error_code ec{};
+                (void) ec; // MAKE COMPILER HAPPY
                 // Test options
                 assert(!(a_Options.listDirectories == false && a_Options.recursive == true)
                        && "Cannot recurse without listing directories");
                 assert(!(!a_Options.chrootPath.empty() && 0 != a_Options.homePath.find(a_Options.chrootPath))
                        && "homePath is not a subdirectory of chrootPath");
-                assert(!(!a_Options.chrootPath.empty() && !fs::exists(a_Options.chrootPath))
+                assert(!(!a_Options.chrootPath.empty() && !fs::exists(a_Options.chrootPath, ec))
                        && "chrootPath does not exist");
-                assert(fs::exists(strHomePath)
+                assert(fs::exists(strHomePath, ec)
                        && "homePath does not exist");
 
                 // We need to know if user is typing an absolute path (or relative otherwise)
