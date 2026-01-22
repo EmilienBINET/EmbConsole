@@ -311,19 +311,61 @@ namespace emb {
                     for(size_t ulIdx=0; ulIdx<vulColumnsSize.size(); ++ulIdx) {
                         auto columnText = row.at(ulIdx);
                         bool bEllipsis{false};
-                        if(columnText.strText.size() > vulColumnsSize.at(ulIdx)) {
+
+                        if (columnText.strText.size() > vulColumnsSize.at(ulIdx)) {
                             columnText.strText.resize(vulColumnsSize.at(ulIdx) - 3);
                             bEllipsis = true;
                         }
                         else {
                             columnText.strText.resize(vulColumnsSize.at(ulIdx), ' ');
                         }
+
+                        size_t ulNbNewLinesChars = std::count_if(
+                            columnText.strText.begin(),
+                            columnText.strText.end(),
+                            [](char c) { return c == '\n' || c == '\r'; }
+                        );
+
+                        if (ulNbNewLinesChars > 0) {
+                            // Reserve space for the '\' character that we will show
+                            columnText.strText.resize(columnText.strText.size() - ulNbNewLinesChars);
+                        }
                         columnText.strText = " " + columnText.strText;
+
                         a_rConsole
                             << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
-                            << SetColor(columnText.eColor)
-                            << PrintText(columnText.strText);
-                        if(bEllipsis) {
+                            << SetColor(columnText.eColor);
+
+                        if (ulNbNewLinesChars <= 0) {
+                            a_rConsole << PrintText(columnText.strText);
+                        }
+                        else {
+                            std::string strText{};
+                            for (char c : columnText.strText) {
+                                if (c == '\n') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\n")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (c == '\r') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\r")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else {
+                                    strText += c;
+                                }
+                            }
+                            a_rConsole << PrintText(strText);
+                        }
+
+                        if (bEllipsis) {
                             a_rConsole
                                 << SetColor(SetColor::Color::BrightRed)
                                 << PrintText("... ");
@@ -332,6 +374,7 @@ namespace emb {
                             a_rConsole
                                 << PrintText(" ");
                         }
+
                         a_rConsole
                             << ResetTextFormat();
                     }
