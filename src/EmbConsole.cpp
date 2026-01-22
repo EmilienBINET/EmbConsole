@@ -1,6 +1,7 @@
 #include "EmbConsole.hpp"
 #include "impl/Functions.hpp"
 #include <string>
+#include <sstream>
 #if __cplusplus >= 201703L // >= C++17
 #include "impl/filesystem.hpp"
 namespace fs = std::filesystem;
@@ -313,19 +314,105 @@ namespace emb {
                     for(size_t ulIdx=0; ulIdx<vulColumnsSize.size(); ++ulIdx) {
                         auto columnText = row.at(ulIdx);
                         bool bEllipsis{false};
-                        if(columnText.strText.size() > vulColumnsSize.at(ulIdx)) {
+
+                        if (columnText.strText.size() > vulColumnsSize.at(ulIdx)) {
                             columnText.strText.resize(vulColumnsSize.at(ulIdx) - 3);
                             bEllipsis = true;
                         }
                         else {
                             columnText.strText.resize(vulColumnsSize.at(ulIdx), ' ');
                         }
+
+                        size_t ulNbNewLinesChars = std::count_if(
+                            columnText.strText.begin(),
+                            columnText.strText.end(),
+                            [](char c) { return c == '\b' || c == '\f' || c == '\n' || c == '\r' || c == '\t'; }
+                        );
+
+                        size_t ulNbBinChars = std::count_if(
+                            columnText.strText.begin(),
+                            columnText.strText.end(),
+                            [](unsigned char c) { return !(c == '\b' || c == '\f' || c == '\n' || c == '\r' || c == '\t') && !std::isprint(c); }
+                        );
+
+                        if (ulNbNewLinesChars > 0) {
+                            // Reserve space for the '\' character that we will show
+                            columnText.strText.resize(columnText.strText.size() - ulNbNewLinesChars);
+                        }
+                        if (ulNbBinChars > 0) {
+                            // Reserve space for the '\x?' character that we will show
+                            columnText.strText.resize(columnText.strText.size() - ulNbBinChars * 3);
+                        }
                         columnText.strText = " " + columnText.strText;
+
                         a_rConsole
                             << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
-                            << SetColor(columnText.eColor)
-                            << PrintText(columnText.strText);
-                        if(bEllipsis) {
+                            << SetColor(columnText.eColor);
+
+                        if (ulNbNewLinesChars <= 0 && ulNbBinChars <= 0) {
+                            a_rConsole << PrintText(columnText.strText);
+                        }
+                        else {
+                            std::string strText{};
+                            for (char c : columnText.strText) {
+                                if (c == '\b') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\b")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (c == '\f') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\f")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (c == '\n') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\n")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (c == '\r') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\r")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (c == '\t') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\t")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (!std::isprint(static_cast<unsigned char>(c))) {
+                                    std::stringstream stream;
+                                    stream << "\\x" << std::setfill('0') << std::setw(2) << std::hex << (0xFF & static_cast<unsigned int>(c));
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText(stream.str())
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else {
+                                    strText += c;
+                                }
+                            }
+                            a_rConsole << PrintText(strText);
+                        }
+
+                        if (bEllipsis) {
                             a_rConsole
                                 << SetColor(SetColor::Color::BrightRed)
                                 << PrintText("... ");
@@ -334,6 +421,7 @@ namespace emb {
                             a_rConsole
                                 << PrintText(" ");
                         }
+
                         a_rConsole
                             << ResetTextFormat();
                     }
