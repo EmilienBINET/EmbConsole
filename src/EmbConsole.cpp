@@ -1,6 +1,7 @@
 #include "EmbConsole.hpp"
 #include "impl/Functions.hpp"
 #include <string>
+#include <sstream>
 #if __cplusplus >= 201703L // >= C++17
 #include "impl/filesystem.hpp"
 namespace fs = std::filesystem;
@@ -326,9 +327,19 @@ namespace emb {
                             [](char c) { return c == '\b' || c == '\f' || c == '\n' || c == '\r' || c == '\t'; }
                         );
 
+                        size_t ulNbBinChars = std::count_if(
+                            columnText.strText.begin(),
+                            columnText.strText.end(),
+                            [](unsigned char c) { return !(c == '\b' || c == '\f' || c == '\n' || c == '\r' || c == '\t') && !std::isprint(c); }
+                        );
+
                         if (ulNbNewLinesChars > 0) {
                             // Reserve space for the '\' character that we will show
                             columnText.strText.resize(columnText.strText.size() - ulNbNewLinesChars);
+                        }
+                        if (ulNbBinChars > 0) {
+                            // Reserve space for the '\x?' character that we will show
+                            columnText.strText.resize(columnText.strText.size() - ulNbBinChars * 3);
                         }
                         columnText.strText = " " + columnText.strText;
 
@@ -336,7 +347,7 @@ namespace emb {
                             << PrintSymbol(PrintSymbol::Symbol::VerticalBar)
                             << SetColor(columnText.eColor);
 
-                        if (ulNbNewLinesChars <= 0) {
+                        if (ulNbNewLinesChars <= 0 && ulNbBinChars <= 0) {
                             a_rConsole << PrintText(columnText.strText);
                         }
                         else {
@@ -379,6 +390,16 @@ namespace emb {
                                         << PrintText(strText)
                                         << SetColor(SetColor::Color::BrightRed)
                                         << PrintText("\\t")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (!std::isprint(static_cast<unsigned char>(c))) {
+                                    std::stringstream stream;
+                                    stream << "\\x" << std::setfill('0') << std::setw(2) << std::hex << (0xFF & static_cast<unsigned int>(c));
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText(stream.str())
                                         << SetColor(columnText.eColor);
                                     strText.clear();
                                 }
