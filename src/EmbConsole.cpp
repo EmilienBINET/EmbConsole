@@ -323,7 +323,7 @@ namespace emb {
                         size_t ulNbNewLinesChars = std::count_if(
                             columnText.strText.begin(),
                             columnText.strText.end(),
-                            [](char c) { return c == '\n' || c == '\r'; }
+                            [](char c) { return c == '\b' || c == '\f' || c == '\n' || c == '\r' || c == '\t'; }
                         );
 
                         if (ulNbNewLinesChars > 0) {
@@ -342,7 +342,23 @@ namespace emb {
                         else {
                             std::string strText{};
                             for (char c : columnText.strText) {
-                                if (c == '\n') {
+                                if (c == '\b') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\b")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (c == '\f') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\f")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (c == '\n') {
                                     a_rConsole
                                         << PrintText(strText)
                                         << SetColor(SetColor::Color::BrightRed)
@@ -355,6 +371,14 @@ namespace emb {
                                         << PrintText(strText)
                                         << SetColor(SetColor::Color::BrightRed)
                                         << PrintText("\\r")
+                                        << SetColor(columnText.eColor);
+                                    strText.clear();
+                                }
+                                else if (c == '\t') {
+                                    a_rConsole
+                                        << PrintText(strText)
+                                        << SetColor(SetColor::Color::BrightRed)
+                                        << PrintText("\\t")
                                         << SetColor(columnText.eColor);
                                     strText.clear();
                                 }
