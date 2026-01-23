@@ -51,7 +51,6 @@ namespace emb {
 
             addCommand(emb::console::UserCommandInfo("/exit", "Exit the current shell"), [this] {
                 if (m_iClientSocket > 0) {
-                    TerminalAnsi::stop();
                     int status = shutdown_socket(m_iClientSocket);
                     if (status == 0) {
                         status = close_socket(m_iClientSocket);
@@ -94,6 +93,8 @@ namespace emb {
 
             m_ServerThread = std::thread{ &TerminalLocalTcp::serverLoop, this };
             emb::tools::thread::set_thread_name(m_ServerThread, "TrmTcpSockSrv");
+
+            TerminalAnsi::start();
         }
 
         void TerminalLocalTcp::processEvents() noexcept {
@@ -123,6 +124,7 @@ namespace emb {
         }
 
         void TerminalLocalTcp::stop() noexcept {
+            TerminalAnsi::stop();
             int status = shutdown_socket(m_iServerSocket);
             if (status == 0) {
                 status = close_socket(m_iServerSocket);
@@ -178,7 +180,6 @@ namespace emb {
                     emb::tools::thread::set_thread_name(m_ClientThreadTx, "TrmTcpSockTx");
 
                     write("Connected\n\r");
-                    TerminalAnsi::start();
 
                     m_ClientThreadRx.join();
                     m_ClientThreadTx.join();
