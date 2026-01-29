@@ -7,7 +7,7 @@
 #include <cassert>
 #include <unordered_map>
 
-#ifdef STATIC
+#ifdef EMBCONSOLE_STATIC
 #define EmbConsole_EXPORT
 #elif defined _WIN32
 #ifdef _EXPORTING
