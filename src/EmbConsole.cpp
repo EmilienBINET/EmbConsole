@@ -2,6 +2,7 @@
 #include "impl/Functions.hpp"
 #include <string>
 #include <sstream>
+#include <iomanip>
 #if __cplusplus >= 201703L // >= C++17
 #include "impl/filesystem.hpp"
 namespace fs = std::filesystem;
