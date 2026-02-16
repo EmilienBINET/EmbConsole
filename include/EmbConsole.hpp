@@ -1153,5 +1153,96 @@ namespace emb {
              */
             void print(IPrintableConsole& a_rConsole, Table const& a_stTable);
         }
+        
+
+        //////////////////////////////////////////////////
+        ///// Arguments tools
+        //////////////////////////////////////////////////
+
+        namespace arguments {
+            template<typename T>
+            EmbConsole_EXPORT inline T getNthArgumentOrValue(UserCommandData const& a_stData, size_t const a_uN, T const a_tDefault, std::string const& a_strWarning) noexcept {
+                a_stData.console.print(a_strWarning + " (Cast function not specialized)");
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline std::string getNthArgumentOrValue<std::string>(UserCommandData const& a_stData, size_t const a_uN, std::string const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return a_stData.args.at(a_uN);
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline int getNthArgumentOrValue<int>(UserCommandData const& a_stData, size_t const a_uN, int const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return std::stoi(a_stData.args.at(a_uN));
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline long getNthArgumentOrValue<long>(UserCommandData const& a_stData, size_t const a_uN, long const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return std::stol(a_stData.args.at(a_uN));
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline unsigned long getNthArgumentOrValue<unsigned long>(UserCommandData const& a_stData, size_t const a_uN, unsigned long const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return std::stoul(a_stData.args.at(a_uN));
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline unsigned int getNthArgumentOrValue<unsigned int>(UserCommandData const& a_stData, size_t const a_uN, unsigned int const a_tDefault, std::string const& a_strWarning) noexcept {
+                return getNthArgumentOrValue<unsigned long>(a_stData, a_uN, a_tDefault, a_strWarning);
+            }
+
+            template<>
+            EmbConsole_EXPORT inline long long getNthArgumentOrValue<long long>(UserCommandData const& a_stData, size_t const a_uN, long long const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return std::stoll(a_stData.args.at(a_uN));
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline unsigned long long getNthArgumentOrValue<unsigned long long>(UserCommandData const& a_stData, size_t const a_uN, unsigned long long const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return std::stoull(a_stData.args.at(a_uN));
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline float getNthArgumentOrValue<float>(UserCommandData const& a_stData, size_t const a_uN, float const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return std::stof(a_stData.args.at(a_uN));
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline double getNthArgumentOrValue<double>(UserCommandData const& a_stData, size_t const a_uN, double const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return std::stod(a_stData.args.at(a_uN));
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+
+            template<>
+            EmbConsole_EXPORT inline long double getNthArgumentOrValue<long double>(UserCommandData const& a_stData, size_t const a_uN, long double const a_tDefault, std::string const& a_strWarning) noexcept try {
+                return std::stold(a_stData.args.at(a_uN));
+            } catch(...) {
+                a_stData.console.print(a_strWarning);
+                return a_tDefault;
+            }
+        }
+
     } // console
 } // emb
