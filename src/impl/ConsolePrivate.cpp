@@ -13,6 +13,7 @@
 #include "base/TerminalSyslog.hpp"
 #include "base/TerminalLocalTcp.hpp"
 #include "Tools.hpp"
+#include <algorithm>
 
 namespace emb {
     namespace console {
