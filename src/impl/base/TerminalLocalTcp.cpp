@@ -25,6 +25,7 @@
 
 /* CLIENT:
  * #!/bin/bash
+ * clear
  * stty -icanon -echo
  * nc 127.0.0.1 <port>
  * stty icanon echo
@@ -42,6 +43,7 @@ namespace emb {
                 ofstream outShell{ m_pOption->strShellFilePath };
                 outShell
                     << "#!/bin/bash" << endl
+                    << "clear" << endl
                     << "stty -icanon -echo" << endl
                     << "nc 127.0.0.1 " << m_pOption->iPort << endl
                     << "stty icanon echo" << endl;
