@@ -1151,7 +1151,7 @@ namespace emb {
              * @param a_rConsole    Console to print the table onto
              * @param a_stTable     Table to print
              */
-            void print(IPrintableConsole& a_rConsole, Table const& a_stTable);
+            EmbConsole_EXPORT void print(IPrintableConsole& a_rConsole, Table const& a_stTable);
         }
         
 
