@@ -10,6 +10,7 @@
 
 /* CLIENT:
  * #!/bin/bash
+ * clear
  * stty -icanon -echo
  * nc -U /tmp/mysocket
  * stty icanon echo
@@ -30,6 +31,7 @@ namespace emb {
                 ofstream outShell{ m_strShellPath };
                 outShell
                     << "#!/bin/bash" << endl
+                    << "clear" << endl
                     << "stty -icanon -echo" << endl
                     << "nc -U " << m_strSocketPath << endl
                     << "stty icanon echo" << endl;

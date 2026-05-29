@@ -1,5 +1,6 @@
 #include "EmbConsole.hpp"
 #include "impl/Functions.hpp"
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <iomanip>
